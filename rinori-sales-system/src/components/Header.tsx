@@ -17,7 +17,11 @@ export default function Header() {
             justifyContent: 'space-between',
             alignItems: 'center'
         }}>
-            <h1 style={{ fontSize: '1.125rem', fontWeight: '600' }}>Rinori 売上管理システム</h1>
+            <h1 style={{ fontSize: '1.125rem', fontWeight: '600' }}>
+                <Link href="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+                    Rinori 売上管理システム
+                </Link>
+            </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                 <span style={{ fontSize: '0.875rem', color: '#666' }}>
                     ユーザー: {user?.name || "ゲスト"} ({user?.role === 'master' ? 'マスター権限' : 'スタッフ権限'})
