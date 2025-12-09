@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>予算 vs 実績一覧 - Rinori 販売管理システム</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <h1 class="system-name">Rinori 販売管理システム</h1>
+    </div>
+    <nav class="header-nav">
+      <div class="nav-item">売上管理 ▼</div>
+      <div class="nav-item">商品管理 ▼</div>
+      <div class="nav-item">予算管理 ▼</div>
+      <div class="nav-item">PL・分析 ▼</div>
+      <div class="nav-item">広告費管理 ▼</div>
+      <div class="nav-item">設定 ▼</div>
+    </nav>
+    <div class="header-right">
+      <span class="user-info">admin (マスター)</span>
+      <button class="btn-logout">ログアウト</button>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <h1 class="page-title">予算 vs 実績一覧</h1>
+
+    <section class="section card">
+      <h2 class="section-title">期間選択</h2>
+      <div class="form-grid">
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">期間種別</label>
+          <div>
+            <label style="margin-right: 12px;"><input type="radio" name="period_type" checked> 単月</label>
+            <label style="margin-right: 12px;"><input type="radio" name="period_type"> 複数月範囲</label>
+            <label style="margin-right: 12px;"><input type="radio" name="period_type"> 3ヶ月</label>
+            <label style="margin-right: 12px;"><input type="radio" name="period_type"> 6ヶ月</label>
+            <label><input type="radio" name="period_type"> 期首〜現在</label>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">期間</label>
+          <input type="month" value="2025-01" style="height: 32px; font-size: 14px;"> ～
+          <input type="month" value="2025-03" style="height: 32px; font-size: 14px;">
+        </div>
+        <div class="form-row">
+          <button class="btn btn-primary">表示</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">一覧</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>商品コード</th>
+            <th>商品名</th>
+            <th>予算数量</th>
+            <th>実績数量</th>
+            <th>数量達成率</th>
+            <th>予算売上（税別）</th>
+            <th>実績売上（税別）</th>
+            <th>売上達成率</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>RINO-FR010</td>
+            <td>フレアスカート</td>
+            <td>100</td>
+            <td>120</td>
+            <td class="achievement-high">120%</td>
+            <td>1,000,000円</td>
+            <td>1,200,000円</td>
+            <td class="achievement-high">120%</td>
+          </tr>
+          <tr>
+            <td>RINO-DO002</td>
+            <td>ワンピース</td>
+            <td>80</td>
+            <td>75</td>
+            <td class="achievement-mid">94%</td>
+            <td>800,000円</td>
+            <td>750,000円</td>
+            <td class="achievement-mid">94%</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-left">© 2025 Rinori</div>
+    <div class="footer-right">Version 1.3</div>
+  </footer>
+  <script src="js/dummy-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

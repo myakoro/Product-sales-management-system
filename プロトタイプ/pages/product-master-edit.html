@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品マスタ編集 - Rinori 販売管理システム</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <h1 class="system-name"><a href="../index.html" style="color: inherit; text-decoration: none;">Rinori 販売管理システム</a></h1>
+    </div>
+    <nav class="header-nav">
+      <a href="sales-csv-import.html" class="nav-item">売上管理 ▼</a>
+      <a href="product-master-list.html" class="nav-item">商品管理 ▼</a>
+      <a href="budget-settings.html" class="nav-item">予算管理 ▼</a>
+      <a href="pl-view.html" class="nav-item">PL・分析 ▼</a>
+      <a href="ad-expenses.html" class="nav-item">広告費管理 ▼</a>
+      <a href="tax-settings.html" class="nav-item">設定 ▼</a>
+    </nav>
+    <div class="header-right">
+      <span class="user-info">admin (マスター)</span>
+      <button class="btn-logout">ログアウト</button>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <h1 class="page-title">商品マスタ編集</h1>
+
+    <section class="section card">
+      <h2 class="section-title">基本情報（税別）</h2>
+      <div class="form-grid">
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 110px; font-size: 15px; font-weight: 600;">商品コード</label>
+          <input type="text" value="RINO-FR010" style="width: 260px; height: 32px; font-size: 14px;">
+        </div>
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 110px; font-size: 15px; font-weight: 600;">商品名</label>
+          <input type="text" value="フレアスカート" style="width: 260px; height: 32px; font-size: 14px;">
+        </div>
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 110px; font-size: 15px; font-weight: 600;">販売価格</label>
+          <input type="number" value="9900" style="width: 160px; height: 32px; font-size: 14px;">
+        </div>
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 110px; font-size: 15px; font-weight: 600;">原価</label>
+          <input type="number" value="3960" style="width: 160px; height: 32px; font-size: 14px;">
+        </div>
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 110px; font-size: 15px; font-weight: 600;">商品区分</label>
+          <select style="width: 160px; height: 32px; font-size: 14px;">
+            <option>自社</option>
+            <option>仕入</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label style="display: inline-block; width: 110px; font-size: 15px; font-weight: 600;">管理ステータス</label>
+          <select style="width: 160px; height: 32px; font-size: 14px;">
+            <option>管理中</option>
+            <option>管理外</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="section card">
+      <h2 class="section-title">メモ</h2>
+      <textarea rows="4" style="width: 100%;">春夏の主力スカート。カラー追加予定。</textarea>
+    </section>
+
+    <section class="section" style="text-align: right;">
+      <button class="btn btn-secondary">キャンセル</button>
+      <button class="btn btn-primary">保存</button>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-left">© 2025 Rinori</div>
+    <div class="footer-right">Version 1.3</div>
+  </footer>
+  <script src="../js/dummy-data.js"></script>
+  <script src="../js/app.js"></script>
+</body>
+</html>

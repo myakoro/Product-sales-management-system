@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>商品マスタ一覧 - Rinori 販売管理システム</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <h1 class="system-name"><a href="../index.html" style="color: inherit; text-decoration: none;">Rinori 販売管理システム</a></h1>
+    </div>
+    <nav class="header-nav">
+      <a href="sales-csv-import.html" class="nav-item">売上管理 ▼</a>
+      <a href="product-master-list.html" class="nav-item">商品管理 ▼</a>
+      <a href="budget-settings.html" class="nav-item">予算管理 ▼</a>
+      <a href="pl-view.html" class="nav-item">PL・分析 ▼</a>
+      <a href="ad-expenses.html" class="nav-item">広告費管理 ▼</a>
+      <a href="tax-settings.html" class="nav-item">設定 ▼</a>
+    </nav>
+    <div class="header-right">
+      <span class="user-info">admin (マスター)</span>
+      <button class="btn-logout">ログアウト</button>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <h1 class="page-title">商品マスタ一覧</h1>
+
+    <section class="section card">
+      <h2 class="section-title">検索条件</h2>
+      <div class="form-grid">
+        <div>
+          <div class="form-row" style="margin-bottom: 8px;">
+            <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">商品区分</label>
+            <select style="width: 230px; height: 32px; font-size: 14px;">
+              <option>すべて</option>
+              <option>自社</option>
+              <option>仕入</option>
+            </select>
+          </div>
+          <div class="form-row" style="margin-bottom: 8px;">
+            <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">管理ステータス</label>
+            <select style="width: 230px; height: 32px; font-size: 14px;">
+              <option>すべて</option>
+              <option>管理中</option>
+              <option>管理外</option>
+            </select>
+          </div>
+          <div class="form-row" style="margin-bottom: 8px;">
+            <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">キーワード</label>
+            <input type="text" placeholder="商品コード・商品名" style="width: 230px; height: 32px; font-size: 14px;">
+          </div>
+          <div class="form-row">
+            <button class="btn btn-primary" style="margin-right: 8px;">検索</button>
+            <a href="product-master-edit.html" class="btn btn-secondary">新規登録</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">商品一覧</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>操作</th>
+            <th>商品コード</th>
+            <th>商品名</th>
+            <th>販売価格（税別）</th>
+            <th>原価（税別）</th>
+            <th>商品区分</th>
+            <th>管理ステータス</th>
+            <th>登録日</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <a href="product-master-edit.html" class="btn btn-sm btn-secondary">編集</a>
+            </td>
+            <td>RINO-FR010</td>
+            <td>フレアスカート</td>
+            <td>10,000円</td>
+            <td>3,000円</td>
+            <td>自社</td>
+            <td>管理中</td>
+            <td>2024-04-01</td>
+          </tr>
+          <tr>
+            <td>
+              <a href="product-master-edit.html" class="btn btn-sm btn-secondary">編集</a>
+            </td>
+            <td>RINO-DO002</td>
+            <td>ワンピース</td>
+            <td>12,000円</td>
+            <td>4,800円</td>
+            <td>自社</td>
+            <td>管理中</td>
+            <td>2024-03-15</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="section" style="margin-top: 12px;">
+        <div class="alert alert-warning">
+          ⚠ 不完全マスタ: 3件あります。詳細は <a href="#">こちら</a>。
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-left">© 2025 Rinori</div>
+    <div class="footer-right">Version 1.3</div>
+  </footer>
+  <script src="../js/dummy-data.js"></script>
+  <script src="../js/app.js"></script>
+</body>
+</html>

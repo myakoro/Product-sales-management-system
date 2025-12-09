@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>広告費管理（統合） - Rinori 販売管理システム</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <h1 class="system-name"><a href="../index.html" style="color: inherit; text-decoration: none;">Rinori 販売管理システム</a></h1>
+    </div>
+    <nav class="header-nav">
+      <a href="sales-csv-import.html" class="nav-item">売上管理 ▼</a>
+      <a href="product-master-list.html" class="nav-item">商品管理 ▼</a>
+      <a href="budget-settings.html" class="nav-item">予算管理 ▼</a>
+      <a href="pl-view.html" class="nav-item">PL・分析 ▼</a>
+      <a href="ad-expenses.html" class="nav-item">広告費管理 ▼</a>
+      <a href="tax-settings.html" class="nav-item">設定 ▼</a>
+    </nav>
+    <div class="header-right">
+      <span class="user-info">admin (マスター)</span>
+      <button class="btn-logout">ログアウト</button>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <h1 class="page-title">広告費管理（統合）</h1>
+    
+    <!-- タブ付き広告費管理 -->
+    <section class="section">
+      <h2 class="section-title">広告費管理</h2>
+
+      <!-- タブナビゲーション -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="expenses">広告費一覧</button>
+        <button class="tab-btn" data-tab="categories">カテゴリ管理</button>
+      </div>
+
+      <!-- タブ1: 広告費一覧 -->
+      <div class="tab-content active" id="expenses-tab">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>日付</th>
+              <th>金額</th>
+              <th>カテゴリ</th>
+              <th>メモ</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- 既存行（インライン編集） -->
+            <tr>
+              <td><input type="date" value="2025-01-15" class="inline-input"></td>
+              <td><input type="number" value="50000" class="inline-input"></td>
+              <td>
+                <select class="inline-input">
+                  <option selected>Google広告</option>
+                  <option>SNS広告</option>
+                </select>
+              </td>
+              <td><input type="text" value="リスティング" class="inline-input"></td>
+              <td><button class="btn btn-secondary">削除</button></td>
+            </tr>
+            <!-- 新規追加行 -->
+            <tr class="new-row">
+              <td><input type="date" class="inline-input"></td>
+              <td><input type="number" placeholder="金額" class="inline-input"></td>
+              <td>
+                <select class="inline-input">
+                  <option value="">カテゴリ選択</option>
+                  <option>Google広告</option>
+                  <option>SNS広告</option>
+                </select>
+              </td>
+              <td><input type="text" placeholder="メモ" class="inline-input"></td>
+              <td><button class="btn btn-primary">保存</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- タブ2: カテゴリ管理 -->
+      <div class="tab-content" id="categories-tab">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>カテゴリ名</th>
+              <th>作成日</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><input type="text" value="Google広告" class="inline-input"></td>
+              <td>2025-01-01</td>
+              <td><button class="btn btn-secondary">削除</button></td>
+            </tr>
+            <!-- 新規追加行 -->
+            <tr class="new-row">
+              <td><input type="text" placeholder="カテゴリ名" class="inline-input"></td>
+              <td>-</td>
+              <td><button class="btn btn-primary">保存</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-left">© 2025 Rinori</div>
+    <div class="footer-right">Version 1.3</div>
+  </footer>
+
+  <script src="../js/dummy-data.js"></script>
+  <script src="../js/app.js"></script>
+</body>
+</html>

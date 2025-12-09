@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>予算設定（統合） - Rinori 販売管理システム</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <h1 class="system-name"><a href="../index.html" style="color: inherit; text-decoration: none;">Rinori 販売管理システム</a></h1>
+    </div>
+    <nav class="header-nav">
+      <a href="sales-csv-import.html" class="nav-item">売上管理 ▼</a>
+      <a href="product-master-list.html" class="nav-item">商品管理 ▼</a>
+      <a href="budget-settings.html" class="nav-item">予算管理 ▼</a>
+      <a href="pl-view.html" class="nav-item">PL・分析 ▼</a>
+      <a href="ad-expenses.html" class="nav-item">広告費管理 ▼</a>
+      <a href="tax-settings.html" class="nav-item">設定 ▼</a>
+    </nav>
+    <div class="header-right">
+      <span class="user-info">admin (マスター)</span>
+      <button class="btn-logout">ログアウト</button>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <h1 class="page-title">予算設定（統合）</h1>
+
+    <!-- 期間選択とサマリ -->
+    <section class="section card">
+      <h2 class="section-title">期間選択とサマリ</h2>
+      <div class="form-grid">
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">開始年月</label>
+          <input type="month" value="2025-01" style="height: 32px; font-size: 14px;">
+        </div>
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">終了年月</label>
+          <input type="month" value="2025-12" style="height: 32px; font-size: 14px;">
+        </div>
+        <div class="form-row">
+          <button class="btn btn-primary">表示</button>
+        </div>
+      </div>
+      <div class="budget-summary" style="margin-top: 12px;">
+        <div>期間売上合計: <strong>12,000,000円</strong></div>
+        <div>期間粗利合計: <strong>7,200,000円</strong>（粗利率 60.0%）</div>
+      </div>
+    </section>
+
+    <!-- 予算設定テーブル（Excel型UI統合） -->
+    <section class="section">
+      <h2 class="section-title">予算設定（2025-01 〜 2025-12）</h2>
+
+      <!-- 商品検索（商品コード・商品名の部分一致） -->
+      <div class="form-row" style="margin-bottom: 8px;">
+        <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">商品検索</label>
+        <input type="text" placeholder="商品コード・商品名（部分一致）" style="width: 260px; height: 32px; font-size: 14px;">
+      </div>
+
+      <div class="excel-table-container">
+        <table class="excel-table">
+          <thead>
+            <tr>
+              <th class="fixed-col">商品コード ▲▼</th>
+              <th class="fixed-col">商品名</th>
+              <th class="fixed-col">期間合計数量</th>
+              <th class="fixed-col">期間売上</th>
+              <th class="fixed-col">期間粗利</th>
+              <th>2025-01</th>
+              <th>2025-02</th>
+              <th>2025-03</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr data-price="10000" data-cost="4000">
+              <td class="fixed-col">RINO-FR010</td>
+              <td class="fixed-col">フレアスカート</td>
+              <td class="fixed-col"><input type="number" value="100" class="editable-cell total-qty"></td>
+              <td class="fixed-col calculated-cell total-sales">1,000,000円</td>
+              <td class="fixed-col calculated-cell total-profit">600,000円</td>
+              <td><input type="number" value="33" class="editable-cell month-qty"></td>
+              <td><input type="number" value="33" class="editable-cell month-qty"></td>
+              <td><input type="number" value="34" class="editable-cell month-qty"></td>
+            </tr>
+            <tr data-price="10000" data-cost="4000">
+              <td class="fixed-col">RINO-DO002</td>
+              <td class="fixed-col">ワンピース</td>
+              <td class="fixed-col"><input type="number" value="80" class="editable-cell total-qty"></td>
+              <td class="fixed-col calculated-cell total-sales">800,000円</td>
+              <td class="fixed-col calculated-cell total-profit">480,000円</td>
+              <td><input type="number" value="26" class="editable-cell month-qty"></td>
+              <td><input type="number" value="27" class="editable-cell month-qty"></td>
+              <td><input type="number" value="27" class="editable-cell month-qty"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 操作ボタン -->
+    <section class="section">
+      <div class="button-group" style="text-align: right;">
+        <button class="btn btn-secondary">履歴を見る</button>
+        <button class="btn btn-primary">保存</button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-left">© 2025 Rinori</div>
+    <div class="footer-right">Version 1.3</div>
+  </footer>
+  <script src="../js/dummy-data.js"></script>
+  <script src="../js/app.js"></script>
+</body>
+</html>

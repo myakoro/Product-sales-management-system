@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSV取込履歴 - Rinori 販売管理システム</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <h1 class="system-name">Rinori 販売管理システム</h1>
+    </div>
+    <nav class="header-nav">
+      <div class="nav-item">売上管理 ▼</div>
+      <div class="nav-item">商品管理 ▼</div>
+      <div class="nav-item">予算管理 ▼</div>
+      <div class="nav-item">PL・分析 ▼</div>
+      <div class="nav-item">広告費管理 ▼</div>
+      <div class="nav-item">設定 ▼</div>
+    </nav>
+    <div class="header-right">
+      <span class="user-info">admin (マスター)</span>
+      <button class="btn-logout">ログアウト</button>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <h1 class="page-title">CSV取込履歴</h1>
+
+    <section class="section card">
+      <h2 class="section-title">検索条件</h2>
+      <div class="form-grid">
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">期間</label>
+          <input type="month" value="2025-01" style="width: 120px; height: 32px; font-size: 14px;"> ～
+          <input type="month" value="2025-12" style="width: 120px; height: 32px; font-size: 14px;">
+        </div>
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">取込種別</label>
+          <select style="width: 230px; height: 32px; font-size: 14px;">
+            <option>すべて</option>
+            <option>売上CSV取込</option>
+            <option>商品一覧CSV取込</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <button class="btn btn-primary">検索</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2 class="section-title">取込履歴一覧</h2>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>取込日時</th>
+            <th>取込種別</th>
+            <th>対象年月</th>
+            <th>取込モード</th>
+            <th>コメント</th>
+            <th>取込件数</th>
+            <th>取込実行ユーザー</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>2025-01-05 10:23</td>
+            <td>売上CSV取込</td>
+            <td>2025-01</td>
+            <td>通常取込</td>
+            <td>1月度売上CSV</td>
+            <td>120</td>
+            <td>admin</td>
+          </tr>
+          <tr>
+            <td>2025-01-04 09:10</td>
+            <td>商品一覧CSV取込</td>
+            <td>-</td>
+            <td>新規登録</td>
+            <td>新商品候補あり</td>
+            <td>50</td>
+            <td>staff01</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-left">© 2025 Rinori</div>
+    <div class="footer-right">Version 1.3</div>
+  </footer>
+  <script src="js/dummy-data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

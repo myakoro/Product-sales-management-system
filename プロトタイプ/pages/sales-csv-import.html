@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>売上CSV取込 - Rinori 販売管理システム</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <h1 class="system-name"><a href="../index.html" style="color: inherit; text-decoration: none;">Rinori 販売管理システム</a></h1>
+    </div>
+    <nav class="header-nav">
+      <a href="sales-csv-import.html" class="nav-item">売上管理 ▼</a>
+      <a href="product-master-list.html" class="nav-item">商品管理 ▼</a>
+      <a href="budget-settings.html" class="nav-item">予算管理 ▼</a>
+      <a href="pl-view.html" class="nav-item">PL・分析 ▼</a>
+      <a href="ad-expenses.html" class="nav-item">広告費管理 ▼</a>
+      <a href="tax-settings.html" class="nav-item">設定 ▼</a>
+    </nav>
+    <div class="header-right">
+      <span class="user-info">admin (マスター)</span>
+      <button class="btn-logout">ログアウト</button>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <h1 class="page-title">売上CSV取込</h1>
+
+    <!-- 入力フォームカード -->
+    <section class="section card">
+      <h2 class="section-title">取込設定</h2>
+      <div class="form-grid">
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">対象年月</label>
+          <input type="month" value="2025-10" style="height: 32px; font-size: 14px;">
+        </div>
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">取込モード</label>
+          <div>
+            <label><input type="radio" name="import-mode" value="add" checked> 追加</label>
+            <label style="margin-left: 8px;"><input type="radio" name="import-mode" value="overwrite"> 上書き</label>
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">コメント</label>
+          <textarea rows="3" style="width: 260px; font-size: 14px;">10月度売上CSV</textarea>
+        </div>
+        <div class="form-row" style="margin-bottom: 8px;">
+          <label style="display: inline-block; width: 90px; font-size: 15px; font-weight: 600;">CSVファイル</label>
+          <input type="file" style="font-size: 14px;">
+        </div>
+        <div class="form-row" style="text-align: right;">
+          <button class="btn btn-primary">取込実行</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 取込結果表示エリア（ダミー） -->
+    <section class="section">
+      <div class="alert alert-info">
+        取込結果: 120件取り込み、新商品候補 2件、エラー 0件。
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-left">© 2025 Rinori</div>
+    <div class="footer-right">Version 1.3</div>
+  </footer>
+  <script src="../js/dummy-data.js"></script>
+  <script src="../js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PL画面 - Rinori 販売管理システム</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <h1 class="system-name"><a href="../index.html" style="color: inherit; text-decoration: none;">Rinori 販売管理システム</a></h1>
+    </div>
+    <nav class="header-nav">
+      <a href="sales-csv-import.html" class="nav-item">売上管理 ▼</a>
+      <a href="product-master-list.html" class="nav-item">商品管理 ▼</a>
+      <a href="budget-settings.html" class="nav-item">予算管理 ▼</a>
+      <a href="pl-view.html" class="nav-item">PL・分析 ▼</a>
+      <a href="ad-expenses.html" class="nav-item">広告費管理 ▼</a>
+      <a href="tax-settings.html" class="nav-item">設定 ▼</a>
+    </nav>
+    <div class="header-right">
+      <span class="user-info">admin (マスター)</span>
+      <button class="btn-logout">ログアウト</button>
+    </div>
+  </header>
+
+  <main class="page-container">
+    <h1 class="page-title">PL画面（月次・期間）</h1>
+
+    <!-- 期間選択 -->
+    <section class="section card">
+      <h2 class="section-title">期間選択</h2>
+
+      <!-- ラジオボタン方式 -->
+      <div class="period-selection">
+        <div class="radio-group">
+          <input type="radio" id="preset" name="period-mode" value="preset" checked>
+          <label for="preset">プリセット期間</label>
+
+          <div class="preset-options" id="preset-section">
+            <select class="period-type">
+              <option value="single">単月</option>
+              <option value="3months">3ヶ月</option>
+              <option value="6months">6ヶ月</option>
+              <option value="ytd">期首〜現在</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="radio-group">
+          <input type="radio" id="custom" name="period-mode" value="custom">
+          <label for="custom">任意の期間</label>
+
+          <div class="custom-options" id="custom-section">
+            <label>開始年月: <input type="month" value="2025-01"></label>
+            <label>終了年月: <input type="month" value="2025-03"></label>
+          </div>
+        </div>
+
+        <button class="btn btn-primary">表示</button>
+      </div>
+    </section>
+
+    <!-- PLサマリ（マスター権限想定） -->
+    <section class="section card">
+      <h2 class="section-title">PLサマリ</h2>
+      <div style="max-width: 520px;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>項目</th>
+            <th>金額（税別）</th>
+            <th>率</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>売上</td>
+            <td>1,000,000円</td>
+            <td>-</td>
+          </tr>
+          <tr>
+            <td>原価</td>
+            <td>-400,000円</td>
+            <td>40.0%</td>
+          </tr>
+          <tr style="background-color: #F3F4FF;">
+            <td>粗利</td>
+            <td>600,000円</td>
+            <td>60.0%</td>
+          </tr>
+          <tr>
+            <td>広告費</td>
+            <td>-200,000円</td>
+            <td>20.0%</td>
+          </tr>
+          <tr style="background-color: #F3F4FF;">
+            <td>営業利益</td>
+            <td>400,000円</td>
+            <td>40.0%</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+    </section>
+
+    <!-- スタッフ権限の場合の案内（説明用） -->
+    <section class="section card">
+      <h2 class="section-title">スタッフ権限での表示</h2>
+      <p>スタッフ権限の場合、このPL総合計ブロックは表示されず、以下のメッセージのみ表示されます。</p>
+      <div class="alert alert-info">総合計はマスター権限のみ表示されます。</div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-left">© 2025 Rinori</div>
+    <div class="footer-right">Version 1.3</div>
+  </footer>
+  <script src="../js/dummy-data.js"></script>
+  <script src="../js/app.js"></script>
+</body>
+</html>

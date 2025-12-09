@@ -1,0 +1,394 @@
+/* 共通スタイル: Rinori 販売管理システム HTMLモックアップ */
+
+:root {
+  /* ベースカラー */
+  --primary-color: #2563EB;
+  --secondary-color: #4B5563;
+  --accent-color: #E11D48;
+  --bg-page: #F9FAFB;
+  --bg-card: #FFFFFF;
+  --border-color: #E5E7EB;
+
+  /* 状態カラー */
+  --success-color: #16A34A;
+  --warning-color: #F97316;
+  --error-color: #DC2626;
+  --info-color: #0EA5E9;
+
+  /* テキストカラー */
+  --text-main: #111827;
+  --text-sub: #4B5563;
+  --text-disabled: #9CA3AF;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-main);
+  background: var(--bg-page);
+}
+
+/* ヘッダー */
+.header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.system-name {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.header-nav {
+  display: flex;
+  gap: 16px;
+}
+
+.nav-item {
+  cursor: pointer;
+  padding: 8px 12px;
+  text-decoration: none;
+  color: var(--text-main);
+}
+
+.nav-item:hover {
+  background: var(--bg-page);
+  border-radius: 4px;
+}
+
+.nav-item.active {
+  background: var(--bg-page);
+  border-radius: 4px;
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-info {
+  font-size: 13px;
+  color: var(--text-sub);
+}
+
+.btn-logout {
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  cursor: pointer;
+}
+
+/* ページコンテナ */
+.page-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+.page-title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.section {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+/* カード */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 16px;
+}
+
+/* サマリカード */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
+}
+
+.summary-card {
+  text-align: center;
+}
+
+.card-label {
+  font-size: 12px;
+  color: var(--text-sub);
+  margin-bottom: 8px;
+}
+
+.card-value {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.card-rate {
+  font-size: 14px;
+  color: var(--text-sub);
+}
+
+/* テーブル */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--bg-card);
+}
+
+.data-table th,
+.data-table td {
+  padding: 12px;
+  text-align: left;
+  border: 1px solid var(--border-color);
+}
+
+.data-table th {
+  background: #F3F4F6;
+  font-weight: 600;
+}
+
+.data-table tr:hover {
+  background: var(--bg-page);
+}
+
+/* 達成率の色分け */
+.achievement-high {
+  color: var(--success-color);
+  font-weight: 600;
+}
+
+.achievement-mid {
+  color: var(--warning-color);
+  font-weight: 600;
+}
+
+.achievement-low {
+  color: var(--error-color);
+  font-weight: 600;
+}
+
+/* ボタン */
+.btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn-sm {
+  padding: 4px 8px;
+  font-size: 12px;
+}
+
+.btn-primary {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: #fff;
+  color: var(--primary-color);
+  border: 1px solid var(--primary-color);
+}
+
+.btn:hover {
+  opacity: 0.9;
+}
+
+/* アラート */
+.alert {
+  padding: 12px 16px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.alert-warning {
+  background: #FEF3C7;
+  border-left: 4px solid var(--warning-color);
+}
+
+.alert-info {
+  background: #DBEAFE;
+  border-left: 4px solid var(--info-color);
+}
+
+/* Excel型テーブル */
+.excel-table-container {
+  overflow-x: auto;
+}
+
+.excel-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.excel-table th,
+.excel-table td {
+  border: 1px solid var(--border-color);
+  padding: 8px;
+  text-align: center;
+}
+
+.row-header {
+  background: #F3F4F6;
+  font-weight: 600;
+  text-align: left !important;
+}
+
+.editable-cell {
+  width: 100%;
+  border: none;
+  text-align: center;
+  padding: 4px;
+}
+
+.calculated-cell {
+  background: #F9FAFB;
+  color: var(--text-sub);
+}
+
+/* フッター */
+.footer {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-color);
+  padding: 16px 24px;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 48px;
+}
+
+/* ショートカットグリッド */
+.shortcut-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+/* Excel固定列用 */
+.fixed-col {
+  background: #F3F4F6;
+  font-weight: 600;
+  position: sticky;
+  left: 0;
+  z-index: 1;
+}
+
+/* タブUI */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tab-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid var(--border-color);
+  background: #fff;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  background: var(--primary-color);
+  color: #fff;
+  border-color: var(--primary-color);
+}
+
+.tab-content {
+  display: none;
+  margin-top: 8px;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* PL画面 期間選択用 */
+.period-selection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.radio-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.preset-options,
+.custom-options {
+  margin-left: 24px;
+}
+
+.period-type {
+  padding: 4px 8px;
+}
+
+/* インライン入力用 */
+.inline-input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+}
+
+.new-row {
+  background: #F9FAFB;
+}
+
+/* 新商品候補一覧 操作ボタン・説明 */
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.description {
+  color: var(--text-sub);
+  margin-bottom: 16px;
+}
+
+/* ショートカットカード */
+.shortcut-card {
+  display: block;
+  background: #fff;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  padding: 16px;
+  text-align: center;
+  text-decoration: none;
+  color: var(--primary-color);
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.shortcut-card:hover {
+  background: #F3F4F6;
+}
