@@ -30,9 +30,22 @@ export const authOptions: NextAuthOptions = {
                     });
                 }
 
-                const user = await prisma.user.findUnique({
+                let user = await prisma.user.findUnique({
                     where: { username: credentials.username }
                 });
+
+                // admin ユーザーが存在しない状態で admin ログインが来た場合は、復旧用に再作成する
+                if (!user && credentials.username === "admin") {
+                    const defaultPassword = "admin";
+                    const hash = await bcrypt.hash(defaultPassword, 10);
+                    user = await prisma.user.create({
+                        data: {
+                            username: "admin",
+                            passwordHash: hash,
+                            role: "master",
+                        },
+                    });
+                }
 
                 if (!user) {
                     return null;
