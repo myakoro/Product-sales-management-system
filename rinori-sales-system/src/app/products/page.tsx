@@ -1,0 +1,202 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import Link from "next/link";
+
+type Product = {
+    productCode: string;
+    productName: string;
+    salesPriceExclTax: number;
+    costExclTax: number;
+    productType: string;
+    managementStatus: string;
+    createdAt: string;
+};
+
+export default function ProductsPage() {
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(false);
+
+    // Filters
+    const [searchTerm, setSearchTerm] = useState("");
+    const [typeFilter, setTypeFilter] = useState("all");
+    const [statusFilter, setStatusFilter] = useState("all");
+
+    // Debounce search
+    const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedSearch(searchTerm);
+        }, 500);
+        return () => clearTimeout(handler);
+    }, [searchTerm]);
+
+    const fetchProducts = async () => {
+        setLoading(true);
+        try {
+            const params = new URLSearchParams();
+            if (debouncedSearch) params.set('search', debouncedSearch);
+            if (typeFilter !== 'all') params.set('type', typeFilter);
+            if (statusFilter !== 'all') params.set('status', statusFilter);
+
+            const res = await fetch(`/api/products?${params.toString()}`);
+            if (res.ok) {
+                const data = await res.json();
+                setProducts(data);
+            }
+        } catch (error) {
+            console.error("Failed to fetch products", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchProducts();
+    }, [debouncedSearch, typeFilter, statusFilter]);
+
+    return (
+        <div className="min-h-screen">
+            <header className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center">
+                <h1 className="text-lg font-semibold">Rinori 売上管理システム</h1>
+                <div className="flex items-center gap-4">
+                    <Link href="/" className="text-sm text-gray-600 hover:text-primary">
+                        ダッシュボード
+                    </Link>
+                    <span className="text-sm text-gray-600">ユーザー: 管理者</span>
+                </div>
+            </header>
+
+            <main className="max-w-7xl mx-auto px-6 py-8">
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-semibold">商品マスタ一覧</h2>
+                    <Link
+                        href="/products/new"
+                        className="px-4 py-2 bg-primary text-white rounded hover:opacity-90"
+                    >
+                        新規登録
+                    </Link>
+                </div>
+
+                {/* 検索・フィルタエリア */}
+                <div className="bg-white border border-gray-200 rounded p-4 mb-4">
+                    <div className="grid grid-cols-4 gap-4">
+                        <input
+                            type="text"
+                            placeholder="商品コード・商品名で検索"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 rounded"
+                        />
+                        <select
+                            value={typeFilter}
+                            onChange={(e) => setTypeFilter(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 rounded"
+                        >
+                            <option value="all">商品区分: すべて</option>
+                            <option value="自社">自社</option>
+                            <option value="仕入">仕入</option>
+                        </select>
+                        <select
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                            className="px-3 py-2 border border-gray-300 rounded"
+                        >
+                            <option value="all">ステータス: すべて</option>
+                            <option value="管理中">管理中</option>
+                            <option value="管理外">管理外</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* 商品一覧テーブル */}
+                <div className="bg-white border border-gray-200 rounded overflow-hidden">
+                    <table className="w-full">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                    商品コード
+                                </th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                    商品名
+                                </th>
+                                <th className="px-4 py-3 text-right text-sm font-semibold">
+                                    販売価格（税別）
+                                </th>
+                                <th className="px-4 py-3 text-right text-sm font-semibold">
+                                    原価（税別）
+                                </th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                    商品区分
+                                </th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                    管理ステータス
+                                </th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                    登録日
+                                </th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                    操作
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-gray-200">
+                            {loading && (
+                                <tr>
+                                    <td colSpan={8} className="text-center py-8 text-gray-500">
+                                        読み込み中...
+                                    </td>
+                                </tr>
+                            )}
+                            {!loading && products.length === 0 && (
+                                <tr>
+                                    <td colSpan={8} className="text-center py-8 text-gray-500">
+                                        商品が見つかりません。
+                                    </td>
+                                </tr>
+                            )}
+                            {!loading && products.map((product) => (
+                                <tr key={product.productCode} className="hover:bg-gray-50">
+                                    <td className="px-4 py-3 text-sm">{product.productCode}</td>
+                                    <td className="px-4 py-3 text-sm">{product.productName}</td>
+                                    <td className="px-4 py-3 text-sm text-right">
+                                        ¥{product.salesPriceExclTax.toLocaleString()}
+                                    </td>
+                                    <td className="px-4 py-3 text-sm text-right">
+                                        ¥{product.costExclTax.toLocaleString()}
+                                    </td>
+                                    <td className="px-4 py-3 text-sm">{product.productType}</td>
+                                    <td className="px-4 py-3 text-sm">
+                                        <span
+                                            className={`px-2 py-1 rounded text-xs ${product.managementStatus === "管理中"
+                                                ? "bg-green-100 text-green-800"
+                                                : "bg-gray-100 text-gray-800"
+                                                }`}
+                                        >
+                                            {product.managementStatus}
+                                        </span>
+                                    </td>
+                                    <td className="px-4 py-3 text-sm">
+                                        {new Date(product.createdAt).toLocaleDateString()}
+                                    </td>
+                                    <td className="px-4 py-3 text-sm">
+                                        <Link
+                                            href={`/products/${product.productCode}`}
+                                            className="text-primary hover:underline"
+                                        >
+                                            編集
+                                        </Link>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+
+                <div className="mt-4 text-sm text-gray-600">
+                    {products.length}件の商品を表示中
+                </div>
+            </main>
+        </div>
+    );
+}

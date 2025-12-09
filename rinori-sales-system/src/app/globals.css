@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --primary-color: #2563EB;
+  --secondary-color: #4B5563;
+  --accent-color: #E11D48;
+  --bg-page: #F9FAFB;
+  --bg-card: #FFFFFF;
+  --border-color: #E5E7EB;
+  --success-color: #16A34A;
+  --warning-color: #F97316;
+  --error-color: #DC2626;
+  --info-color: #0EA5E9;
+  --text-main: #111827;
+  --text-sub: #4B5563;
+  --text-disabled: #9CA3AF;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  color: var(--text-main);
+  background: var(--bg-page);
+}

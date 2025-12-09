@@ -1,0 +1,192 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// ユーザーマスタ
+model User {
+  id            Int      @id @default(autoincrement())
+  username      String   @unique
+  passwordHash  String   @map("password_hash")
+  role          String   @default("staff") // 'master' or 'staff'
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  salesRecords  SalesRecord[]
+  adExpenses    AdExpense[]
+  importHistories ImportHistory[]
+
+  @@map("users")
+}
+
+// 商品カテゴリ（V1.3追加）
+model ProductCategory {
+  id           Int      @id @default(autoincrement())
+  categoryName String   @map("category_name")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  products     Product[]
+
+  @@map("product_categories")
+}
+
+// 商品マスタ
+model Product {
+  productCode        String   @id @map("product_code")
+  productName        String   @map("product_name")
+  salesPriceExclTax  Float    @map("sales_price_excl_tax")
+  costExclTax        Float    @map("cost_excl_tax")
+  productType        String   @map("product_type") // '自社' or '仕入'
+  managementStatus   String   @map("management_status") // '管理中' or '管理外'
+  categoryId         Int?     @map("category_id")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  category           ProductCategory? @relation(fields: [categoryId], references: [id])
+  salesRecords       SalesRecord[]
+  monthlyBudgets     MonthlyBudget[]
+  periodBudgets      PeriodBudget[]
+
+  @@map("products")
+}
+
+// 売上実績
+model SalesRecord {
+  id                  Int      @id @default(autoincrement())
+  productCode         String   @map("product_code")
+  periodYm            String   @map("period_ym")
+  salesDate           DateTime @map("sales_date")
+  quantity            Int
+  salesAmountExclTax  Float    @map("sales_amount_excl_tax")
+  costAmountExclTax   Float    @map("cost_amount_excl_tax")
+  grossProfit         Float    @map("gross_profit")
+  importHistoryId     Int      @map("import_history_id")
+  createdByUserId     Int      @map("created_by_user_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  product             Product        @relation(fields: [productCode], references: [productCode])
+  importHistory       ImportHistory  @relation(fields: [importHistoryId], references: [id])
+  createdBy           User           @relation(fields: [createdByUserId], references: [id])
+
+  @@map("sales_records")
+}
+
+// 月別予算
+model MonthlyBudget {
+  id                   Int      @id @default(autoincrement())
+  productCode          String   @map("product_code")
+  periodYm             String   @map("period_ym")
+  budgetQuantity       Int      @map("budget_quantity")
+  budgetSalesExclTax   Float    @map("budget_sales_excl_tax")
+  budgetCostExclTax    Float    @map("budget_cost_excl_tax")
+  budgetGrossProfit    Float    @map("budget_gross_profit")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  product              Product  @relation(fields: [productCode], references: [productCode])
+
+  @@map("monthly_budgets")
+}
+
+// 期間予算
+model PeriodBudget {
+  id                 Int      @id @default(autoincrement())
+  productCode        String   @map("product_code")
+  startYm            String   @map("start_ym")
+  endYm              String   @map("end_ym")
+  totalQuantity      Int      @map("total_quantity")
+  totalSalesExclTax  Float    @map("total_sales_excl_tax")
+  memo               String?
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  product            Product  @relation(fields: [productCode], references: [productCode])
+  histories          PeriodBudgetHistory[]
+
+  @@map("period_budgets")
+}
+
+// 期間予算履歴
+model PeriodBudgetHistory {
+  id                Int      @id @default(autoincrement())
+  periodBudgetId    Int      @map("period_budget_id")
+  productCode       String   @map("product_code")
+  startYm           String   @map("start_ym")
+  endYm             String   @map("end_ym")
+  totalQuantity     Int      @map("total_quantity")
+  monthlyBreakdown  String   @map("monthly_breakdown") // JSON string
+  savedAt           DateTime @default(now()) @map("saved_at")
+
+  periodBudget      PeriodBudget @relation(fields: [periodBudgetId], references: [id])
+
+  @@map("period_budget_histories")
+}
+
+// 広告費カテゴリ
+model AdCategory {
+  id           Int      @id @default(autoincrement())
+  categoryName String   @map("category_name")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  adExpenses   AdExpense[]
+
+  @@map("ad_categories")
+}
+
+// 広告費
+model AdExpense {
+  id              Int      @id @default(autoincrement())
+  expenseDate     DateTime @map("expense_date")
+  amount          Float
+  adCategoryId    Int      @map("ad_category_id")
+  memo            String?
+  createdByUserId Int      @map("created_by_user_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  adCategory      AdCategory @relation(fields: [adCategoryId], references: [id])
+  createdBy       User       @relation(fields: [createdByUserId], references: [id])
+
+  @@map("ad_expenses")
+}
+
+// 税率マスタ
+model TaxRate {
+  id        Int      @id @default(autoincrement())
+  startYm   String   @map("start_ym")
+  rate      Float
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("tax_rates")
+}
+
+// CSV取込履歴
+model ImportHistory {
+  id               Int      @id @default(autoincrement())
+  importType       String   @map("import_type") // 'sales' or 'products'
+  targetYm         String?  @map("target_ym")
+  importMode       String?  @map("import_mode") // 'append' or 'overwrite'
+  comment          String?
+  recordCount      Int      @map("record_count")
+  importedByUserId Int      @map("imported_by_user_id")
+  importedAt       DateTime @default(now()) @map("imported_at")
+
+  importedBy       User          @relation(fields: [importedByUserId], references: [id])
+  salesRecords     SalesRecord[]
+
+  @@map("import_histories")
+}
+
+// 新商品候補
+model NewProductCandidate {
+  id          Int      @id @default(autoincrement())
+  productCode String   @map("product_code")
+  sampleSku   String   @map("sample_sku")
+  productName String?  @map("product_name")
+  status      String   @default("pending") // 'pending', 'registered', 'ignored'
+  detectedAt  DateTime @default(now()) @map("detected_at")
+
+  @@map("new_product_candidates")
+}
