@@ -23,7 +23,8 @@ export default function LoginPage() {
         });
 
         if (result?.error) {
-            setError('ユーザー名またはパスワードが間違っています。');
+            console.error('Login error:', result.error);
+            setError(`ログインエラー: ${result.error} (DB接続やマイグレーションを確認してください)`);
             setLoading(false);
         } else {
             router.push('/');
