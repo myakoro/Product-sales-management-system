@@ -16,6 +16,20 @@ export const authOptions: NextAuthOptions = {
                     return null;
                 }
 
+                // 初回起動時など、ユーザーが1人もいない場合はデフォルト管理者を自動作成
+                const userCount = await prisma.user.count();
+                if (userCount === 0) {
+                    const defaultPassword = "admin";
+                    const hash = await bcrypt.hash(defaultPassword, 10);
+                    await prisma.user.create({
+                        data: {
+                            username: "admin",
+                            passwordHash: hash,
+                            role: "master",
+                        },
+                    });
+                }
+
                 const user = await prisma.user.findUnique({
                     where: { username: credentials.username }
                 });
