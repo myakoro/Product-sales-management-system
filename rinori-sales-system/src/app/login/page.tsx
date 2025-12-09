@@ -82,6 +82,10 @@ export default function LoginPage() {
                         {loading ? 'ログイン中...' : 'ログイン'}
                     </button>
                 </form>
+
+                <p className="mt-4 text-xs text-gray-500 text-center">
+                    パスワードをお忘れの場合は、マスター権限ユーザーにお問い合わせください。
+                </p>
             </div>
         </div>
     );
