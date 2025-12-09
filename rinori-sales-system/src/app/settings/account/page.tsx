@@ -139,6 +139,14 @@ export default function AccountSettingsPage() {
                             {loading ? '変更中...' : 'パスワードを変更'}
                         </button>
                     </form>
+                    <div className="mt-4 text-center">
+                        <a
+                            href="/"
+                            className="inline-block px-4 py-2 text-sm border border-gray-300 rounded text-gray-700 hover:bg-gray-50"
+                        >
+                            トップページに戻る
+                        </a>
+                    </div>
                 </div>
             </main>
         </div>
