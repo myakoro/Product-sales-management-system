@@ -447,21 +447,38 @@ export default function HomePage() {
                         <h3 style={{ color: '#0070f3', fontWeight: '600' }}>アカウント設定</h3>
                     </Link>
                     {user?.role === 'master' && (
-                        <Link
-                            href="/settings/users"
-                            style={{
-                                display: 'block',
-                                backgroundColor: 'white',
-                                border: '1px solid #e0e0e0',
-                                borderRadius: '8px',
-                                padding: '1.5rem',
-                                textAlign: 'center',
-                                textDecoration: 'none',
-                                transition: 'background-color 0.2s'
-                            }}
-                        >
-                            <h3 style={{ color: '#0070f3', fontWeight: '600' }}>ユーザー管理（マスター）</h3>
-                        </Link>
+                        <>
+                            <Link
+                                href="/settings/users"
+                                style={{
+                                    display: 'block',
+                                    backgroundColor: 'white',
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: '8px',
+                                    padding: '1.5rem',
+                                    textAlign: 'center',
+                                    textDecoration: 'none',
+                                    transition: 'background-color 0.2s'
+                                }}
+                            >
+                                <h3 style={{ color: '#0070f3', fontWeight: '600' }}>ユーザー管理（マスター）</h3>
+                            </Link>
+                            <Link
+                                href="/settings/export"
+                                style={{
+                                    display: 'block',
+                                    backgroundColor: 'white',
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: '8px',
+                                    padding: '1.5rem',
+                                    textAlign: 'center',
+                                    textDecoration: 'none',
+                                    transition: 'background-color 0.2s'
+                                }}
+                            >
+                                <h3 style={{ color: '#0070f3', fontWeight: '600' }}>データエクスポート（マスター）</h3>
+                            </Link>
+                        </>
                     )}
                 </div>
             </main>
