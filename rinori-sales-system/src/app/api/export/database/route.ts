@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
         }
 
         // マスター権限チェック
-        if (session.user.role !== 'master') {
+        if ((session.user as any).role !== 'master') {
             return NextResponse.json(
                 { error: 'マスター権限が必要です' },
                 { status: 403 }
