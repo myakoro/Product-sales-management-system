@@ -13,7 +13,10 @@ export async function GET(request: Request) {
     try {
         const products = await prisma.product.findMany({
             where: {
-                managementStatus: '管理中',
+                // 管理中商品のみ対象（日本語/英語両対応）
+                managementStatus: {
+                    in: ['管理中', 'managed']
+                },
             },
             orderBy: {
                 productCode: 'asc',
