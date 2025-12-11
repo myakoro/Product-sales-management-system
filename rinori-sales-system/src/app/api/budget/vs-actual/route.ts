@@ -94,7 +94,7 @@ export async function GET(request: Request) {
 
         console.log(`[予実集計] 実績データ: ${actualData.length}件`);
 
-        // 商品別データを作成（予算がある商品のみ）
+        // 商品別データを作成
         const productResults = [];
         let totalBudgetQuantity = 0;
         let totalActualQuantity = 0;
@@ -106,14 +106,22 @@ export async function GET(request: Request) {
         let totalActualGrossProfit = 0;
 
         for (const product of products) {
-            const budget = budgetMap.get(product.productCode);
+            const budget = budgetMap.get(product.productCode) || { quantity: 0, sales: 0, cost: 0, grossProfit: 0 };
+            const actual = actualMap.get(product.productCode) || { quantity: 0, sales: 0, cost: 0, grossProfit: 0 };
 
-            // 予算がない商品はスキップ
-            if (!budget || (budget.quantity === 0 && budget.sales === 0)) {
+            // 予算・実績の両方が完全に0の場合のみスキップ
+            if (
+                budget.quantity === 0 &&
+                budget.sales === 0 &&
+                budget.cost === 0 &&
+                budget.grossProfit === 0 &&
+                actual.quantity === 0 &&
+                actual.sales === 0 &&
+                actual.cost === 0 &&
+                actual.grossProfit === 0
+            ) {
                 continue;
             }
-
-            const actual = actualMap.get(product.productCode) || { quantity: 0, sales: 0, cost: 0, grossProfit: 0 };
 
             const quantityAchievementRate = budget.quantity > 0
                 ? (actual.quantity / budget.quantity) * 100
