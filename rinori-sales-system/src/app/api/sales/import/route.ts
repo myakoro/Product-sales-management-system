@@ -88,6 +88,7 @@ export async function POST(request: Request) {
         // session.user is typed as { name, email, image } by default
         // But our authOptions adds { id, role }
         const user = session.user as any;
+        const userId = parseInt(user.id, 10);
 
         const findCol = (row: any, candidates: string[]) => {
             for (const c of candidates) {
@@ -150,7 +151,7 @@ export async function POST(request: Request) {
                 salesAmountExclTax: amt,
                 costAmountExclTax: cost,
                 grossProfit: gross,
-                createdByUserId: user.id
+                createdByUserId: userId
             });
         }
 
