@@ -50,7 +50,9 @@ export default function BudgetVsActualPage() {
 
         setLoading(true);
         try {
-            const res = await fetch(`/api/budget/vs-actual?startYm=${startYm.replace('-', '')}&endYm=${endYm.replace('-', '')}`);
+            // API 側の periodYm（sales_records.period_ym / monthly_budgets.period_ym）は "YYYY-MM" 形式なので
+            // ここでも type="month" の値（YYYY-MM）をそのまま渡す
+            const res = await fetch(`/api/budget/vs-actual?startYm=${startYm}&endYm=${endYm}`);
 
             if (res.ok) {
                 const data = await res.json();
