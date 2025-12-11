@@ -37,9 +37,11 @@ export async function GET(request: Request) {
             const sales = p.salesRecords.reduce((sum, r) => sum + r.salesAmountExclTax, 0);
             const cost = p.salesRecords.reduce((sum, r) => sum + r.costAmountExclTax, 0);
             const grossProfit = p.salesRecords.reduce((sum, r) => sum + r.grossProfit, 0);
+            const quantity = p.salesRecords.reduce((sum, r) => sum + r.quantity, 0);
 
             const costRate = sales > 0 ? (cost / sales) * 100 : 0;
             const grossProfitRate = sales > 0 ? (grossProfit / sales) * 100 : 0;
+            const avgUnitPrice = quantity > 0 ? Math.round(sales / quantity) : 0;
 
             return {
                 productCode: p.productCode,
@@ -47,6 +49,8 @@ export async function GET(request: Request) {
                 sales,
                 cost,
                 grossProfit,
+                quantity,
+                avgUnitPrice,
                 costRate,
                 grossProfitRate,
             };

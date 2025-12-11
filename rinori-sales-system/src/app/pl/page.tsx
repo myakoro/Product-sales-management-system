@@ -23,6 +23,15 @@ const formatPercent = (val: number, total: number) => {
     return `${(val / total * 100).toFixed(1)}%`;
 };
 
+// Helper to get previous month in YYYY-MM
+const getPreviousMonthYm = () => {
+    const now = new Date();
+    now.setMonth(now.getMonth() - 1);
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+};
+
 // Helper to get ranges
 const getRange = (type: 'single' | '3mo' | '6mo' | 'fiscal', baseYm: string): { start: string, end: string } => {
     const d = new Date(`${baseYm}-01`);
@@ -53,7 +62,7 @@ export default function PlPage() {
     // State
     const [periodMode, setPeriodMode] = useState<'preset' | 'custom'>('preset');
     const [presetType, setPresetType] = useState<'single' | '3mo' | '6mo' | 'fiscal'>('single');
-    const [baseYm, setBaseYm] = useState("2025-10"); // Default from spec example
+    const [baseYm, setBaseYm] = useState("");
 
     // Custom range
     const [customStart, setCustomStart] = useState("2025-01");
@@ -62,6 +71,13 @@ export default function PlPage() {
     const [data, setData] = useState<PlData | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    // Initialize baseYm as previous month (e.g. if today is 2025-12-11, baseYm = 2025-11)
+    useEffect(() => {
+        if (!baseYm) {
+            setBaseYm(getPreviousMonthYm());
+        }
+    }, [baseYm]);
 
     // Auth
     const { data: session } = useSession();

@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 
 type ProductPlData = {
     productCode: string;
     productName: string;
+    quantity: number;
     sales: number;
     cost: number;
     grossProfit: number;
+    avgUnitPrice: number;
     costRate: number;
     grossProfitRate: number;
 };
@@ -40,10 +42,19 @@ const getRange = (type: 'single' | '3mo' | '6mo' | 'fiscal', baseYm: string): { 
     return { start, end };
 };
 
+// Helper to get previous month in YYYY-MM
+const getPreviousMonthYm = () => {
+    const now = new Date();
+    now.setMonth(now.getMonth() - 1);
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    return `${year}-${month}`;
+};
+
 export default function ProductPlPage() {
     // Period Selection State
     const [periodType, setPeriodType] = useState('single');
-    const [baseYm, setBaseYm] = useState("2025-10");
+    const [baseYm, setBaseYm] = useState("");
     const [startRange, setStartRange] = useState("");
     const [endRange, setEndRange] = useState("");
 
@@ -54,6 +65,13 @@ export default function ProductPlPage() {
     const [data, setData] = useState<ProductPlData[]>([]);
     const [loading, setLoading] = useState(false);
     const [sortConfig, setSortConfig] = useState<{ key: keyof ProductPlData, direction: 'asc' | 'desc' }>({ key: 'sales', direction: 'desc' });
+
+    // Initialize baseYm as previous month (e.g. if today is 2025-12-11, baseYm = 2025-11)
+    useEffect(() => {
+        if (!baseYm) {
+            setBaseYm(getPreviousMonthYm());
+        }
+    }, [baseYm]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -211,9 +229,11 @@ export default function ProductPlPage() {
                             <tr>
                                 <th className="px-4 py-3 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('productCode')}>商品コード</th>
                                 <th className="px-4 py-3 cursor-pointer hover:bg-gray-100" onClick={() => handleSort('productName')}>商品名</th>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-100" onClick={() => handleSort('quantity')}>販売個数</th>
                                 <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-100" onClick={() => handleSort('sales')}>売上(税別)</th>
                                 <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-100" onClick={() => handleSort('cost')}>原価(税別)</th>
                                 <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-100" onClick={() => handleSort('grossProfit')}>粗利</th>
+                                <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-100" onClick={() => handleSort('avgUnitPrice')}>平均単価</th>
                                 <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-100" onClick={() => handleSort('costRate')}>原価率</th>
                                 <th className="px-4 py-3 text-right cursor-pointer hover:bg-gray-100" onClick={() => handleSort('grossProfitRate')}>粗利率</th>
                             </tr>
@@ -221,7 +241,7 @@ export default function ProductPlPage() {
                         <tbody className="divide-y divide-gray-200">
                             {data.length === 0 && !loading && (
                                 <tr>
-                                    <td colSpan={7} className="px-4 py-8 text-center text-gray-500">
+                                    <td colSpan={9} className="px-4 py-8 text-center text-gray-500">
                                         データがありません
                                     </td>
                                 </tr>
@@ -230,9 +250,11 @@ export default function ProductPlPage() {
                                 <tr key={item.productCode} className="hover:bg-gray-50">
                                     <td className="px-4 py-3">{item.productCode}</td>
                                     <td className="px-4 py-3">{item.productName}</td>
+                                    <td className="px-4 py-3 text-right">{item.quantity.toLocaleString()}</td>
                                     <td className="px-4 py-3 text-right">¥{item.sales.toLocaleString()}</td>
                                     <td className="px-4 py-3 text-right">¥{item.cost.toLocaleString()}</td>
                                     <td className="px-4 py-3 text-right">¥{item.grossProfit.toLocaleString()}</td>
+                                    <td className="px-4 py-3 text-right">¥{item.avgUnitPrice.toLocaleString()}</td>
                                     <td className="px-4 py-3 text-right">{item.costRate.toFixed(1)}%</td>
                                     <td className="px-4 py-3 text-right">{item.grossProfitRate.toFixed(1)}%</td>
                                 </tr>
