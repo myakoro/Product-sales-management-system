@@ -114,11 +114,24 @@ export default function SalesImportPage() {
             <main className="max-w-4xl mx-auto px-6 py-8">
                 <h2 className="text-2xl font-semibold mb-6">売上CSV取込</h2>
 
-                <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-6">
+                <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-4">
                     <p className="text-sm text-blue-800">
                         ネクストエンジンの売上CSVをアップロードすると、月次PL・商品別PL・予算vs実績が即時更新されます。
                         <br />
-                        ※CSVには「商品コード」「受注数」「小計」が含まれている必要があります。
+                        ※CSVには「商品コード（SKU）」「商品名」「受注日」「受注数」「売上金額（税込）」が含まれている必要があります。
+                    </p>
+                </div>
+
+                <div className="mb-6">
+                    <a
+                        href="/sales_template.csv"
+                        className="inline-flex items-center px-4 py-2 text-sm border border-primary text-primary rounded hover:bg-primary hover:text-white transition-colors"
+                        download
+                    >
+                        売上CSVテンプレートをダウンロード
+                    </a>
+                    <p className="mt-2 text-xs text-gray-600">
+                        ヘッダーのみのテンプレートです。Excelなどで開き、1行目を変更せずに売上データを入力してCSV形式で保存してください。
                     </p>
                 </div>
 
