@@ -15,6 +15,15 @@ type ProductPlData = {
     grossProfitRate: number;
 };
 
+// 商品コードの並び順を制御するための優先度関数
+// RINO-FR 系 → RINOBG → RINO-SY → その他 の順に優先
+function getProductCodePriority(code: string): number {
+    if (code.startsWith('RINO-FR')) return 1;
+    if (code.startsWith('RINOBG')) return 2;
+    if (code.startsWith('RINO-SY')) return 3;
+    return 4;
+}
+
 // Helper to get ranges (Duplicated from /pl/page.tsx for now)
 const getRange = (type: 'single' | '3mo' | '6mo' | 'fiscal', baseYm: string): { start: string, end: string } => {
     const d = new Date(`${baseYm}-01`);
@@ -64,7 +73,7 @@ export default function ProductPlPage() {
     // Data
     const [data, setData] = useState<ProductPlData[]>([]);
     const [loading, setLoading] = useState(false);
-    const [sortConfig, setSortConfig] = useState<{ key: keyof ProductPlData, direction: 'asc' | 'desc' }>({ key: 'sales', direction: 'desc' });
+    const [sortConfig, setSortConfig] = useState<{ key: keyof ProductPlData, direction: 'asc' | 'desc' }>({ key: 'productCode', direction: 'asc' });
 
     // Initialize baseYm as previous month (e.g. if today is 2025-12-11, baseYm = 2025-11)
     useEffect(() => {
@@ -104,8 +113,19 @@ export default function ProductPlPage() {
 
             const res = await fetch(`/api/pl/products?startYm=${sDate}&endYm=${eDate}&search=${searchTerm}`);
             if (!res.ok) throw new Error("Failed");
-            const result = await res.json();
-            setData(result);
+            const result: ProductPlData[] = await res.json();
+
+            // 初期表示は商品コード優先ルールでソート
+            const sortedInitial = [...result].sort((a, b) => {
+                const pa = getProductCodePriority(a.productCode);
+                const pb = getProductCodePriority(b.productCode);
+                if (pa !== pb) {
+                    return pa - pb;
+                }
+                return a.productCode.localeCompare(b.productCode);
+            });
+
+            setData(sortedInitial);
         } catch (err) {
             console.error(err);
         } finally {
@@ -122,6 +142,16 @@ export default function ProductPlPage() {
         setSortConfig({ key, direction });
 
         const sorted = [...data].sort((a, b) => {
+            if (key === 'productCode') {
+                const pa = getProductCodePriority(a.productCode);
+                const pb = getProductCodePriority(b.productCode);
+                if (pa !== pb) {
+                    return direction === 'asc' ? pa - pb : pb - pa;
+                }
+                const comp = a.productCode.localeCompare(b.productCode);
+                return direction === 'asc' ? comp : -comp;
+            }
+
             if (a[key] < b[key]) return direction === 'asc' ? -1 : 1;
             if (a[key] > b[key]) return direction === 'asc' ? 1 : -1;
             return 0;

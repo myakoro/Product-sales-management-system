@@ -119,6 +119,8 @@ export const authOptions: NextAuthOptions = {
     },
     session: {
         strategy: "jwt",
+        // ログイン状態の有効期限: 2時間（秒単位）
+        maxAge: 60 * 60 * 2,
     },
     secret: process.env.NEXTAUTH_SECRET || "development-secret-key-change-me",
 };

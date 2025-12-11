@@ -84,9 +84,12 @@ export default function BudgetPage() {
         fetchBudgetData();
     }, [startYm, endYm]);
 
-    // 期間合計から月別に配分
-    const handlePeriodTotalChange = (productIndex: number, value: number) => {
+    // 期間合計から月別に配分（productCode ベースで更新）
+    const handlePeriodTotalChange = (productCode: string, value: number) => {
         const newData = [...budgetData];
+        const productIndex = newData.findIndex(p => p.productCode === productCode);
+        if (productIndex === -1) return;
+
         const product = newData[productIndex];
 
         product.periodTotal = value;
@@ -113,9 +116,12 @@ export default function BudgetPage() {
         }
     };
 
-    // 月別数量から期間合計を再計算
-    const handleMonthlyQtyChange = (productIndex: number, month: string, value: number) => {
+    // 月別数量から期間合計を再計算（productCode ベースで更新）
+    const handleMonthlyQtyChange = (productCode: string, month: string, value: number) => {
         const newData = [...budgetData];
+        const productIndex = newData.findIndex(p => p.productCode === productCode);
+        if (productIndex === -1) return;
+
         const product = newData[productIndex];
 
         product.monthlyQty[month] = value;
@@ -331,7 +337,7 @@ export default function BudgetPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                                {sortedData.map((product, idx) => (
+                                {sortedData.map((product) => (
                                     <tr key={product.productCode} className="hover:bg-gray-50">
                                         <td className="px-4 py-3 text-sm border-r sticky left-0 bg-white z-10">{product.productCode}</td>
                                         <td className="px-4 py-3 text-sm border-r sticky left-[120px] bg-white z-10">{product.productName}</td>
@@ -339,7 +345,7 @@ export default function BudgetPage() {
                                             <input
                                                 type="number"
                                                 value={product.periodTotal || 0}
-                                                onChange={(e) => handlePeriodTotalChange(idx, Number(e.target.value) || 0)}
+                                                onChange={(e) => handlePeriodTotalChange(product.productCode, Number(e.target.value) || 0)}
                                                 className="w-20 px-2 py-1 text-right border border-gray-300 rounded"
                                             />
                                         </td>
@@ -354,7 +360,7 @@ export default function BudgetPage() {
                                                 <input
                                                     type="number"
                                                     value={product.monthlyQty[month] || 0}
-                                                    onChange={(e) => handleMonthlyQtyChange(idx, month, Number(e.target.value) || 0)}
+                                                    onChange={(e) => handleMonthlyQtyChange(product.productCode, month, Number(e.target.value) || 0)}
                                                     className="w-16 px-2 py-1 text-center border border-gray-300 rounded"
                                                 />
                                             </td>
