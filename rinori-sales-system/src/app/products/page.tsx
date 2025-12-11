@@ -13,6 +13,17 @@ type Product = {
     createdAt: string;
 };
 
+// 商品コードの並び順を制御するための優先度関数
+// RINO-FR 系 → RINOBG → RINO-SY → その他 の順に優先
+function getProductCodePriority(code: string): number {
+    if (code.startsWith('RINO-FR')) return 1;
+    if (code.startsWith('RINOBG')) return 2;
+    if (code.startsWith('RINO-SY')) return 3;
+    return 4;
+}
+
+type SortKey = keyof Product;
+
 export default function ProductsPage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(false);
@@ -21,6 +32,9 @@ export default function ProductsPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
     const [statusFilter, setStatusFilter] = useState("all");
+
+    const [sortKey, setSortKey] = useState<SortKey>('productCode');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     // Debounce search
     const [debouncedSearch, setDebouncedSearch] = useState(searchTerm);
@@ -54,6 +68,39 @@ export default function ProductsPage() {
     useEffect(() => {
         fetchProducts();
     }, [debouncedSearch, typeFilter, statusFilter]);
+
+    const handleSort = (key: SortKey) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortKey === key && sortDirection === 'asc') {
+            direction = 'desc';
+        }
+        setSortKey(key);
+        setSortDirection(direction);
+    };
+
+    const sortedProducts = [...products].sort((a, b) => {
+        if (sortKey === 'productCode') {
+            const pa = getProductCodePriority(a.productCode);
+            const pb = getProductCodePriority(b.productCode);
+            if (pa !== pb) {
+                return sortDirection === 'asc' ? pa - pb : pb - pa;
+            }
+            const comp = a.productCode.localeCompare(b.productCode);
+            return sortDirection === 'asc' ? comp : -comp;
+        }
+
+        const av = a[sortKey];
+        const bv = b[sortKey];
+
+        if (typeof av === 'number' && typeof bv === 'number') {
+            return sortDirection === 'asc' ? av - bv : bv - av;
+        }
+
+        const sa = String(av);
+        const sb = String(bv);
+        const comp = sa.localeCompare(sb);
+        return sortDirection === 'asc' ? comp : -comp;
+    });
 
     return (
         <div className="min-h-screen">
@@ -114,25 +161,46 @@ export default function ProductsPage() {
                     <table className="w-full">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                <th
+                                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer"
+                                    onClick={() => handleSort('productCode')}
+                                >
                                     商品コード
                                 </th>
-                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                <th
+                                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer"
+                                    onClick={() => handleSort('productName')}
+                                >
                                     商品名
                                 </th>
-                                <th className="px-4 py-3 text-right text-sm font-semibold">
+                                <th
+                                    className="px-4 py-3 text-right text-sm font-semibold cursor-pointer"
+                                    onClick={() => handleSort('salesPriceExclTax')}
+                                >
                                     販売価格（税別）
                                 </th>
-                                <th className="px-4 py-3 text-right text-sm font-semibold">
+                                <th
+                                    className="px-4 py-3 text-right text-sm font-semibold cursor-pointer"
+                                    onClick={() => handleSort('costExclTax')}
+                                >
                                     原価（税別）
                                 </th>
-                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                <th
+                                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer"
+                                    onClick={() => handleSort('productType')}
+                                >
                                     商品区分
                                 </th>
-                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                <th
+                                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer"
+                                    onClick={() => handleSort('managementStatus')}
+                                >
                                     管理ステータス
                                 </th>
-                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                <th
+                                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer"
+                                    onClick={() => handleSort('createdAt')}
+                                >
                                     登録日
                                 </th>
                                 <th className="px-4 py-3 text-left text-sm font-semibold">
@@ -155,7 +223,7 @@ export default function ProductsPage() {
                                     </td>
                                 </tr>
                             )}
-                            {!loading && products.map((product) => (
+                            {!loading && sortedProducts.map((product) => (
                                 <tr key={product.productCode} className="hover:bg-gray-50">
                                     <td className="px-4 py-3 text-sm">{product.productCode}</td>
                                     <td className="px-4 py-3 text-sm">{product.productName}</td>

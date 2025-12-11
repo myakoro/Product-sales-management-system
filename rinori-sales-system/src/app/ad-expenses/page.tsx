@@ -24,8 +24,11 @@ export default function AdExpensesPage() {
     const [categories, setCategories] = useState<AdCategory[]>([]);
     const [expenses, setExpenses] = useState<AdExpense[]>([]);
 
-    // Filter State
+    // Filter & Sort State
     const [targetYm, setTargetYm] = useState("2025-10");
+    const [expenseSortKey, setExpenseSortKey] = useState<'expenseDate' | 'amount' | 'adCategoryId'>('expenseDate');
+    const [expenseSortDirection, setExpenseSortDirection] = useState<'asc' | 'desc'>('asc');
+    const [categorySortDirection, setCategorySortDirection] = useState<'asc' | 'desc'>('asc');
 
     // Loading State
     const [loading, setLoading] = useState(false);
@@ -168,6 +171,44 @@ export default function AdExpensesPage() {
         }
     };
 
+    const handleExpenseSort = (key: 'expenseDate' | 'amount' | 'adCategoryId') => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (expenseSortKey === key && expenseSortDirection === 'asc') {
+            direction = 'desc';
+        }
+        setExpenseSortKey(key);
+        setExpenseSortDirection(direction);
+    };
+
+    const sortedExpenses = [...expenses].sort((a, b) => {
+        let av: any;
+        let bv: any;
+
+        if (expenseSortKey === 'expenseDate') {
+            av = a.expenseDate;
+            bv = b.expenseDate;
+        } else if (expenseSortKey === 'amount') {
+            av = a.amount;
+            bv = b.amount;
+        } else {
+            av = a.adCategoryId;
+            bv = b.adCategoryId;
+        }
+
+        if (av < bv) return expenseSortDirection === 'asc' ? -1 : 1;
+        if (av > bv) return expenseSortDirection === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const handleCategorySortToggle = () => {
+        setCategorySortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
+    };
+
+    const sortedCategories = [...categories].sort((a, b) => {
+        const comp = a.categoryName.localeCompare(b.categoryName);
+        return categorySortDirection === 'asc' ? comp : -comp;
+    });
+
     // Inline Editing for Expenses (Simplified: Blur to save)
     const handleUpdateExpense = async (id: number, field: string, value: any) => {
         try {
@@ -236,15 +277,30 @@ export default function AdExpensesPage() {
                             <table className="w-full text-sm">
                                 <thead className="bg-gray-50 border-b">
                                     <tr>
-                                        <th className="px-4 py-3 text-left w-40">日付</th>
-                                        <th className="px-4 py-3 text-right w-40">金額</th>
-                                        <th className="px-4 py-3 text-left w-48">カテゴリ</th>
+                                        <th
+                                            className="px-4 py-3 text-left w-40 cursor-pointer"
+                                            onClick={() => handleExpenseSort('expenseDate')}
+                                        >
+                                            日付
+                                        </th>
+                                        <th
+                                            className="px-4 py-3 text-right w-40 cursor-pointer"
+                                            onClick={() => handleExpenseSort('amount')}
+                                        >
+                                            金額
+                                        </th>
+                                        <th
+                                            className="px-4 py-3 text-left w-48 cursor-pointer"
+                                            onClick={() => handleExpenseSort('adCategoryId')}
+                                        >
+                                            カテゴリ
+                                        </th>
                                         <th className="px-4 py-3 text-left">メモ</th>
                                         <th className="px-4 py-3 w-20">操作</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
-                                    {expenses.map((exp) => (
+                                    {sortedExpenses.map((exp) => (
                                         <tr key={exp.id} className="hover:bg-gray-50">
                                             <td className="px-4 py-2">
                                                 <input
@@ -352,12 +408,17 @@ export default function AdExpensesPage() {
                             <table className="w-full text-sm">
                                 <thead className="bg-gray-50 border-b">
                                     <tr>
-                                        <th className="px-4 py-3 text-left">カテゴリ名</th>
+                                        <th
+                                            className="px-4 py-3 text-left cursor-pointer"
+                                            onClick={handleCategorySortToggle}
+                                        >
+                                            カテゴリ名
+                                        </th>
                                         <th className="px-4 py-3 w-20">操作</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-gray-200">
-                                    {categories.map((cat) => (
+                                    {sortedCategories.map((cat) => (
                                         <tr key={cat.id} className="hover:bg-gray-50">
                                             <td className="px-4 py-2">
                                                 <input

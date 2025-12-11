@@ -33,12 +33,25 @@ type Summary = {
     totalGrossProfitAchievementRate: number;
 };
 
+// 商品コードの並び順を制御するための優先度関数
+// RINO-FR 系 → RINOBG → RINO-SY → その他 の順に優先
+function getProductCodePriority(code: string): number {
+    if (code.startsWith('RINO-FR')) return 1;
+    if (code.startsWith('RINOBG')) return 2;
+    if (code.startsWith('RINO-SY')) return 3;
+    return 4;
+}
+
+type SortKey = keyof ProductResult;
+
 export default function BudgetVsActualPage() {
     const [startYm, setStartYm] = useState('');
     const [endYm, setEndYm] = useState('');
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState<ProductResult[]>([]);
     const [summary, setSummary] = useState<Summary | null>(null);
+    const [sortKey, setSortKey] = useState<SortKey>('productCode');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -81,6 +94,39 @@ export default function BudgetVsActualPage() {
         if (rate >= 80) return '#fff3cd'; // 薄黄
         return '#f8d7da'; // 薄赤
     };
+
+    const handleSort = (key: SortKey) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortKey === key && sortDirection === 'asc') {
+            direction = 'desc';
+        }
+        setSortKey(key);
+        setSortDirection(direction);
+    };
+
+    const sortedProducts = [...products].sort((a, b) => {
+        if (sortKey === 'productCode') {
+            const pa = getProductCodePriority(a.productCode);
+            const pb = getProductCodePriority(b.productCode);
+            if (pa !== pb) {
+                return sortDirection === 'asc' ? pa - pb : pb - pa;
+            }
+            const comp = a.productCode.localeCompare(b.productCode);
+            return sortDirection === 'asc' ? comp : -comp;
+        }
+
+        const av = a[sortKey];
+        const bv = b[sortKey];
+
+        if (typeof av === 'number' && typeof bv === 'number') {
+            return sortDirection === 'asc' ? av - bv : bv - av;
+        }
+
+        const sa = String(av);
+        const sb = String(bv);
+        const comp = sa.localeCompare(sb);
+        return sortDirection === 'asc' ? comp : -comp;
+    });
 
     return (
         <div style={{ padding: '2rem', maxWidth: '1600px', margin: '0 auto' }}>
@@ -253,21 +299,76 @@ export default function BudgetVsActualPage() {
                                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
                                     <thead>
                                         <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
-                                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600' }}>商品コード</th>
-                                            <th style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600' }}>商品名</th>
-                                            <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600' }}>予算数量</th>
-                                            <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600' }}>実績数量</th>
-                                            <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600' }}>数量達成率</th>
-                                            <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600' }}>予算売上</th>
-                                            <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600' }}>実績売上</th>
-                                            <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600' }}>売上達成率</th>
-                                            <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600' }}>予算粗利</th>
-                                            <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600' }}>実績粗利</th>
-                                            <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600' }}>粗利達成率</th>
+                                            <th
+                                                style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', cursor: 'pointer' }}
+                                                onClick={() => handleSort('productCode')}
+                                            >
+                                                商品コード
+                                            </th>
+                                            <th
+                                                style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', cursor: 'pointer' }}
+                                                onClick={() => handleSort('productName')}
+                                            >
+                                                商品名
+                                            </th>
+                                            <th
+                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
+                                                onClick={() => handleSort('budgetQuantity')}
+                                            >
+                                                予算数量
+                                            </th>
+                                            <th
+                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
+                                                onClick={() => handleSort('actualQuantity')}
+                                            >
+                                                実績数量
+                                            </th>
+                                            <th
+                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
+                                                onClick={() => handleSort('quantityAchievementRate')}
+                                            >
+                                                数量達成率
+                                            </th>
+                                            <th
+                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
+                                                onClick={() => handleSort('budgetSales')}
+                                            >
+                                                予算売上
+                                            </th>
+                                            <th
+                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
+                                                onClick={() => handleSort('actualSales')}
+                                            >
+                                                実績売上
+                                            </th>
+                                            <th
+                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
+                                                onClick={() => handleSort('salesAchievementRate')}
+                                            >
+                                                売上達成率
+                                            </th>
+                                            <th
+                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
+                                                onClick={() => handleSort('budgetGrossProfit')}
+                                            >
+                                                予算粗利
+                                            </th>
+                                            <th
+                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
+                                                onClick={() => handleSort('actualGrossProfit')}
+                                            >
+                                                実績粗利
+                                            </th>
+                                            <th
+                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
+                                                onClick={() => handleSort('grossProfitAchievementRate')}
+                                            >
+                                                粗利達成率
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {products.map((product) => (
+                                        {sortedProducts.map((product) => (
                                             <tr key={product.productCode} style={{ borderBottom: '1px solid #eee' }}>
                                                 <td style={{ padding: '0.75rem', fontWeight: '500' }}>{product.productCode}</td>
                                                 <td style={{ padding: '0.75rem' }}>{product.productName}</td>

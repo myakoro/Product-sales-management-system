@@ -19,6 +19,17 @@ function generateMonths(startYm: string, endYm: string) {
     return months;
 }
 
+// 商品コードの並び順を制御するための優先度関数
+// RINO-FR 系 → RINOBG → RINO-SY → その他 の順に優先
+function getProductCodePriority(code: string): number {
+    if (code.startsWith('RINO-FR')) return 1;
+    if (code.startsWith('RINOBG')) return 2;
+    if (code.startsWith('RINO-SY')) return 3;
+    return 4;
+}
+
+type SortKey = 'productCode' | 'productName' | 'periodTotal' | 'periodSales' | 'periodProfit';
+
 export default function BudgetPage() {
     const [startYm, setStartYm] = useState("2025-01");
     const [endYm, setEndYm] = useState("2025-03");
@@ -28,6 +39,8 @@ export default function BudgetPage() {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [sortKey, setSortKey] = useState<SortKey>('productCode');
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
     // データ取得
     const fetchBudgetData = async () => {
@@ -152,11 +165,42 @@ export default function BudgetPage() {
         }
     };
 
+    const handleSort = (key: SortKey) => {
+        let direction: 'asc' | 'desc' = 'asc';
+        if (sortKey === key && sortDirection === 'asc') {
+            direction = 'desc';
+        }
+        setSortKey(key);
+        setSortDirection(direction);
+    };
+
     // フィルタリング
     const filteredData = budgetData.filter(p =>
         p.productCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.productName.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const sortedData = [...filteredData].sort((a, b) => {
+        if (sortKey === 'productCode') {
+            const pa = getProductCodePriority(a.productCode as string);
+            const pb = getProductCodePriority(b.productCode as string);
+            if (pa !== pb) {
+                return sortDirection === 'asc' ? pa - pb : pb - pa;
+            }
+            const comp = (a.productCode as string).localeCompare(b.productCode as string);
+            return sortDirection === 'asc' ? comp : -comp;
+        }
+
+        const av = a[sortKey] ?? 0;
+        const bv = b[sortKey] ?? 0;
+        if (typeof av === 'number' && typeof bv === 'number') {
+            return sortDirection === 'asc' ? av - bv : bv - av;
+        }
+        const sa = String(av);
+        const sb = String(bv);
+        const comp = sa.localeCompare(sb);
+        return sortDirection === 'asc' ? comp : -comp;
+    });
 
     // サマリ計算
     const summary = filteredData.reduce((acc, p) => ({
@@ -249,11 +293,36 @@ export default function BudgetPage() {
                         <table className="w-full border-collapse">
                             <thead className="bg-gray-50">
                                 <tr>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold border-r sticky left-0 bg-gray-50 z-10">商品コード</th>
-                                    <th className="px-4 py-3 text-left text-sm font-semibold border-r sticky left-[120px] bg-gray-50 z-10">商品名</th>
-                                    <th className="px-4 py-3 text-right text-sm font-semibold border-r">期間合計数量</th>
-                                    <th className="px-4 py-3 text-right text-sm font-semibold border-r">期間売上</th>
-                                    <th className="px-4 py-3 text-right text-sm font-semibold border-r">期間粗利</th>
+                                    <th
+                                        className="px-4 py-3 text-left text-sm font-semibold border-r sticky left-0 bg-gray-50 z-10 cursor-pointer"
+                                        onClick={() => handleSort('productCode')}
+                                    >
+                                        商品コード
+                                    </th>
+                                    <th
+                                        className="px-4 py-3 text-left text-sm font-semibold border-r sticky left-[120px] bg-gray-50 z-10 cursor-pointer"
+                                        onClick={() => handleSort('productName')}
+                                    >
+                                        商品名
+                                    </th>
+                                    <th
+                                        className="px-4 py-3 text-right text-sm font-semibold border-r cursor-pointer"
+                                        onClick={() => handleSort('periodTotal')}
+                                    >
+                                        期間合計数量
+                                    </th>
+                                    <th
+                                        className="px-4 py-3 text-right text-sm font-semibold border-r cursor-pointer"
+                                        onClick={() => handleSort('periodSales')}
+                                    >
+                                        期間売上
+                                    </th>
+                                    <th
+                                        className="px-4 py-3 text-right text-sm font-semibold border-r cursor-pointer"
+                                        onClick={() => handleSort('periodProfit')}
+                                    >
+                                        期間粗利
+                                    </th>
                                     {months.map(month => (
                                         <th key={month} className="px-4 py-3 text-center text-sm font-semibold border-r">
                                             {month.slice(5)}月
@@ -262,7 +331,7 @@ export default function BudgetPage() {
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-200">
-                                {filteredData.map((product, idx) => (
+                                {sortedData.map((product, idx) => (
                                     <tr key={product.productCode} className="hover:bg-gray-50">
                                         <td className="px-4 py-3 text-sm border-r sticky left-0 bg-white z-10">{product.productCode}</td>
                                         <td className="px-4 py-3 text-sm border-r sticky left-[120px] bg-white z-10">{product.productName}</td>
