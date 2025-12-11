@@ -97,6 +97,29 @@ export async function POST(request: Request) {
             return null;
         };
 
+        // 対象年月に適用される税率を取得（仕様書 第1部 5章準拠）
+        console.log('[売上CSV取込] 税率取得中:', targetYm);
+        const taxRateRecord = await prisma.taxRate.findFirst({
+            where: {
+                startYm: {
+                    lte: targetYm,
+                },
+            },
+            orderBy: {
+                startYm: 'desc',
+            },
+        });
+
+        if (!taxRateRecord) {
+            console.error('[売上CSV取込] 税率未設定エラー:', targetYm);
+            return NextResponse.json({
+                error: `対象年月 ${targetYm} に適用する税率が「税率設定」に登録されていません。` ,
+            }, { status: 400 });
+        }
+
+        const taxRate = taxRateRecord.rate; // 例: 0.10
+        console.log('[売上CSV取込] 使用税率:', taxRate);
+
         const recordsToCreate: any[] = [];
         // 新商品候補用のデータ構造（仕様書準拠）
         const newProductCandidates: Map<string, { sku: string, name: string | null }> = new Map();
@@ -136,19 +159,24 @@ export async function POST(request: Request) {
             const dateObj = rawDate ? new Date(rawDate) : new Date();
 
             const qty = parseInt(findCol(row, COL_MAPPING.quantity) || '0', 10);
-            const amt = parseFloat(findCol(row, COL_MAPPING.amount) || '0');
+            const amtInclTax = parseFloat(findCol(row, COL_MAPPING.amount) || '0');
 
-            if (qty === 0 && amt === 0) continue;
+            if (qty === 0 && amtInclTax === 0) continue;
+
+            // 税込金額 → 税抜金額への変換
+            // 税別 = 税込 ÷ (1 + 税率) を小数第2位で四捨五入
+            const salesExclTaxRaw = amtInclTax / (1 + taxRate);
+            const salesExclTax = Math.round(salesExclTaxRaw * 100) / 100;
 
             const cost = product.costExclTax * qty;
-            const gross = amt - cost;
+            const gross = salesExclTax - cost;
 
             recordsToCreate.push({
                 productCode: parentCode,
                 periodYm: targetYm,
                 salesDate: dateObj,
                 quantity: qty,
-                salesAmountExclTax: amt,
+                salesAmountExclTax: salesExclTax,
                 costAmountExclTax: cost,
                 grossProfit: gross,
                 createdByUserId: userId
