@@ -15,7 +15,7 @@ export async function GET(request: Request) {
     try {
         const products = await prisma.product.findMany({
             where: {
-                managementStatus: '管理中',
+                managementStatus: { in: ['管理中', 'managed'] },
                 OR: [
                     { productCode: { contains: searchTerm } }, // Default is case insensitive in SQLite? Prisma usually maps well.
                     { productName: { contains: searchTerm } },

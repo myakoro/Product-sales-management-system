@@ -126,8 +126,8 @@ export async function POST(request: Request) {
                 continue;
             }
 
-            // 管理ステータスチェック
-            if (product.managementStatus === '管理外') {
+            // 管理ステータスチェック（日本語/英語両対応）
+            if (product.managementStatus === '管理外' || product.managementStatus === 'unmanaged') {
                 console.log('[売上CSV取込] 管理外商品をスキップ:', parentCode);
                 continue;
             }

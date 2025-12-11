@@ -26,7 +26,7 @@ export async function GET(request: Request) {
                     lte: endYm,
                 },
                 product: {
-                    managementStatus: '管理中' // Ensure we only count managed products
+                    managementStatus: { in: ['管理中', 'managed'] } // 日本語/英語両方の管理中を集計対象にする
                 }
             },
         });

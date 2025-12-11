@@ -16,10 +16,12 @@ export async function GET(request: Request) {
 
         console.log(`[予実集計] 期間: ${startYm} 〜 ${endYm}`);
 
-        // 管理中の商品を取得
+        // 管理中の商品を取得（日本語/英語両対応）
         const products = await prisma.product.findMany({
             where: {
-                managementStatus: '管理中'
+                managementStatus: {
+                    in: ['管理中', 'managed']
+                }
             },
             select: {
                 productCode: true,
