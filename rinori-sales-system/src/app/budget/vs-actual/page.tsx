@@ -196,9 +196,9 @@ export default function BudgetVsActualPage() {
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.5rem 1rem', fontSize: '0.95rem' }}>
                                     <div style={{ fontWeight: '500' }}>予算:</div>
-                                    <div>¥{summary.totalBudgetSales.toLocaleString()}</div>
+                                    <div>¥{Math.round(summary.totalBudgetSales).toLocaleString()}</div>
                                     <div style={{ fontWeight: '500' }}>実績:</div>
-                                    <div>¥{summary.totalActualSales.toLocaleString()}</div>
+                                    <div>¥{Math.round(summary.totalActualSales).toLocaleString()}</div>
                                     <div style={{ fontWeight: '600' }}>達成率:</div>
                                     <div style={{
                                         fontWeight: '600',
@@ -216,9 +216,9 @@ export default function BudgetVsActualPage() {
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.5rem 1rem', fontSize: '0.95rem' }}>
                                     <div style={{ fontWeight: '500' }}>予算:</div>
-                                    <div>¥{summary.totalBudgetGrossProfit.toLocaleString()}</div>
+                                    <div>¥{Math.round(summary.totalBudgetGrossProfit).toLocaleString()}</div>
                                     <div style={{ fontWeight: '500' }}>実績:</div>
-                                    <div>¥{summary.totalActualGrossProfit.toLocaleString()}</div>
+                                    <div>¥{Math.round(summary.totalActualGrossProfit).toLocaleString()}</div>
                                     <div style={{ fontWeight: '600' }}>達成率:</div>
                                     <div style={{
                                         fontWeight: '600',
@@ -280,8 +280,8 @@ export default function BudgetVsActualPage() {
                                                 }}>
                                                     {product.quantityAchievementRate.toFixed(1)}%
                                                 </td>
-                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>¥{product.budgetSales.toLocaleString()}</td>
-                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>¥{product.actualSales.toLocaleString()}</td>
+                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>¥{Math.round(product.budgetSales).toLocaleString()}</td>
+                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>¥{Math.round(product.actualSales).toLocaleString()}</td>
                                                 <td style={{
                                                     padding: '0.75rem',
                                                     textAlign: 'right',
@@ -291,8 +291,8 @@ export default function BudgetVsActualPage() {
                                                 }}>
                                                     {product.salesAchievementRate.toFixed(1)}%
                                                 </td>
-                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>¥{product.budgetGrossProfit.toLocaleString()}</td>
-                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>¥{product.actualGrossProfit.toLocaleString()}</td>
+                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>¥{Math.round(product.budgetGrossProfit).toLocaleString()}</td>
+                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>¥{Math.round(product.actualGrossProfit).toLocaleString()}</td>
                                                 <td style={{
                                                     padding: '0.75rem',
                                                     textAlign: 'right',

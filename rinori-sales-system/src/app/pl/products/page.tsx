@@ -251,10 +251,10 @@ export default function ProductPlPage() {
                                     <td className="px-4 py-3">{item.productCode}</td>
                                     <td className="px-4 py-3">{item.productName}</td>
                                     <td className="px-4 py-3 text-right">{item.quantity.toLocaleString()}</td>
-                                    <td className="px-4 py-3 text-right">¥{item.sales.toLocaleString()}</td>
-                                    <td className="px-4 py-3 text-right">¥{item.cost.toLocaleString()}</td>
-                                    <td className="px-4 py-3 text-right">¥{item.grossProfit.toLocaleString()}</td>
-                                    <td className="px-4 py-3 text-right">¥{item.avgUnitPrice.toLocaleString()}</td>
+                                    <td className="px-4 py-3 text-right">¥{Math.round(item.sales).toLocaleString()}</td>
+                                    <td className="px-4 py-3 text-right">¥{Math.round(item.cost).toLocaleString()}</td>
+                                    <td className="px-4 py-3 text-right">¥{Math.round(item.grossProfit).toLocaleString()}</td>
+                                    <td className="px-4 py-3 text-right">¥{Math.round(item.avgUnitPrice).toLocaleString()}</td>
                                     <td className="px-4 py-3 text-right">{item.costRate.toFixed(1)}%</td>
                                     <td className="px-4 py-3 text-right">{item.grossProfitRate.toFixed(1)}%</td>
                                 </tr>

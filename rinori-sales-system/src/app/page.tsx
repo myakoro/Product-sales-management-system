@@ -170,21 +170,21 @@ export default function HomePage() {
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
                             <div>
                                 <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>売上（税別）</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: '600' }}>¥{dashboardData.monthlySummary.sales.toLocaleString()}</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: '600' }}>¥{Math.round(dashboardData.monthlySummary.sales).toLocaleString()}</div>
                             </div>
                             <div>
                                 <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>粗利</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#28a745' }}>¥{dashboardData.monthlySummary.grossProfit.toLocaleString()}</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#28a745' }}>¥{Math.round(dashboardData.monthlySummary.grossProfit).toLocaleString()}</div>
                                 <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem' }}>粗利率: {dashboardData.monthlySummary.grossProfitRate.toFixed(1)}%</div>
                             </div>
                             <div>
                                 <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>広告費</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#dc3545' }}>¥{dashboardData.monthlySummary.adExpense.toLocaleString()}</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#dc3545' }}>¥{Math.round(dashboardData.monthlySummary.adExpense).toLocaleString()}</div>
                                 <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem' }}>広告率: {dashboardData.monthlySummary.adExpenseRate.toFixed(1)}%</div>
                             </div>
                             <div>
                                 <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>営業利益</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#0070f3' }}>¥{dashboardData.monthlySummary.operatingProfit.toLocaleString()}</div>
+                                <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#0070f3' }}>¥{Math.round(dashboardData.monthlySummary.operatingProfit).toLocaleString()}</div>
                                 <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem' }}>利益率: {dashboardData.monthlySummary.operatingProfitRate.toFixed(1)}%</div>
                             </div>
                         </div>
@@ -385,6 +385,21 @@ export default function HomePage() {
                         }}
                     >
                         <h3 style={{ color: '#0070f3', fontWeight: '600' }}>予算設定</h3>
+                    </Link>
+                    <Link
+                        href="/budget/vs-actual"
+                        style={{
+                            display: 'block',
+                            backgroundColor: 'white',
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '8px',
+                            padding: '1.5rem',
+                            textAlign: 'center',
+                            textDecoration: 'none',
+                            transition: 'background-color 0.2s'
+                        }}
+                    >
+                        <h3 style={{ color: '#0070f3', fontWeight: '600' }}>予算 vs 実績</h3>
                     </Link>
                     <Link
                         href="/pl"

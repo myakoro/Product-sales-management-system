@@ -12,9 +12,10 @@ type PlData = {
     operatingProfit: number;
 };
 
-// Helper to format currency
+// Helper to format currency (integer yen)
 const formatCurrency = (amount: number) => {
-    return `¥${amount.toLocaleString()}`;
+    const rounded = Math.round(amount);
+    return `¥${rounded.toLocaleString()}`;
 };
 
 // Helper to format percent

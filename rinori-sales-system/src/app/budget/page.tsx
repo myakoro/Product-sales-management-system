@@ -228,11 +228,11 @@ export default function BudgetPage() {
                     <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
                             <div className="text-sm text-gray-600">合計売上（税別）</div>
-                            <div className="text-xl font-semibold">¥{summary.totalSales.toLocaleString()}</div>
+                            <div className="text-xl font-semibold">¥{Math.round(summary.totalSales).toLocaleString()}</div>
                         </div>
                         <div>
                             <div className="text-sm text-gray-600">合計粗利</div>
-                            <div className="text-xl font-semibold">¥{summary.totalProfit.toLocaleString()}</div>
+                            <div className="text-xl font-semibold">¥{Math.round(summary.totalProfit).toLocaleString()}</div>
                         </div>
                         <div>
                             <div className="text-sm text-gray-600">粗利率</div>
@@ -275,10 +275,10 @@ export default function BudgetPage() {
                                             />
                                         </td>
                                         <td className="px-4 py-3 text-right text-sm border-r bg-gray-50">
-                                            ¥{product.periodSales.toLocaleString()}
+                                            ¥{Math.round(product.periodSales).toLocaleString()}
                                         </td>
                                         <td className="px-4 py-3 text-right text-sm border-r bg-gray-50">
-                                            ¥{product.periodProfit.toLocaleString()}
+                                            ¥{Math.round(product.periodProfit).toLocaleString()}
                                         </td>
                                         {months.map(month => (
                                             <td key={month} className="px-4 py-3 text-center border-r">
