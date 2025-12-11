@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, use, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -17,9 +17,9 @@ const dummyProduct = {
 export default function EditProductPage({
     params,
 }: {
-    params: Promise<{ code: string }>;
+    params: { code: string };
 }) {
-    const { code } = use(params);
+    const { code } = params;
     const router = useRouter();
     const [formData, setFormData] = useState({
         productCode: "",
