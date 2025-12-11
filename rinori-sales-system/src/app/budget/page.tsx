@@ -223,8 +223,8 @@ export default function BudgetPage() {
                     </div>
                 </div>
 
-                {/* サマリ */}
-                <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-4">
+                {/* サマリ（スクロール時も上部に固定） */}
+                <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-4 sticky top-0 z-20">
                     <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
                             <div className="text-sm text-gray-600">合計売上（税別）</div>
