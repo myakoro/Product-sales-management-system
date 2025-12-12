@@ -493,6 +493,21 @@ export default function HomePage() {
                             >
                                 <h3 style={{ color: '#0070f3', fontWeight: '600' }}>データエクスポート（マスター）</h3>
                             </Link>
+                            <Link
+                                href="/settings/import"
+                                style={{
+                                    display: 'block',
+                                    backgroundColor: 'white',
+                                    border: '1px solid #e0e0e0',
+                                    borderRadius: '8px',
+                                    padding: '1.5rem',
+                                    textAlign: 'center',
+                                    textDecoration: 'none',
+                                    transition: 'background-color 0.2s'
+                                }}
+                            >
+                                <h3 style={{ color: '#0070f3', fontWeight: '600' }}>データ復元（マスター）</h3>
+                            </Link>
                         </>
                     )}
                 </div>

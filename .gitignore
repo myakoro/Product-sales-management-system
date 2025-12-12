@@ -16,3 +16,8 @@ yarn-error.log*
 Thumbs.db
 .idea/
 .vscode/
+
+# Local DB / backups (do not commit)
+rinori-sales-system/prisma/prod.db
+rinori-sales-system/rinori-sales-backup-*.db
+rinori-sales-system/check-prod-db.js
