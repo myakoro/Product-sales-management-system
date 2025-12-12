@@ -83,6 +83,22 @@ export async function POST(request: Request) {
             },
         });
 
+        // 新商品候補テーブルに同じ商品コードで pending のものがあれば、登録済みに更新しておく
+        try {
+            await prisma.newProductCandidate.updateMany({
+                where: {
+                    productCode,
+                    status: 'pending',
+                },
+                data: {
+                    status: 'registered',
+                },
+            });
+        } catch (updateError) {
+            console.error('Failed to update newProductCandidate status for productCode', productCode, updateError);
+            // 候補の更新に失敗しても商品登録自体は成功させる
+        }
+
         return NextResponse.json(product);
     } catch (error) {
         console.error('Failed to create product:', error);
