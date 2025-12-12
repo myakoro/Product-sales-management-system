@@ -52,6 +52,7 @@ export default function BudgetVsActualPage() {
     const [summary, setSummary] = useState<Summary | null>(null);
     const [sortKey, setSortKey] = useState<SortKey>('productCode');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+    const [hideZeroRows, setHideZeroRows] = useState(true);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -104,7 +105,16 @@ export default function BudgetVsActualPage() {
         setSortDirection(direction);
     };
 
-    const sortedProducts = [...products].sort((a, b) => {
+    const filteredProducts = hideZeroRows
+        ? products.filter(p =>
+            p.budgetQuantity !== 0 ||
+            p.actualQuantity !== 0 ||
+            p.budgetSales !== 0 ||
+            p.actualSales !== 0
+        )
+        : products;
+
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
         if (sortKey === 'productCode') {
             const pa = getProductCodePriority(a.productCode);
             const pb = getProductCodePriority(b.productCode);
@@ -286,9 +296,20 @@ export default function BudgetVsActualPage() {
                         borderRadius: '8px',
                         boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                     }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem' }}>
-                            商品別一覧（{products.length}件）
-                        </h2>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>
+                                商品別一覧（{sortedProducts.length}件）
+                            </h2>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={hideZeroRows}
+                                    onChange={(e) => setHideZeroRows(e.target.checked)}
+                                    style={{ cursor: 'pointer' }}
+                                />
+                                予算・実績がどちらも0の商品を非表示
+                            </label>
+                        </div>
 
                         {products.length === 0 ? (
                             <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>

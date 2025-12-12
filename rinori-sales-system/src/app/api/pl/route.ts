@@ -6,10 +6,14 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const startYm = searchParams.get('startYm');
     const endYm = searchParams.get('endYm');
+    const salesChannelIdStr = searchParams.get('salesChannelId');
 
     if (!startYm || !endYm) {
         return NextResponse.json({ error: 'Missing startYm or endYm' }, { status: 400 });
     }
+
+    const salesChannelId = salesChannelIdStr ? parseInt(salesChannelIdStr, 10) : null;
+    const isChannelFiltered = salesChannelId !== null && salesChannelId > 0;
 
     try {
         // 1. Calculate Sales, Cost, Gross Profit from SalesRecords
@@ -26,8 +30,9 @@ export async function GET(request: Request) {
                     lte: endYm,
                 },
                 product: {
-                    managementStatus: { in: ['管理中', 'managed'] } // 日本語/英語両方の管理中を集計対象にする
-                }
+                    managementStatus: { in: ['管理中', 'managed'] }
+                },
+                ...(isChannelFiltered ? { salesChannelId: salesChannelId } : {})
             },
         });
 
@@ -59,6 +64,17 @@ export async function GET(request: Request) {
                 },
             },
         });
+
+        // 販路別の場合は広告費・営業利益を返さない（V1.4設計書方針）
+        if (isChannelFiltered) {
+            return NextResponse.json({
+                sales,
+                cost,
+                grossProfit,
+                adExpense: null,
+                operatingProfit: null,
+            });
+        }
 
         const adExpense = adAgg._sum.amount || 0;
 

@@ -15,6 +15,12 @@ type ProductPlData = {
     grossProfitRate: number;
 };
 
+type SalesChannel = {
+    id: number;
+    name: string;
+    isActive: boolean;
+};
+
 // 商品コードの並び順を制御するための優先度関数
 // RINO-FR 系 → RINOBG → RINO-SY → その他 の順に優先
 function getProductCodePriority(code: string): number {
@@ -70,10 +76,22 @@ export default function ProductPlPage() {
     // Search
     const [searchTerm, setSearchTerm] = useState("");
 
+    // Sales channel filter
+    const [salesChannels, setSalesChannels] = useState<SalesChannel[]>([]);
+    const [salesChannelId, setSalesChannelId] = useState<string>("");
+
     // Data
     const [data, setData] = useState<ProductPlData[]>([]);
     const [loading, setLoading] = useState(false);
     const [sortConfig, setSortConfig] = useState<{ key: keyof ProductPlData, direction: 'asc' | 'desc' }>({ key: 'productCode', direction: 'asc' });
+
+    // Fetch sales channels
+    useEffect(() => {
+        fetch("/api/sales-channels?activeOnly=true")
+            .then((res) => res.json())
+            .then((data) => setSalesChannels(data))
+            .catch((err) => console.error("Failed to fetch sales channels:", err));
+    }, []);
 
     // Initialize baseYm as previous month (e.g. if today is 2025-12-11, baseYm = 2025-11)
     useEffect(() => {
@@ -111,7 +129,11 @@ export default function ProductPlPage() {
                 eDate = endRange;
             }
 
-            const res = await fetch(`/api/pl/products?startYm=${sDate}&endYm=${eDate}&search=${searchTerm}`);
+            let url = `/api/pl/products?startYm=${sDate}&endYm=${eDate}&search=${searchTerm}`;
+            if (salesChannelId) {
+                url += `&salesChannelId=${salesChannelId}`;
+            }
+            const res = await fetch(url);
             if (!res.ok) throw new Error("Failed");
             const result: ProductPlData[] = await res.json();
 
@@ -240,6 +262,22 @@ export default function ProductPlPage() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="px-3 py-2 border border-gray-300 rounded"
                             />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium mb-1">販路</label>
+                            <select
+                                value={salesChannelId}
+                                onChange={(e) => setSalesChannelId(e.target.value)}
+                                className="px-3 py-2 border border-gray-300 rounded"
+                            >
+                                <option value="">全販路</option>
+                                {salesChannels.map((channel) => (
+                                    <option key={channel.id} value={channel.id}>
+                                        {channel.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <button

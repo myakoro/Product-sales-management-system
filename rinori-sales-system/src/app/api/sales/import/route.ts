@@ -50,11 +50,24 @@ export async function POST(request: Request) {
         const targetYm = formData.get('targetYm') as string;
         const importMode = formData.get('importMode') as string;
         const comment = formData.get('comment') as string || '';
+        const salesChannelIdStr = formData.get('salesChannelId') as string;
 
-        console.log('[売上CSV取込] パラメータ:', { targetYm, importMode, fileName: file?.name });
+        console.log('[売上CSV取込] パラメータ:', { targetYm, importMode, salesChannelId: salesChannelIdStr, fileName: file?.name });
 
-        if (!file || !targetYm || !importMode) {
-            return NextResponse.json({ error: '必須パラメータが不足しています' }, { status: 400 });
+        if (!file || !targetYm || !importMode || !salesChannelIdStr) {
+            return NextResponse.json({ error: '必須パラメータが不足しています（販路の選択が必要です）' }, { status: 400 });
+        }
+
+        const salesChannelId = parseInt(salesChannelIdStr, 10);
+        if (isNaN(salesChannelId)) {
+            return NextResponse.json({ error: '販路IDが不正です' }, { status: 400 });
+        }
+
+        const salesChannel = await prisma.salesChannel.findUnique({
+            where: { id: salesChannelId }
+        });
+        if (!salesChannel) {
+            return NextResponse.json({ error: '指定された販路が存在しません' }, { status: 400 });
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
@@ -179,6 +192,7 @@ export async function POST(request: Request) {
                 salesAmountExclTax: salesExclTax,
                 costAmountExclTax: cost,
                 grossProfit: gross,
+                salesChannelId: salesChannelId,
                 createdByUserId: userId
             });
         }
@@ -219,6 +233,28 @@ export async function POST(request: Request) {
                 }
             }
 
+            if (importMode === 'overwrite') {
+                console.log('[売上CSV取込] 上書きモード: 同月・同販路の既存データを削除中:', { targetYm, salesChannelId });
+                const oldHistories = await tx.importHistory.findMany({
+                    where: {
+                        importType: 'sales',
+                        targetYm: targetYm,
+                        salesChannelId: salesChannelId
+                    },
+                    select: { id: true }
+                });
+                const oldHistoryIds = oldHistories.map(h => h.id);
+                if (oldHistoryIds.length > 0) {
+                    await tx.salesRecord.deleteMany({
+                        where: { importHistoryId: { in: oldHistoryIds } }
+                    });
+                    await tx.importHistory.deleteMany({
+                        where: { id: { in: oldHistoryIds } }
+                    });
+                    console.log('[売上CSV取込] 削除完了: 履歴', oldHistoryIds.length, '件');
+                }
+            }
+
             console.log('[売上CSV取込] 履歴作成中');
             const history = await tx.importHistory.create({
                 data: {
@@ -226,17 +262,11 @@ export async function POST(request: Request) {
                     targetYm: targetYm,
                     importMode: importMode,
                     comment: comment,
+                    salesChannelId: salesChannelId,
                     recordCount: recordsToCreate.length,
                     importedByUserId: parseInt(user.id)
                 }
             });
-
-            if (importMode === 'overwrite') {
-                console.log('[売上CSV取込] 既存データ削除中:', targetYm);
-                await tx.salesRecord.deleteMany({
-                    where: { periodYm: targetYm }
-                });
-            }
 
             console.log('[売上CSV取込] 売上レコード登録中:', recordsToCreate.length);
             for (const record of recordsToCreate) {

@@ -8,8 +8,14 @@ type PlData = {
     sales: number;
     cost: number;
     grossProfit: number;
-    adExpense: number;
-    operatingProfit: number;
+    adExpense: number | null;
+    operatingProfit: number | null;
+};
+
+type SalesChannel = {
+    id: number;
+    name: string;
+    isActive: boolean;
 };
 
 // Helper to format currency (integer yen)
@@ -69,9 +75,21 @@ export default function PlPage() {
     const [customStart, setCustomStart] = useState("2025-01");
     const [customEnd, setCustomEnd] = useState("2025-12");
 
+    // Sales channel filter
+    const [salesChannels, setSalesChannels] = useState<SalesChannel[]>([]);
+    const [salesChannelId, setSalesChannelId] = useState<string>("");
+
     const [data, setData] = useState<PlData | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    // Fetch sales channels
+    useEffect(() => {
+        fetch("/api/sales-channels?activeOnly=true")
+            .then((res) => res.json())
+            .then((data) => setSalesChannels(data))
+            .catch((err) => console.error("Failed to fetch sales channels:", err));
+    }, []);
 
     // Initialize baseYm as previous month (e.g. if today is 2025-12-11, baseYm = 2025-11)
     useEffect(() => {
@@ -100,7 +118,11 @@ export default function PlPage() {
                 eDate = customEnd;
             }
 
-            const res = await fetch(`/api/pl?startYm=${sDate}&endYm=${eDate}`);
+            let url = `/api/pl?startYm=${sDate}&endYm=${eDate}`;
+            if (salesChannelId) {
+                url += `&salesChannelId=${salesChannelId}`;
+            }
+            const res = await fetch(url);
             if (!res.ok) throw new Error("Failed to fetch data");
             const result = await res.json();
             setData(result);
@@ -216,7 +238,27 @@ export default function PlPage() {
                             </div>
                         </div>
 
-                        <div className="mt-2">
+                        {/* Sales Channel Filter */}
+                        <div className="flex items-center gap-4 mt-4 pt-4 border-t border-gray-200">
+                            <label className="text-sm font-medium text-gray-700">販路:</label>
+                            <select
+                                value={salesChannelId}
+                                onChange={(e) => setSalesChannelId(e.target.value)}
+                                className="px-3 py-2 border border-gray-300 rounded bg-white"
+                            >
+                                <option value="">全販路</option>
+                                {salesChannels.map((channel) => (
+                                    <option key={channel.id} value={channel.id}>
+                                        {channel.name}
+                                    </option>
+                                ))}
+                            </select>
+                            {salesChannelId && (
+                                <span className="text-xs text-gray-500">※販路別では広告費・営業利益は表示されません</span>
+                            )}
+                        </div>
+
+                        <div className="mt-4">
                             <button
                                 onClick={fetchData}
                                 disabled={loading}
@@ -278,27 +320,31 @@ export default function PlPage() {
                                         </div>
                                     </div>
 
-                                    {/* Ad Expense */}
-                                    <div className="flex justify-between py-2 border-b border-gray-100 text-gray-600">
-                                        <span>広告費:</span>
-                                        <div className="text-right">
-                                            <span>-{formatCurrency(data.adExpense)}</span>
-                                            <span className="text-sm ml-2">({formatPercent(data.adExpense, data.sales)})</span>
-                                        </div>
-                                    </div>
+                                    {data.adExpense !== null && data.operatingProfit !== null && (
+                                        <>
+                                            {/* Ad Expense */}
+                                            <div className="flex justify-between py-2 border-b border-gray-100 text-gray-600">
+                                                <span>広告費:</span>
+                                                <div className="text-right">
+                                                    <span>-{formatCurrency(data.adExpense)}</span>
+                                                    <span className="text-sm ml-2">({formatPercent(data.adExpense, data.sales)})</span>
+                                                </div>
+                                            </div>
 
-                                    <div className="border-t-2 border-gray-800 my-4"></div>
+                                            <div className="border-t-2 border-gray-800 my-4"></div>
 
-                                    {/* Operating Profit */}
-                                    <div className="flex justify-between py-4 text-xl">
-                                        <span className="font-bold">営業利益:</span>
-                                        <div className="text-right">
-                                            <span className={`font-bold ${data.operatingProfit >= 0 ? 'text-black' : 'text-red-600'}`}>
-                                                {formatCurrency(data.operatingProfit)}
-                                            </span>
-                                            <span className="text-base ml-2 text-gray-600">({formatPercent(data.operatingProfit, data.sales)})</span>
-                                        </div>
-                                    </div>
+                                            {/* Operating Profit */}
+                                            <div className="flex justify-between py-4 text-xl">
+                                                <span className="font-bold">営業利益:</span>
+                                                <div className="text-right">
+                                                    <span className={`font-bold ${data.operatingProfit >= 0 ? 'text-black' : 'text-red-600'}`}>
+                                                        {formatCurrency(data.operatingProfit)}
+                                                    </span>
+                                                    <span className="text-base ml-2 text-gray-600">({formatPercent(data.operatingProfit, data.sales)})</span>
+                                                </div>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             )}
                         </>

@@ -4,18 +4,16 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-    const password = 'password123';
+    const password = 'admin123';
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Delete existing admin to force recreation
-    try {
-        await prisma.user.delete({ where: { username: 'admin' } });
-    } catch (e) {
-        // Ignore if not found
-    }
-
-    const upsertUser = await prisma.user.create({
-        data: {
+    const upsertUser = await prisma.user.upsert({
+        where: { username: 'admin' },
+        update: {
+            passwordHash: hashedPassword,
+            role: 'master',
+        },
+        create: {
             username: 'admin',
             passwordHash: hashedPassword,
             role: 'master',
@@ -39,6 +37,15 @@ async function main() {
         },
     });
     console.log({ upsertStaff });
+
+    const defaultSalesChannels = ['EC', 'モール', '卸', '催事ポップアップ', 'その他'];
+    for (const name of defaultSalesChannels) {
+        await prisma.salesChannel.upsert({
+            where: { name },
+            update: { isActive: true },
+            create: { name, isActive: true },
+        });
+    }
 }
 
 main()

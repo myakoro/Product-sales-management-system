@@ -7,17 +7,21 @@ export async function GET(request: Request) {
     const startYm = searchParams.get('startYm');
     const endYm = searchParams.get('endYm');
     const searchTerm = searchParams.get('search') || '';
+    const salesChannelIdStr = searchParams.get('salesChannelId');
 
     if (!startYm || !endYm) {
         return NextResponse.json({ error: 'Missing startYm or endYm' }, { status: 400 });
     }
+
+    const salesChannelId = salesChannelIdStr ? parseInt(salesChannelIdStr, 10) : null;
+    const isChannelFiltered = salesChannelId !== null && salesChannelId > 0;
 
     try {
         const products = await prisma.product.findMany({
             where: {
                 managementStatus: { in: ['管理中', 'managed'] },
                 OR: [
-                    { productCode: { contains: searchTerm } }, // Default is case insensitive in SQLite? Prisma usually maps well.
+                    { productCode: { contains: searchTerm } },
                     { productName: { contains: searchTerm } },
                 ],
             },
@@ -28,6 +32,7 @@ export async function GET(request: Request) {
                             gte: startYm,
                             lte: endYm,
                         },
+                        ...(isChannelFiltered ? { salesChannelId: salesChannelId } : {})
                     },
                 },
             },

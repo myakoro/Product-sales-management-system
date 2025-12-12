@@ -63,11 +63,13 @@ model SalesRecord {
   salesAmountExclTax  Float    @map("sales_amount_excl_tax")
   costAmountExclTax   Float    @map("cost_amount_excl_tax")
   grossProfit         Float    @map("gross_profit")
+  salesChannelId      Int?     @map("sales_channel_id")
   importHistoryId     Int      @map("import_history_id")
   createdByUserId     Int      @map("created_by_user_id")
   createdAt           DateTime @default(now()) @map("created_at")
 
   product             Product        @relation(fields: [productCode], references: [productCode])
+  salesChannel        SalesChannel?  @relation(fields: [salesChannelId], references: [id])
   importHistory       ImportHistory  @relation(fields: [importHistoryId], references: [id])
   createdBy           User           @relation(fields: [createdByUserId], references: [id])
 
@@ -162,6 +164,19 @@ model TaxRate {
   @@map("tax_rates")
 }
 
+model SalesChannel {
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  salesRecords   SalesRecord[]
+  importHistories ImportHistory[]
+
+  @@map("sales_channels")
+}
+
 // CSV取込履歴
 model ImportHistory {
   id               Int      @id @default(autoincrement())
@@ -169,13 +184,15 @@ model ImportHistory {
   targetYm         String?  @map("target_ym")
   importMode       String?  @map("import_mode") // 'append' or 'overwrite'
   comment          String?
+  salesChannelId   Int?     @map("sales_channel_id")
   recordCount      Int      @map("record_count")
   importedByUserId Int      @map("imported_by_user_id")
   importedAt       DateTime @default(now()) @map("imported_at")
 
   importedBy       User          @relation(fields: [importedByUserId], references: [id])
+  salesChannel     SalesChannel? @relation(fields: [salesChannelId], references: [id])
   salesRecords     SalesRecord[]
-
+  
   @@map("import_histories")
 }
 

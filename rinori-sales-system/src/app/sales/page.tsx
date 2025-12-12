@@ -1,15 +1,31 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
+
+type SalesChannel = {
+    id: number;
+    name: string;
+    isActive: boolean;
+};
 
 export default function SalesImportPage() {
     const [formData, setFormData] = useState({
         targetYm: "",
         importMode: "append",
         comment: "",
+        salesChannelId: "",
         file: null as File | null,
     });
+
+    const [salesChannels, setSalesChannels] = useState<SalesChannel[]>([]);
+
+    useEffect(() => {
+        fetch("/api/sales-channels?activeOnly=true")
+            .then((res) => res.json())
+            .then((data) => setSalesChannels(data))
+            .catch((err) => console.error("Failed to fetch sales channels:", err));
+    }, []);
 
 
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -27,6 +43,12 @@ export default function SalesImportPage() {
         // Check file
         if (!formData.file) {
             alert("CSVファイルを選択してください");
+            return;
+        }
+
+        // Check sales channel
+        if (!formData.salesChannelId) {
+            alert("販路を選択してください");
             return;
         }
 
@@ -48,6 +70,7 @@ export default function SalesImportPage() {
             uploadData.append("targetYm", formData.targetYm);
             uploadData.append("importMode", formData.importMode);
             uploadData.append("comment", formData.comment);
+            uploadData.append("salesChannelId", formData.salesChannelId);
             if (formData.file) {
                 uploadData.append("file", formData.file);
             }
@@ -179,9 +202,30 @@ export default function SalesImportPage() {
                                         }
                                         className="mr-2"
                                     />
-                                    <span className="text-red-600">上書き（対象年月のデータを全て削除して上書き）</span>
+                                    <span className="text-red-600">上書き（対象年月・同一販路のデータを削除して上書き）</span>
                                 </label>
                             </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium mb-2">
+                                販路 <span className="text-red-500">*</span>
+                            </label>
+                            <select
+                                required
+                                value={formData.salesChannelId}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, salesChannelId: e.target.value })
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                            >
+                                <option value="">選択してください</option>
+                                {salesChannels.map((channel) => (
+                                    <option key={channel.id} value={channel.id}>
+                                        {channel.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div>
