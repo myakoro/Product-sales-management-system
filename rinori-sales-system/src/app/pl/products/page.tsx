@@ -68,8 +68,8 @@ export default function ProductPLPage() {
     return (
         <div className="min-h-screen">
             <header className="bg-white border-b border-gray-200 px-6 py-4 relative flex items-center justify-center">
-                <h1 className="text-3xl font-bold text-center">商品別PL分析</h1>
-                <Link href="/" className="absolute right-6 text-xl text-gray-600 hover:text-primary">
+                <h1 className="text-xl font-bold text-center">商品別PL分析</h1>
+                <Link href="/" className="absolute right-6 text-gray-600 hover:text-primary">
                     ダッシュボードへ戻る
                 </Link>
             </header>

@@ -34,13 +34,13 @@ export default function Header() {
             zIndex: 100
         }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
-                <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', margin: 0 }}>
+                <h1 style={{ fontSize: '1.125rem', fontWeight: '600', margin: 0 }}>
                     <Link href="/" style={{ textDecoration: 'none', color: '#333' }}>
                         Rinori 売上管理
                     </Link>
                 </h1>
                 <nav>
-                    <ul style={{ display: 'flex', gap: '1.5rem', listStyle: 'none', margin: 0, padding: 0 }}>
+                    <ul style={{ display: 'flex', gap: '1.25rem', listStyle: 'none', margin: 0, padding: 0 }}>
                         {navItems.map((item) => (
                             <li key={item.href}>
                                 <Link
@@ -48,8 +48,8 @@ export default function Header() {
                                     style={{
                                         textDecoration: 'none',
                                         color: '#555',
-                                        fontSize: '1.25rem',
-                                        fontWeight: 600
+                                        fontSize: '0.9rem',
+                                        fontWeight: 500
                                     }}
                                 >
                                     {item.label}
@@ -60,14 +60,14 @@ export default function Header() {
                 </nav>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                <span style={{ fontSize: '1.1rem', color: '#666' }}>
+                <span style={{ fontSize: '0.875rem', color: '#666' }}>
                     {user?.name || "ゲスト"} ({user?.role === 'master' ? 'マスター' : 'スタッフ'})
                 </span>
                 <button
                     onClick={() => signOut({ callbackUrl: '/login' })}
                     style={{
-                        padding: '0.5rem 1rem',
-                        fontSize: '1rem',
+                        padding: '0.4rem 0.8rem',
+                        fontSize: '0.8rem',
                         border: '1px solid #ddd',
                         borderRadius: '4px',
                         backgroundColor: 'white',
