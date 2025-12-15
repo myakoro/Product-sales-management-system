@@ -134,36 +134,36 @@ export default function ImportHistoryPage() {
     return (
         <div className="min-h-screen bg-gray-50">
             <div className="bg-white border-b border-gray-200 px-6 py-3 mb-6">
-                <div className="max-w-6xl mx-auto flex items-center justify-between">
+                <div className="max-w-[1400px] mx-auto flex items-center justify-between">
                     <h1 className="text-xl font-semibold">取込履歴管理</h1>
                     <div className="flex gap-4">
-                        <Link href="/import/sales" className="text-sm text-blue-600 hover:underline">
+                        <Link href="/import/sales" className="text-xl text-blue-600 hover:underline">
                             + 新規売上取込
                         </Link>
-                        <Link href="/" className="text-sm text-gray-600 hover:text-primary">
+                        <Link href="/" className="text-xl text-gray-600 hover:text-primary">
                             ダッシュボードへ戻る
                         </Link>
                     </div>
                 </div>
             </div>
 
-            <main className="max-w-6xl mx-auto px-6 pb-12">
+            <main className="max-w-[1400px] mx-auto px-6 pb-12">
                 <div className="bg-white rounded shadow border border-gray-200 overflow-hidden">
                     {loading ? (
                         <div className="p-8 text-center text-gray-500">読み込み中...</div>
                     ) : (
-                        <table className="w-full text-sm text-left">
+                        <table className="w-full text-xl text-left">
                             <thead className="bg-gray-50 text-gray-600 font-medium">
                                 <tr>
-                                    <th className="px-4 py-3">取込日時</th>
-                                    <th className="px-4 py-3">種類</th>
-                                    <th className="px-4 py-3">対象年月</th>
-                                    <th className="px-4 py-3">モード</th>
-                                    <th className="px-4 py-3">販路</th>
-                                    <th className="px-4 py-3">コメント</th>
-                                    <th className="px-4 py-3 text-right">件数</th>
-                                    <th className="px-4 py-3">実行者</th>
-                                    <th className="px-4 py-3 text-center">操作</th>
+                                    <th className="px-4 py-3 whitespace-nowrap">取込日時</th>
+                                    <th className="px-4 py-3 whitespace-nowrap">種類</th>
+                                    <th className="px-4 py-3 whitespace-nowrap">対象年月</th>
+                                    <th className="px-4 py-3 whitespace-nowrap">モード</th>
+                                    <th className="px-4 py-3 whitespace-nowrap">販路</th>
+                                    <th className="px-4 py-3 whitespace-nowrap">コメント</th>
+                                    <th className="px-4 py-3 text-right whitespace-nowrap">件数</th>
+                                    <th className="px-4 py-3 whitespace-nowrap">実行者</th>
+                                    <th className="px-4 py-3 text-center whitespace-nowrap">操作</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-gray-100">
@@ -199,13 +199,13 @@ export default function ImportHistoryPage() {
                                                 <div className="flex justify-center gap-2">
                                                     <button
                                                         onClick={() => openEditModal(h)}
-                                                        className="text-blue-600 hover:underline text-xs"
+                                                        className="text-blue-600 hover:underline text-lg"
                                                     >
                                                         販路変更
                                                     </button>
                                                     <button
                                                         onClick={() => handleDelete(h)}
-                                                        className="text-red-600 hover:underline text-xs"
+                                                        className="text-red-600 hover:underline text-lg"
                                                     >
                                                         削除
                                                     </button>
@@ -232,7 +232,7 @@ export default function ImportHistoryPage() {
                         <div className="bg-white rounded-lg p-6 w-96 shadow-xl" onClick={e => e.stopPropagation()}>
                             <h3 className="text-lg font-semibold mb-4">販路の変更</h3>
                             <div className="mb-4">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                <label className="block text-xl font-medium text-gray-700 mb-1">
                                     新しい販路
                                 </label>
                                 <select
@@ -249,13 +249,13 @@ export default function ImportHistoryPage() {
                             <div className="flex justify-end gap-3">
                                 <button
                                     onClick={closeEditModal}
-                                    className="px-4 py-2 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                                    className="px-4 py-2 text-xl text-gray-600 hover:bg-gray-100 rounded"
                                 >
                                     キャンセル
                                 </button>
                                 <button
                                     onClick={handleSaveChannel}
-                                    className="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-700 rounded"
+                                    className="px-4 py-2 text-xl text-white bg-blue-600 hover:bg-blue-700 rounded"
                                 >
                                     保存
                                 </button>
@@ -267,3 +267,5 @@ export default function ImportHistoryPage() {
         </div>
     );
 }
+
+

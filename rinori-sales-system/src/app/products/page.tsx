@@ -162,48 +162,48 @@ export default function ProductsPage() {
                         <thead className="bg-gray-50">
                             <tr>
                                 <th
-                                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer"
+                                    className="px-4 py-3 text-left text-xl font-semibold cursor-pointer"
                                     onClick={() => handleSort('productCode')}
                                 >
                                     商品コード
                                 </th>
                                 <th
-                                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer"
+                                    className="px-4 py-3 text-left text-xl font-semibold cursor-pointer"
                                     onClick={() => handleSort('productName')}
                                 >
                                     商品名
                                 </th>
                                 <th
-                                    className="px-4 py-3 text-right text-sm font-semibold cursor-pointer"
+                                    className="px-4 py-3 text-right text-xl font-semibold cursor-pointer"
                                     onClick={() => handleSort('salesPriceExclTax')}
                                 >
                                     販売価格（税別）
                                 </th>
                                 <th
-                                    className="px-4 py-3 text-right text-sm font-semibold cursor-pointer"
+                                    className="px-4 py-3 text-right text-xl font-semibold cursor-pointer"
                                     onClick={() => handleSort('costExclTax')}
                                 >
                                     原価（税別）
                                 </th>
                                 <th
-                                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer"
+                                    className="px-4 py-3 text-left text-xl font-semibold cursor-pointer"
                                     onClick={() => handleSort('productType')}
                                 >
                                     商品区分
                                 </th>
                                 <th
-                                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer"
+                                    className="px-4 py-3 text-left text-xl font-semibold cursor-pointer"
                                     onClick={() => handleSort('managementStatus')}
                                 >
                                     管理ステータス
                                 </th>
                                 <th
-                                    className="px-4 py-3 text-left text-sm font-semibold cursor-pointer"
+                                    className="px-4 py-3 text-left text-xl font-semibold cursor-pointer"
                                     onClick={() => handleSort('createdAt')}
                                 >
                                     登録日
                                 </th>
-                                <th className="px-4 py-3 text-left text-sm font-semibold">
+                                <th className="px-4 py-3 text-left text-xl font-semibold">
                                     操作
                                 </th>
                             </tr>
@@ -225,16 +225,16 @@ export default function ProductsPage() {
                             )}
                             {!loading && sortedProducts.map((product) => (
                                 <tr key={product.productCode} className="hover:bg-gray-50">
-                                    <td className="px-4 py-3 text-sm">{product.productCode}</td>
-                                    <td className="px-4 py-3 text-sm">{product.productName}</td>
-                                    <td className="px-4 py-3 text-sm text-right">
+                                    <td className="px-4 py-3 text-xl">{product.productCode}</td>
+                                    <td className="px-4 py-3 text-xl">{product.productName}</td>
+                                    <td className="px-4 py-3 text-xl text-right">
                                         ¥{product.salesPriceExclTax.toLocaleString()}
                                     </td>
-                                    <td className="px-4 py-3 text-sm text-right">
+                                    <td className="px-4 py-3 text-xl text-right">
                                         ¥{product.costExclTax.toLocaleString()}
                                     </td>
-                                    <td className="px-4 py-3 text-sm">{product.productType === 'own' ? '自社' : product.productType === 'purchase' ? '仕入' : product.productType}</td>
-                                    <td className="px-4 py-3 text-sm">
+                                    <td className="px-4 py-3 text-xl">{product.productType === 'own' ? '自社' : product.productType === 'purchase' ? '仕入' : product.productType}</td>
+                                    <td className="px-4 py-3 text-xl">
                                         <span
                                             className={`px-2 py-1 rounded text-xs ${product.managementStatus === "managed"
                                                 ? "bg-green-100 text-green-800"
@@ -244,10 +244,10 @@ export default function ProductsPage() {
                                             {product.managementStatus === 'managed' ? '管理中' : product.managementStatus === 'unmanaged' ? '管理外' : product.managementStatus}
                                         </span>
                                     </td>
-                                    <td className="px-4 py-3 text-sm">
+                                    <td className="px-4 py-3 text-xl">
                                         {new Date(product.createdAt).toLocaleDateString()}
                                     </td>
-                                    <td className="px-4 py-3 text-sm">
+                                    <td className="px-4 py-3 text-xl">
                                         <Link
                                             href={`/products/${product.productCode}`}
                                             className="text-primary hover:underline"

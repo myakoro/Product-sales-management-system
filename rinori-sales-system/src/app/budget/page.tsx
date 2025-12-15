@@ -248,14 +248,14 @@ export default function BudgetPage() {
             <header className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center">
                 <h1 className="text-lg font-semibold">Rinori 売上管理システム</h1>
                 <div className="flex items-center gap-4">
-                    <Link href="/" className="text-sm text-gray-600 hover:text-primary">
+                    <Link href="/" className="text-xl text-gray-600 hover:text-primary">
                         ダッシュボード
                     </Link>
-                    <span className="text-sm text-gray-600">ユーザー: 管理者</span>
+                    <span className="text-xl text-gray-600">ユーザー: 管理者</span>
                 </div>
             </header>
 
-            <main className="max-w-7xl mx-auto px-6 py-8">
+            <main className="max-w-[1600px] mx-auto px-6 py-8">
                 <h2 className="text-2xl font-semibold mb-6">予算設定</h2>
 
                 {message && (
@@ -268,7 +268,7 @@ export default function BudgetPage() {
                 <div className="bg-white border border-gray-200 rounded p-4 mb-4">
                     <div className="grid grid-cols-4 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-2">開始年月</label>
+                            <label className="block text-xl font-medium mb-2">開始年月</label>
                             <input
                                 type="month"
                                 value={startYm}
@@ -277,7 +277,7 @@ export default function BudgetPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-2">終了年月</label>
+                            <label className="block text-xl font-medium mb-2">終了年月</label>
                             <input
                                 type="month"
                                 value={endYm}
@@ -286,7 +286,7 @@ export default function BudgetPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-2">商品検索</label>
+                            <label className="block text-xl font-medium mb-2">商品検索</label>
                             <input
                                 type="text"
                                 placeholder="商品コード・商品名"
@@ -302,15 +302,15 @@ export default function BudgetPage() {
                 <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-4 sticky top-0 z-20">
                     <div className="grid grid-cols-3 gap-4 text-center">
                         <div>
-                            <div className="text-sm text-gray-600">合計売上（税別）</div>
+                            <div className="text-xl text-gray-600">合計売上（税別）</div>
                             <div className="text-xl font-semibold">¥{Math.round(summary.totalSales).toLocaleString()}</div>
                         </div>
                         <div>
-                            <div className="text-sm text-gray-600">合計粗利</div>
+                            <div className="text-xl text-gray-600">合計粗利</div>
                             <div className="text-xl font-semibold">¥{Math.round(summary.totalProfit).toLocaleString()}</div>
                         </div>
                         <div>
-                            <div className="text-sm text-gray-600">粗利率</div>
+                            <div className="text-xl text-gray-600">粗利率</div>
                             <div className="text-xl font-semibold">{profitRate}%</div>
                         </div>
                     </div>
@@ -325,37 +325,37 @@ export default function BudgetPage() {
                             <thead className="bg-gray-50">
                                 <tr>
                                     <th
-                                        className="px-4 py-3 text-left text-sm font-semibold border-r sticky left-0 bg-gray-50 z-10 cursor-pointer"
+                                        className="px-4 py-3 text-left text-xl font-semibold border-r sticky left-0 bg-gray-50 z-10 cursor-pointer"
                                         onClick={() => handleSort('productCode')}
                                     >
                                         商品コード
                                     </th>
                                     <th
-                                        className="px-4 py-3 text-left text-sm font-semibold border-r sticky left-[120px] bg-gray-50 z-10 cursor-pointer"
+                                        className="px-4 py-3 text-left text-xl font-semibold border-r sticky left-[120px] bg-gray-50 z-10 cursor-pointer min-w-[400px]"
                                         onClick={() => handleSort('productName')}
                                     >
                                         商品名
                                     </th>
                                     <th
-                                        className="px-4 py-3 text-right text-sm font-semibold border-r cursor-pointer"
+                                        className="px-4 py-3 text-right text-xl font-semibold border-r cursor-pointer"
                                         onClick={() => handleSort('periodTotal')}
                                     >
                                         期間合計数量
                                     </th>
                                     <th
-                                        className="px-4 py-3 text-right text-sm font-semibold border-r cursor-pointer"
+                                        className="px-4 py-3 text-right text-xl font-semibold border-r cursor-pointer"
                                         onClick={() => handleSort('periodSales')}
                                     >
                                         期間売上
                                     </th>
                                     <th
-                                        className="px-4 py-3 text-right text-sm font-semibold border-r cursor-pointer"
+                                        className="px-4 py-3 text-right text-xl font-semibold border-r cursor-pointer"
                                         onClick={() => handleSort('periodProfit')}
                                     >
                                         期間粗利
                                     </th>
                                     {months.map(month => (
-                                        <th key={month} className="px-4 py-3 text-center text-sm font-semibold border-r">
+                                        <th key={month} className="px-4 py-3 text-center text-xl font-semibold border-r">
                                             {month.slice(5)}月
                                         </th>
                                     ))}
@@ -364,8 +364,8 @@ export default function BudgetPage() {
                             <tbody className="divide-y divide-gray-200">
                                 {sortedData.map((product) => (
                                     <tr key={product.productCode} className="hover:bg-gray-50">
-                                        <td className="px-4 py-3 text-sm border-r sticky left-0 bg-white z-10">{product.productCode}</td>
-                                        <td className="px-4 py-3 text-sm border-r sticky left-[120px] bg-white z-10">{product.productName}</td>
+                                        <td className="px-4 py-3 text-xl border-r sticky left-0 bg-white z-10">{product.productCode}</td>
+                                        <td className="px-4 py-3 text-xl border-r sticky left-[120px] bg-white z-10 min-w-[400px]">{product.productName}</td>
                                         <td className="px-4 py-3 text-right border-r">
                                             <input
                                                 type="number"
@@ -381,10 +381,10 @@ export default function BudgetPage() {
                                                 🕒
                                             </button>
                                         </td>
-                                        <td className="px-4 py-3 text-right text-sm border-r bg-gray-50">
+                                        <td className="px-4 py-3 text-right text-xl border-r bg-gray-50">
                                             ¥{Math.round(product.periodSales).toLocaleString()}
                                         </td>
-                                        <td className="px-4 py-3 text-right text-sm border-r bg-gray-50">
+                                        <td className="px-4 py-3 text-right text-xl border-r bg-gray-50">
                                             ¥{Math.round(product.periodProfit).toLocaleString()}
                                         </td>
                                         {months.map(month => (
@@ -439,7 +439,7 @@ export default function BudgetPage() {
                         ) : historyData.length === 0 ? (
                             <div className="text-center py-4 text-gray-500">履歴はありません</div>
                         ) : (
-                            <table className="w-full text-sm">
+                            <table className="w-full text-xl">
                                 <thead className="bg-gray-50">
                                     <tr>
                                         <th className="px-4 py-2 text-left">保存日時</th>
@@ -486,3 +486,4 @@ export default function BudgetPage() {
         </div>
     );
 }
+

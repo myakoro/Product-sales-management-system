@@ -106,13 +106,55 @@ export default function SalesImportPage() {
             <div className="bg-white border-b border-gray-200 px-6 py-3 mb-6">
                 <div className="max-w-4xl mx-auto flex items-center justify-between">
                     <h1 className="text-xl font-semibold">売上CSV取込</h1>
-                    <Link href="/" className="text-sm text-gray-600 hover:text-primary">
-                        ダッシュボードへ戻る
-                    </Link>
+                    <div className="flex gap-3">
+                        <Link href="/import/history" className="text-lg px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 font-medium">
+                            📋 取込履歴
+                        </Link>
+                        <Link href="/" className="text-lg text-gray-600 hover:text-primary">
+                            ダッシュボードへ戻る
+                        </Link>
+                    </div>
                 </div>
             </div>
 
             <main className="max-w-4xl mx-auto px-6 pb-12">
+                {/* CSV Template Download Section */}
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                    <div className="flex items-start gap-3">
+                        <div className="text-blue-600 text-2xl">📥</div>
+                        <div className="flex-1">
+                            <h3 className="font-semibold text-blue-900 mb-1">
+                                CSV様式をダウンロード
+                            </h3>
+                            <p className="text-sm text-blue-700 mb-3">
+                                ネクストエンジン以外で手動作成する場合は、この様式に従ってください
+                            </p>
+                            <a
+                                href="/templates/sales_template.csv"
+                                download="売上CSV様式.csv"
+                                className="inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
+                            >
+                                CSV様式ダウンロード
+                            </a>
+                        </div>
+                    </div>
+
+                    <div className="mt-4 pt-4 border-t border-blue-200">
+                        <div className="flex items-center gap-2">
+                            <span className="text-blue-600">📋</span>
+                            <span className="text-sm text-blue-700">
+                                過去の取込履歴を確認・修正する
+                            </span>
+                            <Link
+                                href="/import/history"
+                                className="text-blue-600 hover:underline text-sm font-medium ml-2"
+                            >
+                                取込履歴を見る →
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+
                 <form onSubmit={handleSubmit} className="bg-white p-6 rounded shadow-sm border border-gray-200 space-y-6">
 
                     {error && (

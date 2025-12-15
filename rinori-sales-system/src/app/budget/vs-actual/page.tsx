@@ -223,16 +223,16 @@ export default function BudgetVsActualPage() {
                         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                         marginBottom: '2rem'
                     }}>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem' }}>
+                        <h2 style={{ fontSize: '1.8rem', fontWeight: '600', marginBottom: '1.5rem' }}>
                             全体サマリー
                         </h2>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem' }}>
                             <div>
-                                <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', color: '#666' }}>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#666' }}>
                                     数量
                                 </h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.5rem 1rem', fontSize: '0.95rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.5rem 1rem', fontSize: '1.25rem' }}>
                                     <div style={{ fontWeight: '500' }}>予算:</div>
                                     <div>{summary.totalBudgetQuantity.toLocaleString()}個</div>
                                     <div style={{ fontWeight: '500' }}>実績:</div>
@@ -240,7 +240,7 @@ export default function BudgetVsActualPage() {
                                     <div style={{ fontWeight: '600' }}>達成率:</div>
                                     <div style={{
                                         fontWeight: '600',
-                                        fontSize: '1.1rem',
+                                        fontSize: '1.4rem',
                                         color: getAchievementColor(summary.totalQuantityAchievementRate)
                                     }}>
                                         {summary.totalQuantityAchievementRate.toFixed(1)}%
@@ -249,10 +249,10 @@ export default function BudgetVsActualPage() {
                             </div>
 
                             <div>
-                                <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', color: '#666' }}>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#666' }}>
                                     売上（税別）
                                 </h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.5rem 1rem', fontSize: '0.95rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.5rem 1rem', fontSize: '1.25rem' }}>
                                     <div style={{ fontWeight: '500' }}>予算:</div>
                                     <div>¥{Math.round(summary.totalBudgetSales).toLocaleString()}</div>
                                     <div style={{ fontWeight: '500' }}>実績:</div>
@@ -260,7 +260,7 @@ export default function BudgetVsActualPage() {
                                     <div style={{ fontWeight: '600' }}>達成率:</div>
                                     <div style={{
                                         fontWeight: '600',
-                                        fontSize: '1.1rem',
+                                        fontSize: '1.4rem',
                                         color: getAchievementColor(summary.totalSalesAchievementRate)
                                     }}>
                                         {summary.totalSalesAchievementRate.toFixed(1)}%
@@ -269,10 +269,10 @@ export default function BudgetVsActualPage() {
                             </div>
 
                             <div>
-                                <h3 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', color: '#666' }}>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1rem', color: '#666' }}>
                                     粗利（税別）
                                 </h3>
-                                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.5rem 1rem', fontSize: '0.95rem' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.5rem 1rem', fontSize: '1.25rem' }}>
                                     <div style={{ fontWeight: '500' }}>予算:</div>
                                     <div>¥{Math.round(summary.totalBudgetGrossProfit).toLocaleString()}</div>
                                     <div style={{ fontWeight: '500' }}>実績:</div>
@@ -280,7 +280,7 @@ export default function BudgetVsActualPage() {
                                     <div style={{ fontWeight: '600' }}>達成率:</div>
                                     <div style={{
                                         fontWeight: '600',
-                                        fontSize: '1.1rem',
+                                        fontSize: '1.4rem',
                                         color: getAchievementColor(summary.totalGrossProfitAchievementRate)
                                     }}>
                                         {summary.totalGrossProfitAchievementRate.toFixed(1)}%
@@ -297,27 +297,27 @@ export default function BudgetVsActualPage() {
                         boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: '600' }}>
+                            <h2 style={{ fontSize: '1.5rem', fontWeight: '600' }}>
                                 商品別一覧（{sortedProducts.length}件）
                             </h2>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.9rem', cursor: 'pointer' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '1.1rem', cursor: 'pointer' }}>
                                 <input
                                     type="checkbox"
                                     checked={hideZeroRows}
                                     onChange={(e) => setHideZeroRows(e.target.checked)}
-                                    style={{ cursor: 'pointer' }}
+                                    style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
                                 />
                                 予算・実績がどちらも0の商品を非表示
                             </label>
                         </div>
 
                         {products.length === 0 ? (
-                            <div style={{ padding: '2rem', textAlign: 'center', color: '#666' }}>
+                            <div style={{ padding: '2rem', textAlign: 'center', color: '#666', fontSize: '1.25rem' }}>
                                 予算が設定されている商品がありません
                             </div>
                         ) : (
                             <div style={{ overflowX: 'auto' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1.1rem' }}>
                                     <thead>
                                         <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
                                             <th
@@ -400,7 +400,8 @@ export default function BudgetVsActualPage() {
                                                     textAlign: 'right',
                                                     fontWeight: '600',
                                                     backgroundColor: getAchievementBgColor(product.quantityAchievementRate),
-                                                    color: getAchievementColor(product.quantityAchievementRate)
+                                                    color: getAchievementColor(product.quantityAchievementRate),
+                                                    fontSize: '1.15rem'
                                                 }}>
                                                     {product.quantityAchievementRate.toFixed(1)}%
                                                 </td>
@@ -411,7 +412,8 @@ export default function BudgetVsActualPage() {
                                                     textAlign: 'right',
                                                     fontWeight: '600',
                                                     backgroundColor: getAchievementBgColor(product.salesAchievementRate),
-                                                    color: getAchievementColor(product.salesAchievementRate)
+                                                    color: getAchievementColor(product.salesAchievementRate),
+                                                    fontSize: '1.15rem'
                                                 }}>
                                                     {product.salesAchievementRate.toFixed(1)}%
                                                 </td>
@@ -422,7 +424,8 @@ export default function BudgetVsActualPage() {
                                                     textAlign: 'right',
                                                     fontWeight: '600',
                                                     backgroundColor: getAchievementBgColor(product.grossProfitAchievementRate),
-                                                    color: getAchievementColor(product.grossProfitAchievementRate)
+                                                    color: getAchievementColor(product.grossProfitAchievementRate),
+                                                    fontSize: '1.15rem'
                                                 }}>
                                                     {product.grossProfitAchievementRate.toFixed(1)}%
                                                 </td>

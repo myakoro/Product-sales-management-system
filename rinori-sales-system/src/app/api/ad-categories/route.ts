@@ -33,6 +33,15 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Category name is required' }, { status: 400 });
         }
 
+        // Check for duplicate
+        const existing = await prisma.adCategory.findFirst({
+            where: { categoryName }
+        });
+
+        if (existing) {
+            return NextResponse.json({ error: 'このカテゴリ名は既に使用されています' }, { status: 409 });
+        }
+
         const category = await prisma.adCategory.create({
             data: { categoryName, isActive: true }
         });
@@ -54,6 +63,18 @@ export async function PUT(request: Request) {
         const { id, categoryName } = await request.json();
         if (!id || !categoryName) {
             return NextResponse.json({ error: 'ID and Category name are required' }, { status: 400 });
+        }
+
+        // Check for duplicate (excluding self)
+        const existing = await prisma.adCategory.findFirst({
+            where: {
+                categoryName,
+                NOT: { id: Number(id) }
+            }
+        });
+
+        if (existing) {
+            return NextResponse.json({ error: 'このカテゴリ名は既に使用されています' }, { status: 409 });
         }
 
         const category = await prisma.adCategory.update({

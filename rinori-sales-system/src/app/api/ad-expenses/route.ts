@@ -69,3 +69,63 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: 'Failed to create expense' }, { status: 500 });
     }
 }
+
+export async function PUT(request: Request) {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    try {
+        const body = await request.json();
+        const { id, date, amount, categoryId, memo } = body;
+
+        if (!id) {
+            return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+        }
+
+        const expense = await prisma.adExpense.update({
+            where: { id: Number(id) },
+            data: {
+                expenseDate: new Date(date),
+                amount: Number(amount),
+                adCategoryId: Number(categoryId),
+                memo: memo || null,
+            },
+            include: {
+                adCategory: true,
+                createdBy: { select: { username: true } },
+            }
+        });
+
+        return NextResponse.json(expense);
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ error: 'Failed to update expense' }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: Request) {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+        return NextResponse.json({ error: 'ID is required' }, { status: 400 });
+    }
+
+    try {
+        await prisma.adExpense.delete({
+            where: { id: Number(id) }
+        });
+
+        return NextResponse.json({ success: true });
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json({ error: 'Failed to delete expense' }, { status: 500 });
+    }
+}
