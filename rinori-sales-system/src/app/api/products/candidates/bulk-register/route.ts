@@ -24,10 +24,6 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: '候補が選択されていません' }, { status: 400 });
         }
 
-        if (defaultSalesPriceExclTax === undefined || defaultCostExclTax === undefined) {
-            return NextResponse.json({ error: '販売価格と原価を入力してください' }, { status: 400 });
-        }
-
         console.log(`[一括登録] 処理開始: ${candidateIds.length}件`);
 
         // Fetch candidates

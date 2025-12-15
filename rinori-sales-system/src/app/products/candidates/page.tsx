@@ -61,12 +61,7 @@ export default function NewProductCandidatesPage() {
     };
 
     const handleBulkRegister = async () => {
-        if (!bulkSalesPrice || !bulkCost) {
-            alert('販売価格と原価を入力してください');
-            return;
-        }
-
-        if (!confirm(`選択した${selectedIds.length}件の商品を一括登録しますか？`)) {
+        if (!confirm(`選択した${selectedIds.length}件の商品を管理中として一括登録しますか？\n\n※ 販売価格・原価が空欄の場合は0で登録されます。\n後で商品マスタCSVで更新できます。`)) {
             return;
         }
 
@@ -77,8 +72,8 @@ export default function NewProductCandidatesPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     candidateIds: selectedIds,
-                    defaultSalesPriceExclTax: parseFloat(bulkSalesPrice),
-                    defaultCostExclTax: parseFloat(bulkCost),
+                    defaultSalesPriceExclTax: bulkSalesPrice ? parseFloat(bulkSalesPrice) : 0,
+                    defaultCostExclTax: bulkCost ? parseFloat(bulkCost) : 0,
                     productType: bulkProductType,
                     managementStatus: bulkManagementStatus
                 })
@@ -179,7 +174,7 @@ export default function NewProductCandidatesPage() {
                         onClick={() => setShowBulkModal(true)}
                         style={{
                             padding: '0.5rem 1rem',
-                            backgroundColor: '#0070f3',
+                            backgroundColor: '#28a745',
                             color: 'white',
                             border: 'none',
                             borderRadius: '4px',
@@ -187,7 +182,7 @@ export default function NewProductCandidatesPage() {
                             fontWeight: '500'
                         }}
                     >
-                        選択した商品を一括登録
+                        選択した商品を管理中として一括登録
                     </button>
                 </div>
             )}
@@ -346,7 +341,7 @@ export default function NewProductCandidatesPage() {
 
                         <div style={{ marginBottom: '1rem' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                販売価格（税抜）<span style={{ color: 'red' }}>*</span>
+                                販売価格（税抜）<span style={{ color: '#666', fontSize: '0.875rem', marginLeft: '0.5rem' }}>(任意)</span>
                             </label>
                             <input
                                 type="number"
@@ -365,7 +360,7 @@ export default function NewProductCandidatesPage() {
 
                         <div style={{ marginBottom: '1rem' }}>
                             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                原価（税抜）<span style={{ color: 'red' }}>*</span>
+                                原価（税抜）<span style={{ color: '#666', fontSize: '0.875rem', marginLeft: '0.5rem' }}>(任意)</span>
                             </label>
                             <input
                                 type="number"
