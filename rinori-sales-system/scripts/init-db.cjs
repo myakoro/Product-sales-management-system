@@ -1,77 +1,99 @@
 const fs = require("fs");
+const path = require("path");
 const { execSync } = require("child_process");
-const { PrismaClient } = require("@prisma/client");
+const sqlite3 = require("sqlite3").verbose();
+
+function resolveDbPath(databaseUrl) {
+    const raw = (databaseUrl || "").replace(/^file:/, "");
+    const p = raw || "./prisma/dev.db";
+    return path.isAbsolute(p) ? p : path.resolve(process.cwd(), p);
+}
 
 (async () => {
+    const dbPath = resolveDbPath(process.env.DATABASE_URL);
+
     console.log("========================================");
-    console.log("🚀 Starting database initialization check");
+    console.log("🔍 Database Initialization Check");
     console.log("========================================");
+    console.log(`📌 cwd: ${process.cwd()}`);
+    console.log(`📌 DATABASE_URL: ${process.env.DATABASE_URL || "(undefined)"}`);
+    console.log(`📍 dbPath(resolved): ${dbPath}`);
 
-    const dbPath = process.env.DATABASE_URL?.replace("file:", "") || "./prisma/dev.db";
-
-    console.log(`📍 DATABASE_URL: ${process.env.DATABASE_URL}`);
-    console.log(`📂 Resolved DB path: ${dbPath}`);
-
-    // Check if parent directory exists
-    const parentDir = require("path").dirname(dbPath);
-    console.log(`📁 Parent directory: ${parentDir}`);
-
-    try {
-        const dirExists = fs.existsSync(parentDir);
-        console.log(`✓ Parent directory exists: ${dirExists}`);
-
-        if (!dirExists) {
-            console.error(`❌ ERROR: Parent directory ${parentDir} does not exist!`);
-            console.error(`This means the Persistent Disk is not mounted at the expected location.`);
-            process.exit(1);
-        }
-    } catch (error) {
-        console.error(`❌ ERROR checking parent directory:`, error.message);
-        process.exit(1);
+    if (fs.existsSync(dbPath)) {
+        const stat = fs.statSync(dbPath);
+        console.log(`📦 db file size: ${stat.size} bytes`);
     }
 
-    // Check if database needs initialization
     let needsInit = false;
 
+    // 1) ファイルが無ければ初期化
     if (!fs.existsSync(dbPath)) {
-        console.log("🔧 Database file not found. Will initialize.");
+        console.log("❌ Database file not found. Will initialize.");
         needsInit = true;
     } else {
-        console.log("📄 Database file exists. Checking if tables exist...");
+        console.log("✅ Database file exists.");
+        console.log("🔎 Checking table structure via sqlite_master...");
 
-        // Check if tables exist by trying to query
-        const prisma = new PrismaClient();
+        const db = new sqlite3.Database(dbPath, (err) => {
+            if (err) {
+                console.error("❌ Failed to open database:", err.message);
+                needsInit = true;
+            }
+        });
+
         try {
-            await prisma.user.count();
-            console.log("✅ Database tables exist. Skipping initialization.");
-            await prisma.$disconnect();
-        } catch (error) {
-            console.log("⚠️  Database tables do not exist. Will initialize.");
-            needsInit = true;
-            await prisma.$disconnect();
+            // 2) 必須テーブルの存在確認
+            const mustHaveTables = ["sales_channels", "ad_categories", "users"];
+            const missing = [];
+
+            for (const t of mustHaveTables) {
+                const exists = await new Promise((resolve) => {
+                    db.get(
+                        `SELECT name FROM sqlite_master WHERE type='table' AND name=?`,
+                        [t],
+                        (err, row) => {
+                            if (err) {
+                                console.error("⚠️  Query error:", err.message);
+                                resolve(false);
+                            } else {
+                                resolve(!!row);
+                            }
+                        }
+                    );
+                });
+                if (!exists) missing.push(t);
+            }
+
+            if (missing.length === 0) {
+                console.log("✅ Required tables exist. Skipping initialization.");
+            } else {
+                console.log(`❌ Missing tables: ${missing.join(", ")}`);
+                needsInit = true;
+            }
+        } finally {
+            db.close();
         }
     }
 
+    // 3) 初期化が必要なら schema 作成 → seed
     if (needsInit) {
-        console.log("🔧 Initializing database...");
-
+        console.log("\n🚀 Starting database initialization...");
         try {
-            console.log("📝 Running: npx prisma db push");
+            console.log("📝 Running prisma db push...");
             execSync("npx prisma db push", { stdio: "inherit" });
-            console.log("✅ Database schema created successfully");
 
-            console.log("📝 Running: node prisma/seed.js");
+            console.log("🌱 Running seed...");
             execSync("node prisma/seed.js", { stdio: "inherit" });
-            console.log("✅ Database seeded successfully");
 
-            console.log("🎉 Database initialization complete!");
+            console.log("\n✅ Database initialization complete!");
         } catch (error) {
-            console.error("❌ Database initialization failed:", error.message);
+            console.error("\n❌ Initialization failed:");
+            console.error(error?.message || error);
             process.exit(1);
         }
     }
 
-    console.log("========================================");
-    console.log("✓ Database check complete");
-    console.log("========================================");
+    console.log("\n========================================");
+    console.log("✅ Database Ready. Starting app...");
+    console.log("========================================\n");
 })();
