@@ -69,6 +69,45 @@ export default function DataImportPage() {
                     </p>
                 </div>
 
+                <div className="bg-white rounded-lg shadow p-6 mb-8 border border-red-100">
+                    <h2 className="text-xl font-semibold text-red-700 mb-2">月次データの強制削除</h2>
+                    <p className="text-gray-600 text-sm mb-4">
+                        指定した月の売上データを全て強制的に削除します。取込履歴に残っていないデータも削除されます。<br />
+                        <span className="font-bold text-red-600">※この操作は取り消せません。慎重に行ってください。</span>
+                    </p>
+
+                    <div className="flex items-end gap-4">
+                        <div className="flex-1 max-w-xs">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">対象月</label>
+                            <input
+                                type="month"
+                                className="block w-full border border-gray-300 rounded px-3 py-2 text-lg"
+                                onChange={(e) => {
+                                    if (confirm(`${e.target.value}のデータを全て削除しますか？\n履歴に関係なく、この月の全ての売上データが消去されます。`)) {
+                                        fetch('/api/settings/cleanup', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({ targetYm: e.target.value })
+                                        })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                if (data.success) {
+                                                    alert(data.message);
+                                                } else {
+                                                    alert(data.error || '削除に失敗しました');
+                                                }
+                                            })
+                                            .catch(err => alert('エラーが発生しました'));
+                                        e.target.value = ''; // Reset
+                                    } else {
+                                        e.target.value = ''; // Reset
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+                </div>
+
                 <div className="bg-white rounded-lg shadow p-6">
                     <div className="mb-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-2">データベース復元</h2>
