@@ -108,6 +108,34 @@ export default function DataImportPage() {
                     </div>
                 </div>
 
+                <div className="bg-white rounded-lg shadow p-6 mb-8 border border-blue-100">
+                    <h2 className="text-xl font-semibold text-blue-700 mb-2">システム初期データの登録</h2>
+                    <p className="text-gray-600 text-sm mb-4">
+                        販路や広告カテゴリなどの初期マスターデータが未登録の場合に実行してください。<br />
+                        <span className="font-bold text-gray-800">※既にデータがある場合は、欠けているデータのみ追加されます。</span>
+                    </p>
+
+                    <button
+                        onClick={() => {
+                            if (confirm('初期マスターデータを登録しますか？\n（adminユーザー、販路、広告カテゴリなどの初期値を作成します）')) {
+                                fetch('/api/system/seed', { method: 'POST' })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            alert('初期データを登録しました\n\n' + data.logs.join('\n'));
+                                        } else {
+                                            alert(data.error || '登録に失敗しました');
+                                        }
+                                    })
+                                    .catch(() => alert('エラーが発生しました'));
+                            }
+                        }}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                    >
+                        初期データを登録する
+                    </button>
+                </div>
+
                 <div className="bg-white rounded-lg shadow p-6">
                     <div className="mb-6">
                         <h2 className="text-xl font-semibold text-gray-900 mb-2">データベース復元</h2>
