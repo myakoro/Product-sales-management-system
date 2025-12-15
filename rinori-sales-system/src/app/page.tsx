@@ -364,47 +364,65 @@ export default function HomePage() {
                             </ul>
                         </div>
 
-                        {/* 設定カテゴリ */}
+                        {/* マスター登録 */}
+                        <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
+                            <h4 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <span>🛠️</span>
+                                <span>マスター登録</span>
+                            </h4>
+                            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <li>
+                                    <Link href="/settings/sales-channels" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1rem', padding: '1rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                        販路
+                                    </Link>
+                                </li>
+                                <li>
+                                    <Link href="/ad-expenses" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1rem', padding: '1rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                        広告カテゴリー
+                                    </Link>
+                                </li>
+                                {user?.role === 'master' && (
+                                    <li>
+                                        <Link href="/settings/users" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1rem', padding: '1rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                            ユーザー管理
+                                        </Link>
+                                    </li>
+                                )}
+                            </ul>
+                        </div>
+
+                        {/* 設定 */}
                         <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
                             <h4 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <span>⚙️</span>
                                 <span>設定</span>
                             </h4>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                                {/* 左列：よく使う設定 */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                    <Link href="/settings/sales-channels" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
-                                        販路マスタ
+                            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                                <li>
+                                    <Link href="/settings/account" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1rem', padding: '1rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                        アカウント
                                     </Link>
-                                    <Link href="/ad-expenses" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
-                                        広告カテゴリ設定
-                                    </Link>
-                                    <Link href="/settings/account" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
-                                        アカウント設定
-                                    </Link>
-                                    {user?.role === 'master' && (
-                                        <Link href="/settings/users" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
-                                            ユーザー管理
-                                        </Link>
-                                    )}
-                                </div>
-                                {/* 右列：あまり使わない設定 */}
-                                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                    <Link href="/settings/tax-rates" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
-                                        税率設定
-                                    </Link>
-                                    {user?.role === 'master' && (
-                                        <>
-                                            <Link href="/settings/export" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                </li>
+                                {user?.role === 'master' && (
+                                    <>
+                                        <li>
+                                            <Link href="/settings/tax-rates" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1rem', padding: '1rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                                税率設定
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link href="/settings/export" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1rem', padding: '1rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                                 データエクスポート
                                             </Link>
-                                            <Link href="/settings/import" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                        </li>
+                                        <li>
+                                            <Link href="/settings/import" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1rem', padding: '1rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                                 データ復元
                                             </Link>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
+                                        </li>
+                                    </>
+                                )}
+                            </ul>
                         </div>
                     </div>
                 </div>
