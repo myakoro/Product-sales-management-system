@@ -42,6 +42,12 @@ export default function BudgetPage() {
     const [sortKey, setSortKey] = useState<SortKey>('productCode');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
+    // History Modal State
+    const [showHistory, setShowHistory] = useState(false);
+    const [historyData, setHistoryData] = useState<any[]>([]);
+    const [selectedProduct, setSelectedProduct] = useState<{ code: string, name: string } | null>(null);
+    const [loadingHistory, setLoadingHistory] = useState(false);
+
     // データ取得
     const fetchBudgetData = async () => {
         if (!startYm || !endYm) return;
@@ -135,6 +141,25 @@ export default function BudgetPage() {
         product.periodProfit = total * (product.salesPrice - product.cost);
 
         setBudgetData(newData);
+    };
+
+    const handleOpenHistory = async (product: any) => {
+        setSelectedProduct({ code: product.productCode, name: product.productName });
+        setShowHistory(true);
+        setLoadingHistory(true);
+        setHistoryData([]);
+
+        try {
+            const res = await fetch(`/api/budget/history?productCode=${product.productCode}&startYm=${startYm}&endYm=${endYm}`);
+            if (res.ok) {
+                const data = await res.json();
+                setHistoryData(data);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setLoadingHistory(false);
+        }
     };
 
     // 保存処理
@@ -348,6 +373,13 @@ export default function BudgetPage() {
                                                 onChange={(e) => handlePeriodTotalChange(product.productCode, Number(e.target.value) || 0)}
                                                 className="w-20 px-2 py-1 text-right border border-gray-300 rounded"
                                             />
+                                            <button
+                                                onClick={() => handleOpenHistory(product)}
+                                                className="ml-2 text-gray-400 hover:text-blue-600"
+                                                title="変更履歴"
+                                            >
+                                                🕒
+                                            </button>
                                         </td>
                                         <td className="px-4 py-3 text-right text-sm border-r bg-gray-50">
                                             ¥{Math.round(product.periodSales).toLocaleString()}
@@ -385,6 +417,72 @@ export default function BudgetPage() {
                     </Link>
                 </div>
             </main>
+
+            {/* History Modal */}
+            {showHistory && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-lg font-bold">
+                                変更履歴: {selectedProduct?.name} ({selectedProduct?.code})
+                            </h3>
+                            <button
+                                onClick={() => setShowHistory(false)}
+                                className="text-gray-500 hover:text-gray-700"
+                            >
+                                ✕
+                            </button>
+                        </div>
+
+                        {loadingHistory ? (
+                            <div className="text-center py-4">読み込み中...</div>
+                        ) : historyData.length === 0 ? (
+                            <div className="text-center py-4 text-gray-500">履歴はありません</div>
+                        ) : (
+                            <table className="w-full text-sm">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-4 py-2 text-left">保存日時</th>
+                                        <th className="px-4 py-2 text-right">期間合計数量</th>
+                                        <th className="px-4 py-2 text-left">内訳 (抜粋)</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y">
+                                    {historyData.map((h: any) => {
+                                        const breakdown = JSON.parse(h.monthlyBreakdown);
+                                        const breakdownStr = Object.entries(breakdown)
+                                            .map(([ym, qty]) => `${ym.slice(5)}月:${qty}`)
+                                            .join(', ');
+
+                                        return (
+                                            <tr key={h.id}>
+                                                <td className="px-4 py-2">
+                                                    {new Date(h.savedAt).toLocaleString('ja-JP')}
+                                                </td>
+                                                <td className="px-4 py-2 text-right font-medium">
+                                                    {h.totalQuantity}
+                                                </td>
+                                                <td className="px-4 py-2 text-gray-600 truncate max-w-xs" title={breakdownStr}>
+                                                    {breakdownStr}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
+                            </table>
+                        )}
+
+                        <div className="mt-6 text-right">
+                            <button
+                                onClick={() => setShowHistory(false)}
+                                className="px-4 py-2 bg-gray-100 rounded hover:bg-gray-200"
+                            >
+                                閉じる
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

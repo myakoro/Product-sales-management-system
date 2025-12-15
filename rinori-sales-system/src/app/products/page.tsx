@@ -141,8 +141,8 @@ export default function ProductsPage() {
                             className="px-3 py-2 border border-gray-300 rounded"
                         >
                             <option value="all">商品区分: すべて</option>
-                            <option value="自社">自社</option>
-                            <option value="仕入">仕入</option>
+                            <option value="own">自社</option>
+                            <option value="purchase">仕入</option>
                         </select>
                         <select
                             value={statusFilter}
@@ -150,8 +150,8 @@ export default function ProductsPage() {
                             className="px-3 py-2 border border-gray-300 rounded"
                         >
                             <option value="all">ステータス: すべて</option>
-                            <option value="管理中">管理中</option>
-                            <option value="管理外">管理外</option>
+                            <option value="managed">管理中</option>
+                            <option value="unmanaged">管理外</option>
                         </select>
                     </div>
                 </div>
@@ -233,15 +233,15 @@ export default function ProductsPage() {
                                     <td className="px-4 py-3 text-sm text-right">
                                         ¥{product.costExclTax.toLocaleString()}
                                     </td>
-                                    <td className="px-4 py-3 text-sm">{product.productType}</td>
+                                    <td className="px-4 py-3 text-sm">{product.productType === 'own' ? '自社' : product.productType === 'purchase' ? '仕入' : product.productType}</td>
                                     <td className="px-4 py-3 text-sm">
                                         <span
-                                            className={`px-2 py-1 rounded text-xs ${product.managementStatus === "管理中"
+                                            className={`px-2 py-1 rounded text-xs ${product.managementStatus === "managed"
                                                 ? "bg-green-100 text-green-800"
                                                 : "bg-gray-100 text-gray-800"
                                                 }`}
                                         >
-                                            {product.managementStatus}
+                                            {product.managementStatus === 'managed' ? '管理中' : product.managementStatus === 'unmanaged' ? '管理外' : product.managementStatus}
                                         </span>
                                     </td>
                                     <td className="px-4 py-3 text-sm">

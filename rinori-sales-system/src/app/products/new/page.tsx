@@ -16,9 +16,9 @@ function NewProductForm() {
     const [productName, setProductName] = useState(productNameFromQuery || '');
     const [salesPrice, setSalesPrice] = useState('');
     const [cost, setCost] = useState('');
-    const [productType, setProductType] = useState<'自社' | '仕入'>('自社');
-    const [managementStatus, setManagementStatus] = useState<'管理中' | '管理外'>(
-        statusFromQuery === 'unmanaged' || statusFromQuery === '管理外' ? '管理外' : '管理中'
+    const [productType, setProductType] = useState<'own' | 'purchase'>('own');
+    const [managementStatus, setManagementStatus] = useState<'managed' | 'unmanaged'>(
+        statusFromQuery === 'unmanaged' || statusFromQuery === '管理外' ? 'unmanaged' : 'managed'
     );
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -155,7 +155,7 @@ function NewProductForm() {
                         </label>
                         <select
                             value={productType}
-                            onChange={(e) => setProductType(e.target.value as '自社' | '仕入')}
+                            onChange={(e) => setProductType(e.target.value as 'own' | 'purchase')}
                             style={{
                                 width: '100%',
                                 padding: '0.5rem',
@@ -163,8 +163,8 @@ function NewProductForm() {
                                 borderRadius: '4px'
                             }}
                         >
-                            <option value="自社">自社</option>
-                            <option value="仕入">仕入</option>
+                            <option value="own">自社</option>
+                            <option value="purchase">仕入</option>
                         </select>
                     </div>
 
@@ -174,7 +174,7 @@ function NewProductForm() {
                         </label>
                         <select
                             value={managementStatus}
-                            onChange={(e) => setManagementStatus(e.target.value as '管理中' | '管理外')}
+                            onChange={(e) => setManagementStatus(e.target.value as 'managed' | 'unmanaged')}
                             style={{
                                 width: '100%',
                                 padding: '0.5rem',
@@ -182,13 +182,13 @@ function NewProductForm() {
                                 borderRadius: '4px'
                             }}
                         >
-                            <option value="管理中">管理中</option>
-                            <option value="管理外">管理外</option>
+                            <option value="managed">管理中</option>
+                            <option value="unmanaged">管理外</option>
                         </select>
                     </div>
                 </div>
 
-                {managementStatus === '管理中' && (!salesPrice || !cost) && (
+                {managementStatus === 'managed' && (!salesPrice || !cost) && (
                     <div style={{
                         backgroundColor: '#fff3cd',
                         border: '1px solid #ffc107',

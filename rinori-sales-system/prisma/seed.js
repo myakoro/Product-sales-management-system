@@ -46,6 +46,17 @@ async function main() {
             create: { name, isActive: true },
         });
     }
+
+    const defaultAdCategories = ['Meta広告', 'Google広告', 'アフィリエイト', 'その他'];
+    for (const categoryName of defaultAdCategories) {
+        await prisma.adCategory.findFirst({ where: { categoryName } }).then(async (existing) => {
+            if (!existing) {
+                await prisma.adCategory.create({
+                    data: { categoryName },
+                });
+            }
+        });
+    }
 }
 
 main()

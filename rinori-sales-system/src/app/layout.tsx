@@ -7,6 +7,8 @@ export const metadata: Metadata = {
 };
 
 import { NextAuthProvider } from "./providers";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
 export default function RootLayout({
     children,
@@ -15,9 +17,13 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="ja">
-            <body>
+            <body style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
                 <NextAuthProvider>
-                    {children}
+                    <Header />
+                    <main style={{ flex: 1, backgroundColor: '#f9fafb' }}>
+                        {children}
+                    </main>
+                    <Footer />
                 </NextAuthProvider>
             </body>
         </html>

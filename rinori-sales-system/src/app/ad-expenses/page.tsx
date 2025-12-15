@@ -3,48 +3,35 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
-type AdCategory = {
-    id: number;
-    categoryName: string;
-};
-
-type AdExpense = {
-    id: number;
-    expenseDate: string;
-    amount: number;
-    adCategoryId: number;
-    memo?: string;
-    adCategory?: AdCategory;
-};
-
 export default function AdExpensesPage() {
-    const [activeTab, setActiveTab] = useState<'expenses' | 'categories'>('expenses');
-
-    // Data State
-    const [categories, setCategories] = useState<AdCategory[]>([]);
-    const [expenses, setExpenses] = useState<AdExpense[]>([]);
-
-    // Filter & Sort State
-    const [targetYm, setTargetYm] = useState("2025-10");
-    const [expenseSortKey, setExpenseSortKey] = useState<'expenseDate' | 'amount' | 'adCategoryId'>('expenseDate');
-    const [expenseSortDirection, setExpenseSortDirection] = useState<'asc' | 'desc'>('asc');
-    const [categorySortDirection, setCategorySortDirection] = useState<'asc' | 'desc'>('asc');
-
-    // Loading State
+    const [month, setMonth] = useState("2025-10");
+    const [expenses, setExpenses] = useState<any[]>([]);
+    const [categories, setCategories] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-    // Initial Load
+    // Form state
+    const [date, setDate] = useState("");
+    const [amount, setAmount] = useState("");
+    const [categoryId, setCategoryId] = useState("");
+    const [memo, setMemo] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    // Initial load
     useEffect(() => {
         fetchCategories();
+        // Set date default to today or selected month's 1st day?
+        // Default today or start of month.
+        setDate(`${month}-01`);
     }, []);
 
-    // Load expenses when tab or date changes
+    // Fetch expenses when month changes
     useEffect(() => {
-        if (activeTab === 'expenses') {
-            fetchExpenses();
+        fetchExpenses();
+        // If month changes, update date default to fit in that month
+        if (!date.startsWith(month)) {
+            setDate(`${month}-01`);
         }
-    }, [activeTab, targetYm]);
+    }, [month]);
 
     const fetchCategories = async () => {
         try {
@@ -52,418 +39,211 @@ export default function AdExpensesPage() {
             if (res.ok) {
                 const data = await res.json();
                 setCategories(data);
+                if (data.length > 0) setCategoryId(data[0].id);
             }
-        } catch (error) {
-            console.error(error);
+        } catch (e) {
+            console.error(e);
         }
     };
 
     const fetchExpenses = async () => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/ad-expenses?startYm=${targetYm}&endYm=${targetYm}`);
+            const res = await fetch(`/api/ad-expenses?month=${month}`);
             if (res.ok) {
                 const data = await res.json();
                 setExpenses(data);
             }
-        } catch (error) {
-            console.error(error);
-            setMessage({ type: 'error', text: '広告費の取得に失敗しました' });
+        } catch (e) {
+            console.error(e);
         } finally {
             setLoading(false);
         }
     };
 
-    // --- Category Management ---
-    const [newCategoryName, setNewCategoryName] = useState("");
-
-    const handleAddCategory = async () => {
-        if (!newCategoryName.trim()) return;
-        try {
-            const res = await fetch('/api/ad-categories', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ categoryName: newCategoryName })
-            });
-            if (res.ok) {
-                setNewCategoryName("");
-                fetchCategories();
-                setMessage({ type: 'success', text: 'カテゴリを追加しました' });
-            }
-        } catch (error) {
-            setMessage({ type: 'error', text: 'カテゴリ追加に失敗しました' });
-        }
-    };
-
-    const handleUpdateCategory = async (id: number, name: string) => {
-        try {
-            await fetch(`/api/ad-categories/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ categoryName: name })
-            });
-            fetchCategories();
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const handleDeleteCategory = async (id: number) => {
-        if (!confirm('このカテゴリを削除しますか？')) return;
-        try {
-            const res = await fetch(`/api/ad-categories/${id}`, { method: 'DELETE' });
-            if (res.ok) {
-                fetchCategories();
-                setMessage({ type: 'success', text: 'カテゴリを削除しました' });
-            } else {
-                const json = await res.json();
-                setMessage({ type: 'error', text: json.error || '削除できませんでした' });
-            }
-        } catch (error) {
-            setMessage({ type: 'error', text: '削除に失敗しました' });
-        }
-    };
-
-    // --- Expense Management ---
-    const [newExpense, setNewExpense] = useState({
-        date: "",
-        amount: "",
-        categoryId: "",
-        memo: ""
-    });
-
-    const handleAddExpense = async () => {
-        if (!newExpense.date || !newExpense.amount || !newExpense.categoryId) {
-            setMessage({ type: 'error', text: '必須項目を入力してください' });
-            return;
-        }
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (isSubmitting) return;
+        setIsSubmitting(true);
 
         try {
             const res = await fetch('/api/ad-expenses', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    expenseDate: newExpense.date,
-                    amount: newExpense.amount,
-                    adCategoryId: newExpense.categoryId,
-                    memo: newExpense.memo
+                    date,
+                    amount,
+                    categoryId,
+                    memo
                 })
             });
 
             if (res.ok) {
-                setNewExpense({ date: "", amount: "", categoryId: "", memo: "" });
+                // Clear form
+                setAmount("");
+                setMemo("");
+                // Refresh list
                 fetchExpenses();
-                setMessage({ type: 'success', text: '広告費を登録しました' });
+            } else {
+                alert("登録に失敗しました");
             }
-        } catch (error) {
-            setMessage({ type: 'error', text: '登録に失敗しました' });
+        } catch (e) {
+            console.error(e);
+            alert("エラーが発生しました");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
-    const handleDeleteExpense = async (id: number) => {
-        if (!confirm('このデータを削除しますか？')) return;
-        try {
-            await fetch(`/api/ad-expenses/${id}`, { method: 'DELETE' });
-            fetchExpenses();
-            setMessage({ type: 'success', text: '削除しました' });
-        } catch (error) {
-            setMessage({ type: 'error', text: '削除に失敗しました' });
-        }
-    };
-
-    const handleExpenseSort = (key: 'expenseDate' | 'amount' | 'adCategoryId') => {
-        let direction: 'asc' | 'desc' = 'asc';
-        if (expenseSortKey === key && expenseSortDirection === 'asc') {
-            direction = 'desc';
-        }
-        setExpenseSortKey(key);
-        setExpenseSortDirection(direction);
-    };
-
-    const sortedExpenses = [...expenses].sort((a, b) => {
-        let av: any;
-        let bv: any;
-
-        if (expenseSortKey === 'expenseDate') {
-            av = a.expenseDate;
-            bv = b.expenseDate;
-        } else if (expenseSortKey === 'amount') {
-            av = a.amount;
-            bv = b.amount;
-        } else {
-            av = a.adCategoryId;
-            bv = b.adCategoryId;
-        }
-
-        if (av < bv) return expenseSortDirection === 'asc' ? -1 : 1;
-        if (av > bv) return expenseSortDirection === 'asc' ? 1 : -1;
-        return 0;
-    });
-
-    const handleCategorySortToggle = () => {
-        setCategorySortDirection(prev => (prev === 'asc' ? 'desc' : 'asc'));
-    };
-
-    const sortedCategories = [...categories].sort((a, b) => {
-        const comp = a.categoryName.localeCompare(b.categoryName);
-        return categorySortDirection === 'asc' ? comp : -comp;
-    });
-
-    // Inline Editing for Expenses (Simplified: Blur to save)
-    const handleUpdateExpense = async (id: number, field: string, value: any) => {
-        try {
-            await fetch(`/api/ad-expenses/${id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ [field]: value })
-            });
-            // Ideally update local state optimistically, but re-fetching for simplicity
-            fetchExpenses();
-        } catch (error) {
-            console.error(error);
-        }
-    };
+    const totalAmount = expenses.reduce((sum, item) => sum + item.amount, 0);
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen">
             <header className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center">
-                <h1 className="text-lg font-semibold">Rinori 売上管理システム</h1>
-                <div className="flex items-center gap-4">
-                    <Link href="/" className="text-sm text-gray-600 hover:text-primary">
-                        ダッシュボード
-                    </Link>
-                    <span className="text-sm text-gray-600">ユーザー: 管理者</span>
-                </div>
+                <h1 className="text-lg font-semibold">広告費管理</h1>
+                <Link href="/" className="text-sm text-gray-600 hover:text-primary">
+                    ダッシュボードへ戻る
+                </Link>
             </header>
 
-            <main className="max-w-7xl mx-auto px-6 py-8">
-                <h2 className="text-2xl font-semibold mb-6">広告費管理</h2>
+            <main className="max-w-6xl mx-auto px-6 py-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {/* Left Column: List */}
+                    <div className="md:col-span-2">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold">広告費一覧</h2>
+                            <div className="flex items-center gap-2">
+                                <label className="text-sm font-medium">対象月</label>
+                                <input
+                                    type="month"
+                                    value={month}
+                                    onChange={(e) => setMonth(e.target.value)}
+                                    className="px-3 py-1.5 border border-gray-300 rounded"
+                                />
+                            </div>
+                        </div>
 
-                {message && (
-                    <div className={`p-4 mb-4 rounded ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                        {message.text}
+                        <div className="bg-white rounded shadow border border-gray-200 overflow-hidden">
+                            <div className="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
+                                <span className="font-semibold text-gray-700">合計金額</span>
+                                <span className="text-lg font-bold">¥{totalAmount.toLocaleString()}</span>
+                            </div>
+
+                            {loading ? (
+                                <div className="p-8 text-center text-gray-500">読み込み中...</div>
+                            ) : expenses.length === 0 ? (
+                                <div className="p-8 text-center text-gray-500">データがありません</div>
+                            ) : (
+                                <table className="w-full text-sm text-left">
+                                    <thead className="bg-gray-50 text-gray-600">
+                                        <tr>
+                                            <th className="px-4 py-2">日付</th>
+                                            <th className="px-4 py-2">カテゴリ</th>
+                                            <th className="px-4 py-2 text-right">金額</th>
+                                            <th className="px-4 py-2">メモ</th>
+                                            <th className="px-4 py-2">登録者</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-100">
+                                        {expenses.map((item) => (
+                                            <tr key={item.id} className="hover:bg-gray-50">
+                                                <td className="px-4 py-2 whitespace-nowrap">
+                                                    {new Date(item.expenseDate).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    <span className="inline-block px-2 py-0.5 rounded text-xs bg-blue-50 text-blue-700 border border-blue-100">
+                                                        {item.adCategory.categoryName}
+                                                    </span>
+                                                </td>
+                                                <td className="px-4 py-2 text-right font-medium">
+                                                    ¥{item.amount.toLocaleString()}
+                                                </td>
+                                                <td className="px-4 py-2 text-gray-500 truncate max-w-xs" title={item.memo}>
+                                                    {item.memo}
+                                                </td>
+                                                <td className="px-4 py-2 text-xs text-gray-400">
+                                                    {item.createdBy.username}
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
                     </div>
-                )}
 
-                {/* Tabs */}
-                <div className="flex gap-4 border-b border-gray-200 mb-6">
-                    <button
-                        className={`px-4 py-2 border-b-2 font-medium ${activeTab === 'expenses' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                        onClick={() => setActiveTab('expenses')}
-                    >
-                        広告費一覧
-                    </button>
-                    <button
-                        className={`px-4 py-2 border-b-2 font-medium ${activeTab === 'categories' ? 'border-primary text-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
-                        onClick={() => setActiveTab('categories')}
-                    >
-                        カテゴリ管理
-                    </button>
-                </div>
-
-                {activeTab === 'expenses' && (
+                    {/* Right Column: Input Form */}
                     <div>
-                        <div className="bg-white border border-gray-200 rounded p-4 mb-4 flex items-center gap-4">
-                            <label className="text-sm font-medium">対象月</label>
-                            <input
-                                type="month"
-                                value={targetYm}
-                                onChange={(e) => setTargetYm(e.target.value)}
-                                className="px-3 py-2 border border-gray-300 rounded"
-                            />
-                        </div>
+                        <div className="bg-white rounded shadow border border-gray-200 p-6 sticky top-6">
+                            <h2 className="text-lg font-bold mb-4">新規登録</h2>
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">発生日 <span className="text-red-500">*</span></label>
+                                    <input
+                                        type="date"
+                                        required
+                                        value={date}
+                                        onChange={(e) => setDate(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                                    />
+                                </div>
 
-                        <div className="bg-white border border-gray-200 rounded overflow-hidden">
-                            <table className="w-full text-sm">
-                                <thead className="bg-gray-50 border-b">
-                                    <tr>
-                                        <th
-                                            className="px-4 py-3 text-left w-40 cursor-pointer"
-                                            onClick={() => handleExpenseSort('expenseDate')}
-                                        >
-                                            日付
-                                        </th>
-                                        <th
-                                            className="px-4 py-3 text-right w-40 cursor-pointer"
-                                            onClick={() => handleExpenseSort('amount')}
-                                        >
-                                            金額
-                                        </th>
-                                        <th
-                                            className="px-4 py-3 text-left w-48 cursor-pointer"
-                                            onClick={() => handleExpenseSort('adCategoryId')}
-                                        >
-                                            カテゴリ
-                                        </th>
-                                        <th className="px-4 py-3 text-left">メモ</th>
-                                        <th className="px-4 py-3 w-20">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                    {sortedExpenses.map((exp) => (
-                                        <tr key={exp.id} className="hover:bg-gray-50">
-                                            <td className="px-4 py-2">
-                                                <input
-                                                    type="date"
-                                                    defaultValue={exp.expenseDate.split('T')[0]}
-                                                    onBlur={(e) => handleUpdateExpense(exp.id, 'expenseDate', e.target.value)}
-                                                    className="w-full bg-transparent border-none focus:ring-1 focus:ring-primary rounded px-1"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-2 text-right">
-                                                <input
-                                                    type="number"
-                                                    defaultValue={exp.amount}
-                                                    onBlur={(e) => handleUpdateExpense(exp.id, 'amount', e.target.value)}
-                                                    className="w-full bg-transparent border-none focus:ring-1 focus:ring-primary rounded px-1 text-right"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-2">
-                                                <select
-                                                    defaultValue={exp.adCategoryId}
-                                                    onChange={(e) => handleUpdateExpense(exp.id, 'adCategoryId', e.target.value)}
-                                                    className="w-full bg-transparent border-none focus:ring-1 focus:ring-primary rounded px-1"
-                                                >
-                                                    {categories.map(c => (
-                                                        <option key={c.id} value={c.id}>{c.categoryName}</option>
-                                                    ))}
-                                                </select>
-                                            </td>
-                                            <td className="px-4 py-2">
-                                                <input
-                                                    type="text"
-                                                    defaultValue={exp.memo || ""}
-                                                    onBlur={(e) => handleUpdateExpense(exp.id, 'memo', e.target.value)}
-                                                    className="w-full bg-transparent border-none focus:ring-1 focus:ring-primary rounded px-1"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-2 text-center">
-                                                <button
-                                                    onClick={() => handleDeleteExpense(exp.id)}
-                                                    className="text-red-500 hover:text-red-700 text-xs"
-                                                >
-                                                    削除
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {/* New Entry Row */}
-                                    <tr className="bg-blue-50">
-                                        <td className="px-4 py-2">
-                                            <input
-                                                type="date"
-                                                value={newExpense.date}
-                                                onChange={(e) => setNewExpense({ ...newExpense, date: e.target.value })}
-                                                className="w-full border border-gray-300 rounded px-2 py-1"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-2">
-                                            <input
-                                                type="number"
-                                                placeholder="金額"
-                                                value={newExpense.amount}
-                                                onChange={(e) => setNewExpense({ ...newExpense, amount: e.target.value })}
-                                                className="w-full border border-gray-300 rounded px-2 py-1 text-right"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-2">
-                                            <select
-                                                value={newExpense.categoryId}
-                                                onChange={(e) => setNewExpense({ ...newExpense, categoryId: e.target.value })}
-                                                className="w-full border border-gray-300 rounded px-2 py-1"
-                                            >
-                                                <option value="">カテゴリ選択</option>
-                                                {categories.map(c => (
-                                                    <option key={c.id} value={c.id}>{c.categoryName}</option>
-                                                ))}
-                                            </select>
-                                        </td>
-                                        <td className="px-4 py-2">
-                                            <input
-                                                type="text"
-                                                placeholder="メモ"
-                                                value={newExpense.memo}
-                                                onChange={(e) => setNewExpense({ ...newExpense, memo: e.target.value })}
-                                                className="w-full border border-gray-300 rounded px-2 py-1"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-2 text-center">
-                                            <button
-                                                onClick={handleAddExpense}
-                                                className="px-3 py-1 bg-primary text-white rounded text-xs hover:opacity-90"
-                                            >
-                                                保存
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">カテゴリ <span className="text-red-500">*</span></label>
+                                    <select
+                                        required
+                                        value={categoryId}
+                                        onChange={(e) => setCategoryId(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                                    >
+                                        <option value="">選択してください</option>
+                                        {categories.map((cat) => (
+                                            <option key={cat.id} value={cat.id}>
+                                                {cat.categoryName}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">金額 <span className="text-red-500">*</span></label>
+                                    <div className="relative">
+                                        <span className="absolute left-3 top-2 text-gray-500">¥</span>
+                                        <input
+                                            type="number"
+                                            required
+                                            min="0"
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded"
+                                            placeholder="0"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">メモ</label>
+                                    <textarea
+                                        value={memo}
+                                        onChange={(e) => setMemo(e.target.value)}
+                                        className="w-full px-3 py-2 border border-gray-300 rounded"
+                                        rows={3}
+                                    />
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className={`w-full py-2.5 rounded text-white font-medium shadow-sm
+                                        ${isSubmitting ? 'bg-gray-400 cursor-not-allowed' : 'bg-primary hover:bg-blue-600'}
+                                    `}
+                                >
+                                    {isSubmitting ? '登録中...' : '登録する'}
+                                </button>
+                            </form>
                         </div>
                     </div>
-                )}
-
-                {activeTab === 'categories' && (
-                    <div className="max-w-2xl">
-                        <div className="bg-white border border-gray-200 rounded overflow-hidden">
-                            <table className="w-full text-sm">
-                                <thead className="bg-gray-50 border-b">
-                                    <tr>
-                                        <th
-                                            className="px-4 py-3 text-left cursor-pointer"
-                                            onClick={handleCategorySortToggle}
-                                        >
-                                            カテゴリ名
-                                        </th>
-                                        <th className="px-4 py-3 w-20">操作</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                    {sortedCategories.map((cat) => (
-                                        <tr key={cat.id} className="hover:bg-gray-50">
-                                            <td className="px-4 py-2">
-                                                <input
-                                                    type="text"
-                                                    defaultValue={cat.categoryName}
-                                                    onBlur={(e) => handleUpdateCategory(cat.id, e.target.value)}
-                                                    className="w-full bg-transparent border-none focus:ring-1 focus:ring-primary rounded px-1"
-                                                />
-                                            </td>
-                                            <td className="px-4 py-2 text-center">
-                                                <button
-                                                    onClick={() => handleDeleteCategory(cat.id)}
-                                                    className="text-red-500 hover:text-red-700 text-xs"
-                                                >
-                                                    削除
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                    {/* New Category Row */}
-                                    <tr className="bg-blue-50">
-                                        <td className="px-4 py-2">
-                                            <input
-                                                type="text"
-                                                placeholder="新しいカテゴリを作成"
-                                                value={newCategoryName}
-                                                onChange={(e) => setNewCategoryName(e.target.value)}
-                                                className="w-full border border-gray-300 rounded px-2 py-1"
-                                            />
-                                        </td>
-                                        <td className="px-4 py-2 text-center">
-                                            <button
-                                                onClick={handleAddCategory}
-                                                className="px-3 py-1 bg-primary text-white rounded text-xs hover:opacity-90"
-                                            >
-                                                保存
-                                            </button>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                )}
-
+                </div>
             </main>
         </div>
     );

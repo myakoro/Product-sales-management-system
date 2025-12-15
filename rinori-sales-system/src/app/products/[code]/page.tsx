@@ -10,8 +10,8 @@ const dummyProduct = {
     productName: "フレアスカート",
     salesPriceExclTax: 5980,
     costExclTax: 2000,
-    productType: "自社",
-    managementStatus: "管理中",
+    productType: "own",
+    managementStatus: "managed",
 };
 
 export default function EditProductPage({
@@ -26,8 +26,8 @@ export default function EditProductPage({
         productName: "",
         salesPriceExclTax: 0,
         costExclTax: 0,
-        productType: "自社",
-        managementStatus: "管理中",
+        productType: "own",
+        managementStatus: "managed",
     });
     const [loading, setLoading] = useState(true);
 
@@ -240,8 +240,8 @@ export default function EditProductPage({
                                     }
                                     className="w-full px-3 py-2 border border-gray-300 rounded"
                                 >
-                                    <option value="自社">自社</option>
-                                    <option value="仕入">仕入</option>
+                                    <option value="own">自社</option>
+                                    <option value="purchase">仕入</option>
                                 </select>
                             </div>
 
@@ -259,8 +259,8 @@ export default function EditProductPage({
                                     }
                                     className="w-full px-3 py-2 border border-gray-300 rounded"
                                 >
-                                    <option value="管理中">管理中</option>
-                                    <option value="管理外">管理外</option>
+                                    <option value="managed">管理中</option>
+                                    <option value="unmanaged">管理外</option>
                                 </select>
                             </div>
                         </div>

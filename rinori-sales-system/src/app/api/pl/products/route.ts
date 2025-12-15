@@ -1,72 +1,114 @@
 
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/auth";
+
+interface SalesRecordGroup {
+    productCode: string;
+    _sum: {
+        salesAmountExclTax: number | null;
+        costAmountExclTax: number | null;
+        grossProfit: number | null;
+    };
+}
+
+interface ProductSelection {
+    productCode: string;
+    productName: string;
+    productType: string;
+}
+
+interface ProductPLResult {
+    productCode: string;
+    productName: string;
+    productType?: string;
+    sales: number;
+    cost: number;
+    grossProfit: number;
+    costRate: number;
+    grossProfitRate: number;
+}
 
 export async function GET(request: Request) {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    // const userRole = (session.user as any).role; // Both roles can access Product PL
+
     const { searchParams } = new URL(request.url);
     const startYm = searchParams.get('startYm');
     const endYm = searchParams.get('endYm');
-    const searchTerm = searchParams.get('search') || '';
-    const salesChannelIdStr = searchParams.get('salesChannelId');
+    const type = searchParams.get('type') || 'all'; // own, purchase, all
+    const salesChannelId = searchParams.get('salesChannelId');
 
     if (!startYm || !endYm) {
         return NextResponse.json({ error: 'Missing startYm or endYm' }, { status: 400 });
     }
 
-    const salesChannelId = salesChannelIdStr ? parseInt(salesChannelIdStr, 10) : null;
-    const isChannelFiltered = salesChannelId !== null && salesChannelId > 0;
-
     try {
-        const products = await prisma.product.findMany({
+        // Group SalesRecords by Product
+        const groupBy = await prisma.salesRecord.groupBy({
+            by: ['productCode'],
+            _sum: {
+                salesAmountExclTax: true,
+                costAmountExclTax: true,
+                grossProfit: true,
+            },
             where: {
-                managementStatus: { in: ['管理中', 'managed'] },
-                OR: [
-                    { productCode: { contains: searchTerm } },
-                    { productName: { contains: searchTerm } },
-                ],
-            },
-            include: {
-                salesRecords: {
-                    where: {
-                        periodYm: {
-                            gte: startYm,
-                            lte: endYm,
-                        },
-                        ...(isChannelFiltered ? { salesChannelId: salesChannelId } : {})
-                    },
+                periodYm: {
+                    gte: startYm,
+                    lte: endYm,
                 },
-            },
+                product: {
+                    managementStatus: { in: ['managed', '管理中'] },
+                    ...(type !== 'all' ? {
+                        productType: type === 'own' ? { in: ['own', '自社'] } : { in: ['purchase', '仕入'] }
+                    } : {})
+                },
+                ...(salesChannelId && salesChannelId !== 'all' ? { salesChannelId: Number(salesChannelId) } : {})
+            }
         });
 
-        const productPlData = products.map(p => {
-            const sales = p.salesRecords.reduce((sum, r) => sum + r.salesAmountExclTax, 0);
-            const cost = p.salesRecords.reduce((sum, r) => sum + r.costAmountExclTax, 0);
-            const grossProfit = p.salesRecords.reduce((sum, r) => sum + r.grossProfit, 0);
-            const quantity = p.salesRecords.reduce((sum, r) => sum + r.quantity, 0);
+        // Need Product Names, so fetch products or use include?
+        // GroupBy doesn't support include.
+        // So fetch relevant products.
+        const productCodes = groupBy.map((g: SalesRecordGroup) => g.productCode);
+        const products: ProductSelection[] = await prisma.product.findMany({
+            where: { productCode: { in: productCodes } },
+            select: { productCode: true, productName: true, productType: true }
+        });
+        const productMap = new Map<string, ProductSelection>(products.map((p: ProductSelection) => [p.productCode, p]));
 
-            const costRate = sales > 0 ? (cost / sales) * 100 : 0;
-            const grossProfitRate = sales > 0 ? (grossProfit / sales) * 100 : 0;
-            const avgUnitPrice = quantity > 0 ? Math.round(sales / quantity) : 0;
+        const results: ProductPLResult[] = groupBy.map((g: SalesRecordGroup) => {
+            const product = productMap.get(g.productCode);
+            const sales = g._sum.salesAmountExclTax || 0;
+            const cost = g._sum.costAmountExclTax || 0;
+            const gp = g._sum.grossProfit || 0;
 
             return {
-                productCode: p.productCode,
-                productName: p.productName,
-                sales,
-                cost,
-                grossProfit,
-                quantity,
-                avgUnitPrice,
-                costRate,
-                grossProfitRate,
+                productCode: g.productCode,
+                productName: product?.productName || 'Unknown',
+                productType: product?.productType,
+                sales: sales,
+                cost: cost,
+                grossProfit: gp,
+                costRate: sales ? (cost / sales) * 100 : 0,
+                grossProfitRate: sales ? (gp / sales) * 100 : 0,
             };
         });
 
-        // Filter out products with 0 sales if needed? Spec says "Sort defaults to sales desc".
-        // "売上が 0 の商品を除外" -> Spec 6.3 Filter: "売上が 0 の商品を除外" (Exclude products with 0 sales) is an option.
-        // I'll return all and let frontend filter, OR param.
-        // For now returning all is safer for "No data" indication.
+        // Filter out 0 sales if needed? Spec 6.3 "Filter out products with 0 sales"
+        // Let's filter in memory or frontend. Let's return all non-zero records?
+        // groupBy only returns records that exist in SalesRecord. 
+        // If sales is 0 but record exists (e.g. return?), keep it.
 
-        return NextResponse.json(productPlData);
+        // Sort by Sales desc default
+        results.sort((a: any, b: any) => b.sales - a.sales);
+
+        return NextResponse.json(results);
+
     } catch (error) {
         console.error('Failed to fetch Product PL data:', error);
         return NextResponse.json({ error: 'Failed to fetch Product PL data' }, { status: 500 });
