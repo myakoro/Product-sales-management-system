@@ -1,11 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-
-// Force dynamic rendering to avoid build-time static generation
-export const dynamic = 'force-dynamic';
 
 // Types
 type AdCategory = {
@@ -24,7 +21,7 @@ type Expense = {
     createdBy: { username: string };
 };
 
-export default function AdExpensesPage() {
+function AdExpensesContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const initialTab = searchParams.get('tab') === 'categories' ? 'categories' : 'expenses';
@@ -675,5 +672,13 @@ export default function AdExpensesPage() {
                 )}
             </main>
         </div>
+    );
+}
+
+export default function AdExpensesPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <AdExpensesContent />
+        </Suspense>
     );
 }
