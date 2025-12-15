@@ -8,7 +8,16 @@ import Link from "next/link";
 export default function SalesImportPage() {
     const router = useRouter();
     const [file, setFile] = useState<File | null>(null);
-    const [targetYm, setTargetYm] = useState("2024-12"); // Default to current month or meaningful default
+
+    // Calculate previous month as default
+    const getPreviousMonth = () => {
+        const now = new Date();
+        const year = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
+        const month = now.getMonth() === 0 ? 12 : now.getMonth();
+        return `${year}-${String(month).padStart(2, '0')}`;
+    };
+
+    const [targetYm, setTargetYm] = useState(getPreviousMonth());
     const [mode, setMode] = useState("append");
     const [comment, setComment] = useState("");
     const [isUploading, setIsUploading] = useState(false);
