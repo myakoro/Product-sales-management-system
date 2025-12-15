@@ -66,6 +66,6 @@ export async function POST(request: Request) {
 
     } catch (error) {
         console.error('Seed Error:', error);
-        return NextResponse.json({ error: 'Failed to seed data' }, { status: 500 });
+        return NextResponse.json({ error: 'Failed to seed data: ' + (error instanceof Error ? error.message : String(error)) }, { status: 500 });
     }
 }
