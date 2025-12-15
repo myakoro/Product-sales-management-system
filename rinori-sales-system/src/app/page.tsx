@@ -92,7 +92,7 @@ export default function HomePage() {
 
     return (
         <div style={{ minHeight: '100vh', backgroundColor: '#f9f9f9' }}>
-            <Header />
+            {/* Header is provided by RootLayout */}
 
             <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1.5rem' }}>
                 <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1.5rem' }}>ダッシュボード</h2>

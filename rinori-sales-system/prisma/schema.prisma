@@ -131,6 +131,7 @@ model PeriodBudgetHistory {
 model AdCategory {
   id           Int      @id @default(autoincrement())
   categoryName String   @map("category_name")
+  isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at")
 
   adExpenses   AdExpense[]

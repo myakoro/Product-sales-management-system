@@ -35,7 +35,7 @@ export default function AdExpensesPage() {
 
     const fetchCategories = async () => {
         try {
-            const res = await fetch('/api/ad-categories');
+            const res = await fetch('/api/ad-categories?activeOnly=true');
             if (res.ok) {
                 const data = await res.json();
                 setCategories(data);
@@ -100,7 +100,12 @@ export default function AdExpensesPage() {
     return (
         <div className="min-h-screen">
             <header className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center">
-                <h1 className="text-lg font-semibold">広告費管理</h1>
+                <div className="flex items-center gap-4">
+                    <h1 className="text-lg font-semibold">広告費管理</h1>
+                    <Link href="/settings/ad-categories" className="text-xs bg-gray-100 px-3 py-1 rounded-full text-gray-600 hover:bg-gray-200 border border-gray-200">
+                        ⚙ カテゴリ設定
+                    </Link>
+                </div>
                 <Link href="/" className="text-sm text-gray-600 hover:text-primary">
                     ダッシュボードへ戻る
                 </Link>

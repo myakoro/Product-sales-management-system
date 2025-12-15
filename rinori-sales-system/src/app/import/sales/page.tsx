@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { parseSalesCsv, SalesCsvRow } from "@/lib/csv-parser";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -8,7 +8,7 @@ import Link from "next/link";
 export default function SalesImportPage() {
     const router = useRouter();
     const [file, setFile] = useState<File | null>(null);
-    const [targetYm, setTargetYm] = useState("2025-10"); // Default or current month
+    const [targetYm, setTargetYm] = useState("2024-12"); // Default to current month or meaningful default
     const [mode, setMode] = useState("append");
     const [comment, setComment] = useState("");
     const [isUploading, setIsUploading] = useState(false);
@@ -17,16 +17,18 @@ export default function SalesImportPage() {
     const [channels, setChannels] = useState<{ id: number, name: string }[]>([]);
     const [salesChannelId, setSalesChannelId] = useState("");
 
-    useState(() => {
+    useEffect(() => {
         // Fetch channels on mount
         fetch('/api/settings/sales-channels')
             .then(res => res.json())
             .then(data => {
-                const active = data.filter((c: any) => c.isActive);
-                setChannels(active);
+                if (Array.isArray(data)) {
+                    const active = data.filter((c: any) => c.isActive);
+                    setChannels(active);
+                }
             })
             .catch(err => console.error(err));
-    });
+    }, []);
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
