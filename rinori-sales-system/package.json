@@ -5,7 +5,7 @@
     "scripts": {
         "dev": "next dev",
         "build": "prisma generate && next build",
-        "start": "node scripts/init-db.cjs && next start",
+        "start": "node scripts/migrate-unique-constraint.cjs && node scripts/init-db.cjs && next start",
         "lint": "next lint",
         "postinstall": "prisma generate",
         "db:seed": "node prisma/seed.js"
