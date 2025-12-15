@@ -1,4 +1,6 @@
 import Papa from 'papaparse';
+import Encoding from 'encoding-japanese';
+
 
 export interface SalesCsvRow {
     productCode: string;
@@ -61,14 +63,26 @@ export async function parseSalesCsv(file: File): Promise<SalesCsvRow[]> {
         reader.onload = (event) => {
             try {
                 const buffer = event.target?.result as ArrayBuffer;
-                // Shift_JIS rendering
-                const decoder = new TextDecoder('shift-jis');
-                const csvText = decoder.decode(buffer);
+                // Shift_JIS decoding using encoding-japanese
+                const uint8Array = new Uint8Array(buffer);
+                const detectedEncoding = Encoding.detect(uint8Array);
+                console.log('Detected encoding:', detectedEncoding);
+
+                const unicodeArray = Encoding.convert(uint8Array, {
+                    to: 'UNICODE',
+                    from: detectedEncoding || 'SJIS'
+                });
+                const csvText = Encoding.codeToString(unicodeArray);
+
 
                 Papa.parse(csvText, {
                     header: true,
                     skipEmptyLines: true,
                     complete: (results) => {
+                        console.log('Papa parse complete. Total rows:', results.data.length);
+                        console.log('Headers:', results.meta.fields);
+                        console.log('First row sample:', results.data[0]);
+
                         const rows: SalesCsvRow[] = [];
                         if (results.errors.length > 0) {
                             console.warn("CSV parse errors:", results.errors);
@@ -92,19 +106,43 @@ export async function parseSalesCsv(file: File): Promise<SalesCsvRow[]> {
                         // Let's rely on column INDEX if possible or flexible matching.
                         // Papaparse with header: true uses header names.
 
-                        results.data.forEach((row: any) => {
+                        results.data.forEach((row: any, index: number) => {
+                            // Normalize row keys to remove BOM, zero-width chars, and extra whitespace
+                            const normalizedRow: any = {};
+                            Object.keys(row).forEach(key => {
+                                const normalizedKey = key
+                                    .replace(/[\uFEFF\u200B-\u200D\u00A0]/g, '') // Remove BOM, zero-width, non-breaking spaces
+                                    .replace(/\s+/g, '') // Remove all whitespace
+                                    .trim();
+                                normalizedRow[normalizedKey] = row[key];
+                            });
+
+                            if (index === 0) {
+                                console.log('Original keys:', Object.keys(row));
+                                console.log('Normalized keys:', Object.keys(normalizedRow));
+                            }
+
                             // Helper to find value by potential keys
                             const findVal = (keys: string[]) => {
                                 for (const k of keys) {
-                                    if (row[k] !== undefined) return row[k];
+                                    const normalizedKey = k.replace(/\s+/g, '');
+                                    const val = normalizedRow[normalizedKey];
+                                    if (val !== undefined && val !== null && val !== '') {
+                                        return String(val).trim();
+                                    }
                                 }
                                 return undefined;
+
                             };
 
-                            const sku = findVal(['商品コード', '商品コード（SKU）', 'SKU']);
+                            const sku = findVal(['商品コード', '商品ｺｰﾄﾞ', '商品コード（SKU）', 'SKU']);
                             const name = findVal(['商品名', '商品名称']);
-                            const qty = findVal(['受注数', '数量']);
-                            const amount = findVal(['売上金額（税込）', '金額', '小計']);
+                            const qty = findVal(['受注数', '数量', '出荷数']);
+                            const amount = findVal(['売上金額（税込）', '金額', '小計', '単価']);
+
+                            if (index < 3) {
+                                console.log(`Row ${index}:`, { sku, name, qty, amount });
+                            }
 
                             if (sku && qty && amount) {
                                 rows.push({
@@ -115,7 +153,9 @@ export async function parseSalesCsv(file: File): Promise<SalesCsvRow[]> {
                                 });
                             }
                         });
+                        console.log('Total valid rows extracted:', rows.length);
                         resolve(rows);
+
                     },
                     error: (err: any) => reject(err),
                 });

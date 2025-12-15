@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 // Types
 type AdCategory = {
@@ -23,7 +23,9 @@ type Expense = {
 
 export default function AdExpensesPage() {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'expenses' | 'categories'>('expenses');
+    const searchParams = useSearchParams();
+    const initialTab = searchParams.get('tab') === 'categories' ? 'categories' : 'expenses';
+    const [activeTab, setActiveTab] = useState<'expenses' | 'categories'>(initialTab);
 
     // --- Expenses Tab State ---
     const [month, setMonth] = useState("2025-10");
@@ -304,8 +306,8 @@ export default function AdExpensesPage() {
                         <button
                             onClick={() => setActiveTab('expenses')}
                             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'expenses'
-                                    ? 'bg-white text-blue-600 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             📋 広告リスト
@@ -313,8 +315,8 @@ export default function AdExpensesPage() {
                         <button
                             onClick={() => setActiveTab('categories')}
                             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'categories'
-                                    ? 'bg-white text-blue-600 shadow-sm'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white text-blue-600 shadow-sm'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             ⚙️ カテゴリ管理

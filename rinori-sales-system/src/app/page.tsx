@@ -377,7 +377,7 @@ export default function HomePage() {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/ad-expenses" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1rem', padding: '1rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                    <Link href="/ad-expenses?tab=categories" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1rem', padding: '1rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                         広告カテゴリー
                                     </Link>
                                 </li>
