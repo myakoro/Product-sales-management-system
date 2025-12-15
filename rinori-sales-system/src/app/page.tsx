@@ -95,7 +95,7 @@ export default function HomePage() {
             {/* Header is provided by RootLayout */}
 
             <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '2rem 1.5rem' }}>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: '600', marginBottom: '1.5rem' }}>ダッシュボード</h2>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem' }}>ダッシュボード</h2>
 
                 {/* 警告・通知エリア */}
                 <div style={{ marginBottom: '1.5rem' }}>
@@ -114,7 +114,7 @@ export default function HomePage() {
                                 gap: '0.75rem'
                             }}
                         >
-                            <span style={{ fontSize: '1.5rem' }}>⚠️</span>
+                            <span style={{ fontSize: '1.25rem' }}>⚠️</span>
                             <div>
                                 <div style={{ fontWeight: '600', color: '#856404' }}>
                                     商品マスタに未設定項目があります（{incompleteCount}件）
@@ -140,7 +140,7 @@ export default function HomePage() {
                             }}
                         >
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <span style={{ fontSize: '1.5rem' }}>📦</span>
+                                <span style={{ fontSize: '1.25rem' }}>📦</span>
                                 <div>
                                     <div style={{ fontWeight: '600', color: '#0c5460' }}>
                                         新商品候補があります（{dashboardData.newProductCandidatesCount}件）
@@ -163,28 +163,28 @@ export default function HomePage() {
                         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                         marginBottom: '2rem'
                     }}>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1.5rem' }}>
                             {formatMonth(dashboardData.currentMonth)}の実績
                         </h3>
 
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1.5rem' }}>
                             <div>
                                 <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>売上（税別）</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: '600' }}>¥{Math.round(dashboardData.monthlySummary.sales).toLocaleString()}</div>
+                                <div style={{ fontSize: '1.25rem', fontWeight: '600' }}>¥{Math.round(dashboardData.monthlySummary.sales).toLocaleString()}</div>
                             </div>
                             <div>
                                 <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>粗利</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#28a745' }}>¥{Math.round(dashboardData.monthlySummary.grossProfit).toLocaleString()}</div>
+                                <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#28a745' }}>¥{Math.round(dashboardData.monthlySummary.grossProfit).toLocaleString()}</div>
                                 <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem' }}>粗利率: {dashboardData.monthlySummary.grossProfitRate.toFixed(1)}%</div>
                             </div>
                             <div>
                                 <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>広告費</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#dc3545' }}>¥{Math.round(dashboardData.monthlySummary.adExpense).toLocaleString()}</div>
+                                <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#dc3545' }}>¥{Math.round(dashboardData.monthlySummary.adExpense).toLocaleString()}</div>
                                 <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem' }}>広告率: {dashboardData.monthlySummary.adExpenseRate.toFixed(1)}%</div>
                             </div>
                             <div>
                                 <div style={{ fontSize: '0.875rem', color: '#666', marginBottom: '0.5rem' }}>営業利益</div>
-                                <div style={{ fontSize: '1.5rem', fontWeight: '600', color: '#0070f3' }}>¥{Math.round(dashboardData.monthlySummary.operatingProfit).toLocaleString()}</div>
+                                <div style={{ fontSize: '1.25rem', fontWeight: '600', color: '#0070f3' }}>¥{Math.round(dashboardData.monthlySummary.operatingProfit).toLocaleString()}</div>
                                 <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.25rem' }}>利益率: {dashboardData.monthlySummary.operatingProfitRate.toFixed(1)}%</div>
                             </div>
                         </div>
@@ -200,7 +200,7 @@ export default function HomePage() {
                         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
                         marginBottom: '2rem'
                     }}>
-                        <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem' }}>
+                        <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1.5rem' }}>
                             今月の主要商品 予算 vs 実績
                         </h3>
 
@@ -238,12 +238,12 @@ export default function HomePage() {
 
                 {/* カテゴリ別メニュー */}
                 <div style={{ marginTop: '2rem' }}>
-                    <h3 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1.5rem' }}>機能メニュー</h3>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1.5rem' }}>機能メニュー</h3>
 
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
                         {/* 商品カテゴリ */}
                         <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
-                            <h4 style={{ fontSize: '1.25rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <h4 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <span>📦</span>
                                 <span>商品</span>
                             </h4>
@@ -253,7 +253,7 @@ export default function HomePage() {
                                         display: 'block',
                                         color: '#0070f3',
                                         textDecoration: 'none',
-                                        fontSize: '1.25rem',
+                                        fontSize: '1.1rem',
                                         padding: '1rem 1.5rem',
                                         border: '1px solid #e5e7eb',
                                         borderRadius: '8px',
@@ -269,7 +269,7 @@ export default function HomePage() {
                                         display: 'block',
                                         color: '#0070f3',
                                         textDecoration: 'none',
-                                        fontSize: '1.25rem',
+                                        fontSize: '1.1rem',
                                         padding: '1rem 1.5rem',
                                         border: '1px solid #e5e7eb',
                                         borderRadius: '8px',
@@ -285,7 +285,7 @@ export default function HomePage() {
                                         display: 'block',
                                         color: '#0070f3',
                                         textDecoration: 'none',
-                                        fontSize: '1.25rem',
+                                        fontSize: '1.1rem',
                                         padding: '1rem 1.5rem',
                                         border: '1px solid #e5e7eb',
                                         borderRadius: '8px',
@@ -301,18 +301,18 @@ export default function HomePage() {
 
                         {/* 売上カテゴリ */}
                         <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
-                            <h4 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <h4 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <span>💰</span>
                                 <span>売上</span>
                             </h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                 <li>
-                                    <Link href="/import/sales" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                    <Link href="/import/sales" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                         売上CSV取込
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/import/history" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                    <Link href="/import/history" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                         取込履歴
                                     </Link>
                                 </li>
@@ -321,28 +321,28 @@ export default function HomePage() {
 
                         {/* 予算・PLカテゴリ */}
                         <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
-                            <h4 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <h4 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <span>📊</span>
                                 <span>予算・PL</span>
                             </h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                 <li>
-                                    <Link href="/budget" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                    <Link href="/budget" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                         予算設定
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/budget/vs-actual" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                    <Link href="/budget/vs-actual" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                         予算 vs 実績
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/pl/monthly" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                    <Link href="/pl/monthly" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                         月次PL
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/pl/products" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                    <Link href="/pl/products" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                         商品別PL
                                     </Link>
                                 </li>
@@ -351,13 +351,13 @@ export default function HomePage() {
 
                         {/* 広告費管理 */}
                         <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
-                            <h4 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <h4 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <span>📢</span>
                                 <span>広告費管理</span>
                             </h4>
                             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
                                 <li>
-                                    <Link href="/ad-expenses" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                    <Link href="/ad-expenses" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                         広告費管理
                                     </Link>
                                 </li>
@@ -366,39 +366,39 @@ export default function HomePage() {
 
                         {/* 設定カテゴリ */}
                         <div style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', padding: '1.5rem' }}>
-                            <h4 style={{ fontSize: '1.125rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <h4 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <span>⚙️</span>
                                 <span>設定</span>
                             </h4>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 {/* 左列：よく使う設定 */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                    <Link href="/settings/sales-channels" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                    <Link href="/settings/sales-channels" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                         販路マスタ
                                     </Link>
-                                    <Link href="/ad-expenses" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                    <Link href="/ad-expenses" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                         広告カテゴリ設定
                                     </Link>
-                                    <Link href="/settings/account" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                    <Link href="/settings/account" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                         アカウント設定
                                     </Link>
                                     {user?.role === 'master' && (
-                                        <Link href="/settings/users" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                        <Link href="/settings/users" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                             ユーザー管理
                                         </Link>
                                     )}
                                 </div>
                                 {/* 右列：あまり使わない設定 */}
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                    <Link href="/settings/tax-rates" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                    <Link href="/settings/tax-rates" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                         税率設定
                                     </Link>
                                     {user?.role === 'master' && (
                                         <>
-                                            <Link href="/settings/export" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                            <Link href="/settings/export" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                                 データエクスポート
                                             </Link>
-                                            <Link href="/settings/import" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.25rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
+                                            <Link href="/settings/import" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
                                                 データ復元
                                             </Link>
                                         </>
