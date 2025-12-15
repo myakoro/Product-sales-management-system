@@ -83,9 +83,13 @@ export async function POST(request: Request) {
                 if (!product) {
                     // Add to New Product Candidates
                     await tx.newProductCandidate.upsert({
-                        where: { productCode: parentCode },
+                        where: {
+                            productCode_sampleSku: {
+                                productCode: parentCode,
+                                sampleSku: sku
+                            }
+                        },
                         update: {
-                            sampleSku: sku,
                             productName: productName,
                             // status remains as is (e.g. pending)
                         },

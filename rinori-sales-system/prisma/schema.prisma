@@ -206,5 +206,6 @@ model NewProductCandidate {
   status      String   @default("pending") // 'pending', 'registered', 'ignored'
   detectedAt  DateTime @default(now()) @map("detected_at")
 
+  @@unique([productCode, sampleSku])
   @@map("new_product_candidates")
 }
