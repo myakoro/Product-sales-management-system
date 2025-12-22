@@ -16,6 +16,7 @@ export async function GET(request: Request) {
         whereClause.OR = [
             { productCode: { contains: search } },
             { productName: { contains: search } },
+            { asin: { contains: search } }, // V1.51追加
         ];
     }
 
@@ -55,7 +56,8 @@ export async function POST(request: Request) {
             costExclTax,
             productType,
             managementStatus,
-            categoryId
+            categoryId,
+            asin // V1.51追加
         } = body;
 
         // バリデーション
@@ -63,7 +65,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: '必須項目が不足しています' }, { status: 400 });
         }
 
-        // 重複チェック
+        // 重複チェック (商品コード)
         const existing = await prisma.product.findUnique({
             where: { productCode },
         });
@@ -71,7 +73,17 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'この商品コードは既に使用されています' }, { status: 400 });
         }
 
-        const product = await prisma.product.create({
+        // ASIN重複チェック
+        if (asin) {
+            const existingAsin = await (prisma.product as any).findFirst({
+                where: { asin: asin }
+            });
+            if (existingAsin) {
+                return NextResponse.json({ error: 'このASINは既に他の商品に登録されています' }, { status: 400 });
+            }
+        }
+
+        const product = await (prisma.product as any).create({
             data: {
                 productCode,
                 productName,
@@ -80,6 +92,7 @@ export async function POST(request: Request) {
                 productType, // '自社' or '仕入'
                 managementStatus, // '管理中' or '管理外'
                 categoryId: categoryId ? Number(categoryId) : null,
+                asin: asin || null, // V1.51追加
             },
         });
 

@@ -33,7 +33,7 @@ function convertSkuToParentCode(sku: string): string {
     return trimmedSku;
 }
 
-// CSVのカラム定義（柔軟に対応するための候補リスト）
+// CSVのカラム定義（NE形式 - 柔軟に対応するための候補リスト）
 const COL_MAPPING = {
     productCode: ['商品コード', '商品ｺｰﾄﾞ', 'product_code', 'code', '品番', '商品コード（SKU）'],
     productName: ['商品名', 'product_name', 'name', '品名'],
@@ -41,6 +41,28 @@ const COL_MAPPING = {
     quantity: ['受注数', 'quantity', 'qty', '数量'],
     amount: ['小計', '商品計', 'amount', 'price', '売上金額', '売上金額（税込）', '金額']
 };
+
+// Amazon CSVのカラム定義【V1.51追加】
+const AMAZON_COL_MAPPING = {
+    asin: ['（親）ASIN', '(親)ASIN'],
+    title: ['タイトル'],
+    quantity: ['注文された商品点数'],
+    quantityB2B: ['注文点数 - B2B'],
+    amount: ['注文商品の売上額'],
+    amountB2B: ['注文商品の売上額 - B2B']
+};
+
+// Amazon固有の数値フォーマットをパース【V1.51追加】
+function parseAmazonNumber(value: string): number {
+    if (!value || value === '￥0' || value === '0') return 0;
+    // 円記号を除去
+    let cleaned = value.replace(/[￥¥]/g, '');
+    // カンマを除去
+    cleaned = cleaned.replace(/,/g, '');
+    // 数値に変換
+    const num = parseInt(cleaned, 10);
+    return isNaN(num) ? 0 : num;
+}
 
 export async function POST(request: Request) {
     console.log('[売上CSV取込] 処理開始');
@@ -51,8 +73,10 @@ export async function POST(request: Request) {
         const importMode = formData.get('importMode') as string;
         const comment = formData.get('comment') as string || '';
         const salesChannelIdStr = formData.get('salesChannelId') as string;
+        const dataSource = (formData.get('dataSource') as string) || 'NE'; // V1.51追加: 'NE' or 'Amazon'
+        const skipUnregisteredAsins = formData.get('skipUnregisteredAsins') === 'true'; // V1.51追加
 
-        console.log('[売上CSV取込] パラメータ:', { targetYm, importMode, salesChannelId: salesChannelIdStr, fileName: file?.name });
+        console.log('[売上CSV取込] パラメータ:', { targetYm, importMode, salesChannelId: salesChannelIdStr, dataSource, fileName: file?.name });
 
         if (!file || !targetYm || !importMode || !salesChannelIdStr) {
             return NextResponse.json({ error: '必須パラメータが不足しています（販路の選択が必要です）' }, { status: 400 });
@@ -77,29 +101,53 @@ export async function POST(request: Request) {
         const parseResult = Papa.parse(decodedText, { header: true, skipEmptyLines: true });
 
         const headers = parseResult.meta.fields || [];
-        const hasCode = COL_MAPPING.productCode.some(c => headers.includes(c));
 
-        if (!hasCode) {
-            decodedText = new TextDecoder('shift-jis').decode(buffer);
-            const retryResult = Papa.parse(decodedText, { header: true, skipEmptyLines: true });
-            if (retryResult.meta.fields && COL_MAPPING.productCode.some(c => retryResult.meta.fields!.includes(c))) {
-                parsedData = retryResult.data;
+        // 【V1.51追加】Amazon形式のバリデーション
+        if (dataSource === 'Amazon') {
+            const checkHeaders = (h: string[]) => {
+                const hasAsin = AMAZON_COL_MAPPING.asin.some(c => h.includes(c));
+                const hasQty = AMAZON_COL_MAPPING.quantity.some(c => h.includes(c));
+                const hasAmt = AMAZON_COL_MAPPING.amount.some(c => h.includes(c));
+                return hasAsin && hasQty && hasAmt;
+            };
+
+            if (!checkHeaders(headers)) {
+                // Shift-JISでの再試行
+                const sjisText = new TextDecoder('shift-jis').decode(buffer);
+                const sjisResult = Papa.parse(sjisText, { header: true, skipEmptyLines: true });
+                const sjisHeaders = sjisResult.meta.fields || [];
+                if (checkHeaders(sjisHeaders)) {
+                    parsedData = sjisResult.data;
+                } else {
+                    return NextResponse.json({ error: 'Amazon CSVの形式が正しくありません（必須列が見つかりません）' }, { status: 400 });
+                }
             } else {
                 parsedData = parseResult.data;
             }
         } else {
-            parsedData = parseResult.data;
+            // 従来のNE形式バリデーション
+            const hasCode = COL_MAPPING.productCode.some(c => headers.includes(c));
+
+            if (!hasCode) {
+                const sjisText = new TextDecoder('shift-jis').decode(buffer);
+                const retryResult = Papa.parse(sjisText, { header: true, skipEmptyLines: true });
+                if (retryResult.meta.fields && COL_MAPPING.productCode.some(c => retryResult.meta.fields!.includes(c))) {
+                    parsedData = retryResult.data;
+                } else {
+                    parsedData = parseResult.data;
+                }
+            } else {
+                parsedData = parseResult.data;
+            }
         }
 
-        console.log('[売上CSV取込] CSV解析完了:', parsedData.length, '行');
+        console.log(`[売上CSV取込] CSV解析完了: ${parsedData.length} 行 (ソース: ${dataSource})`);
 
         const session = await getServerSession(authOptions);
         if (!session || !session.user) {
             return NextResponse.json({ error: '認証されていません' }, { status: 401 });
         }
 
-        // session.user is typed as { name, email, image } by default
-        // But our authOptions adds { id, role }
         const user = session.user as any;
         const userId = parseInt(user.id, 10);
 
@@ -110,76 +158,101 @@ export async function POST(request: Request) {
             return null;
         };
 
-        // 対象年月に適用される税率を取得（仕様書 第1部 5章準拠）
-        console.log('[売上CSV取込] 税率取得中:', targetYm);
+        // 税率取得（共通）
         const taxRateRecord = await prisma.taxRate.findFirst({
-            where: {
-                startYm: {
-                    lte: targetYm,
-                },
-            },
-            orderBy: {
-                startYm: 'desc',
-            },
+            where: { startYm: { lte: targetYm } },
+            orderBy: { startYm: 'desc' },
         });
 
         if (!taxRateRecord) {
-            console.error('[売上CSV取込] 税率未設定エラー:', targetYm);
             return NextResponse.json({
-                error: `対象年月 ${targetYm} に適用する税率が「税率設定」に登録されていません。` ,
+                error: `対象年月 ${targetYm} に適用する税率が登録されていません。`,
             }, { status: 400 });
         }
 
-        const taxRate = taxRateRecord.rate; // 例: 0.10
-        console.log('[売上CSV取込] 使用税率:', taxRate);
+        const taxRate = taxRateRecord.rate;
 
         const recordsToCreate: any[] = [];
-        // 新商品候補用のデータ構造（仕様書準拠）
         const newProductCandidates: Map<string, { sku: string, name: string | null }> = new Map();
+        const unregisteredAsins: { asin: string, title: string }[] = []; // V1.51追加
 
         console.log('[売上CSV取込] 商品マスタ取得中');
         const allProducts = await prisma.product.findMany();
-        const productMap = new Map(allProducts.map(p => [p.productCode, p]));
+        // 親コードMapとASIN Mapの両方を用意
+        const productMap = new Map((allProducts as any[]).map(p => [p.productCode, p]));
+        const asinMap = new Map((allProducts as any[]).filter(p => p.asin).map(p => [p.asin!, p]));
         console.log('[売上CSV取込] 商品マスタ件数:', allProducts.length);
 
         for (const row of parsedData) {
-            const originalSku = findCol(row, COL_MAPPING.productCode);
-            if (!originalSku) continue;
+            let parentCode: string = '';
+            let productName: string | null = null;
+            let qty: number = 0;
+            let amtInclTax: number = 0;
+            let originalKey: string = ''; // SKU or ASIN
 
-            // SKU → 親コード変換
-            const parentCode = convertSkuToParentCode(originalSku);
-            const productName = findCol(row, COL_MAPPING.productName);
+            if (dataSource === 'Amazon') {
+                const asin = findCol(row, AMAZON_COL_MAPPING.asin);
+                if (!asin) continue;
+                originalKey = asin;
+                productName = findCol(row, AMAZON_COL_MAPPING.title);
 
-            const product = productMap.get(parentCode);
-            if (!product) {
-                // 新商品候補として記録（重複排除）
-                if (!newProductCandidates.has(parentCode)) {
-                    newProductCandidates.set(parentCode, {
-                        sku: originalSku,
-                        name: productName
-                    });
+                // B2B売上を除外（合計 - B2B）
+                const totalQty = parseAmazonNumber(findCol(row, AMAZON_COL_MAPPING.quantity) || '0');
+                const b2bQty = parseAmazonNumber(findCol(row, AMAZON_COL_MAPPING.quantityB2B) || '0');
+                qty = Math.max(0, totalQty - b2bQty);
+
+                const totalAmt = parseAmazonNumber(findCol(row, AMAZON_COL_MAPPING.amount) || '0');
+                const b2bAmt = parseAmazonNumber(findCol(row, AMAZON_COL_MAPPING.amountB2B) || '0');
+                amtInclTax = Math.max(0, totalAmt - b2bAmt);
+
+                const product = asinMap.get(asin);
+                if (!product) {
+                    if (!unregisteredAsins.find(u => u.asin === asin)) {
+                        unregisteredAsins.push({ asin, title: productName || '' });
+                    }
+                    continue;
                 }
-                continue;
+                parentCode = product.productCode;
+                // 管理ステータスチェック（共通）
+                if (product.managementStatus === '管理外' || product.managementStatus === 'unmanaged') {
+                    console.log('[売上CSV取込] 管理外商品をスキップ:', parentCode);
+                    continue;
+                }
+            } else {
+                // NE形式
+                const originalSku = findCol(row, COL_MAPPING.productCode);
+                if (!originalSku) continue;
+                originalKey = originalSku;
+                parentCode = convertSkuToParentCode(originalSku);
+                productName = findCol(row, COL_MAPPING.productName);
+                qty = parseInt(findCol(row, COL_MAPPING.quantity) || '0', 10);
+                amtInclTax = parseFloat(findCol(row, COL_MAPPING.amount) || '0');
+
+                const product = productMap.get(parentCode);
+                if (!product) {
+                    if (!newProductCandidates.has(parentCode)) {
+                        newProductCandidates.set(parentCode, {
+                            sku: originalSku,
+                            name: productName
+                        });
+                    }
+                    continue;
+                }
+                // 管理ステータスチェック（共通）
+                if (product.managementStatus === '管理外' || product.managementStatus === 'unmanaged') {
+                    console.log('[売上CSV取込] 管理外商品をスキップ:', parentCode);
+                    continue;
+                }
             }
-
-            // 管理ステータスチェック（日本語/英語両対応）
-            if (product.managementStatus === '管理外' || product.managementStatus === 'unmanaged') {
-                console.log('[売上CSV取込] 管理外商品をスキップ:', parentCode);
-                continue;
-            }
-
-            const rawDate = findCol(row, COL_MAPPING.date);
-            const dateObj = rawDate ? new Date(rawDate) : new Date();
-
-            const qty = parseInt(findCol(row, COL_MAPPING.quantity) || '0', 10);
-            const amtInclTax = parseFloat(findCol(row, COL_MAPPING.amount) || '0');
 
             if (qty === 0 && amtInclTax === 0) continue;
 
-            // 税込金額 → 税抜金額への変換
-            // 税別 = 税込 ÷ (1 + 税率) を小数第2位で四捨五入
-            const salesExclTaxRaw = amtInclTax / (1 + taxRate);
-            const salesExclTax = Math.round(salesExclTaxRaw * 100) / 100;
+            // 税込金額 → 税抜金額への変換（共通・詳細設計書2-3準拠：整数丸め）
+            const salesExclTax = Math.round(amtInclTax / (1 + taxRate));
+
+            // 商品情報を取得（再度安全に取得）
+            const product = productMap.get(parentCode);
+            if (!product) continue;
 
             const cost = product.costExclTax * qty;
             const gross = salesExclTax - cost;
@@ -187,13 +260,23 @@ export async function POST(request: Request) {
             recordsToCreate.push({
                 productCode: parentCode,
                 periodYm: targetYm,
-                salesDate: dateObj,
+                salesDate: new Date(), // Amazon形式は日付列がないため現在日時（NE形式も同様の運用）
                 quantity: qty,
                 salesAmountExclTax: salesExclTax,
                 costAmountExclTax: cost,
                 grossProfit: gross,
                 salesChannelId: salesChannelId,
                 createdByUserId: userId
+            });
+        }
+
+        // 【V1.51追加】未登録ASINがある場合の警告レスポンス
+        if (dataSource === 'Amazon' && unregisteredAsins.length > 0 && !skipUnregisteredAsins) {
+            console.log('[売上CSV取込] 未登録ASIN検出:', unregisteredAsins.length, '件');
+            return NextResponse.json({
+                success: false,
+                error: 'unregistered_asins',
+                unregisteredAsins
             });
         }
 
@@ -256,11 +339,12 @@ export async function POST(request: Request) {
             }
 
             console.log('[売上CSV取込] 履歴作成中');
-            const history = await tx.importHistory.create({
+            const history = await (tx.importHistory as any).create({
                 data: {
                     importType: 'sales',
                     targetYm: targetYm,
                     importMode: importMode,
+                    dataSource: dataSource, // V1.51追加
                     comment: comment,
                     salesChannelId: salesChannelId,
                     recordCount: recordsToCreate.length,
@@ -286,7 +370,8 @@ export async function POST(request: Request) {
         if (recordsToCreate.length === 0 && skippedCodes.length > 0) {
             return NextResponse.json({
                 success: true,
-                count: 0,
+                importedCount: 0,
+                skippedCount: skippedCodes.length,
                 skippedCodes,
                 message: `マスタ未登録の商品が${skippedCodes.length}件検出されました。「新商品候補一覧」から登録を行ってください。`
             });
@@ -294,7 +379,8 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             success: true,
-            count: recordsToCreate.length,
+            importedCount: recordsToCreate.length,
+            skippedCount: skippedCodes.length,
             skippedCodes
         });
 

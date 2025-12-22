@@ -37,10 +37,24 @@ export async function PUT(
             costExclTax,
             productType,
             managementStatus,
-            categoryId
+            categoryId,
+            asin // V1.51追加
         } = body;
 
-        const product = await prisma.product.update({
+        // ASIN重複チェック
+        if (asin) {
+            const existingProduct = await (prisma.product as any).findFirst({
+                where: {
+                    asin: asin,
+                    NOT: { productCode: params.code }
+                }
+            });
+            if (existingProduct) {
+                return NextResponse.json({ error: 'このASINは既に他の商品に登録されています' }, { status: 400 });
+            }
+        }
+
+        const product = await (prisma.product as any).update({
             where: { productCode: params.code },
             data: {
                 productName,
@@ -49,6 +63,7 @@ export async function PUT(
                 productType,
                 managementStatus,
                 categoryId: categoryId ? Number(categoryId) : null,
+                asin: asin !== undefined ? (asin || null) : undefined, // 空文字はnullとして保存
             },
         });
 

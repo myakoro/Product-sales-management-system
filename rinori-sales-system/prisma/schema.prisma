@@ -42,6 +42,7 @@ model Product {
   productType        String   @map("product_type") // '自社' or '仕入'
   managementStatus   String   @map("management_status") // '管理中' or '管理外'
   categoryId         Int?     @map("category_id")
+  asin               String?  @unique @map("asin") // V1.51追加: Amazon ASIN
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
@@ -184,6 +185,7 @@ model ImportHistory {
   importType       String   @map("import_type") // 'sales' or 'products'
   targetYm         String?  @map("target_ym")
   importMode       String?  @map("import_mode") // 'append' or 'overwrite'
+  dataSource       String?  @map("data_source") // V1.51追加: 'NE' or 'Amazon'
   comment          String?
   salesChannelId   Int?     @map("sales_channel_id")
   recordCount      Int      @map("record_count")

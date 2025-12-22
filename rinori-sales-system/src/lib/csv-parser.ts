@@ -55,7 +55,7 @@ export function convertSkuToParentCode(sku: string): string {
     return cleanSku;
 }
 
-export async function parseSalesCsv(file: File): Promise<SalesCsvRow[]> {
+export async function parseSalesCsv(file: File, isAmazon: boolean = false): Promise<SalesCsvRow[]> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.onload = (event) => {
@@ -71,7 +71,7 @@ export async function parseSalesCsv(file: File): Promise<SalesCsvRow[]> {
                     const decoder = new TextDecoder(encoding);
                     let csvText = decoder.decode(buffer);
 
-                    // Fix for malformed quotes (e.g., "在庫数"" at the end of header or data fields)
+                    // Fix for malformed quotes
                     csvText = csvText.replace(/([^, \t\r\n])""/g, '$1"');
                     csvText = csvText.replace(/([^, \t\r\n])""(\r?\n|$)/g, '$1"$2');
 
@@ -84,23 +84,51 @@ export async function parseSalesCsv(file: File): Promise<SalesCsvRow[]> {
                     results.data.forEach((row: any) => {
                         const findVal = (keys: string[]) => {
                             for (const k of keys) {
-                                if (row[k] !== undefined) return row[k];
+                                if (row[k] !== undefined && row[k] !== null && row[k] !== '') return row[k];
                             }
                             return undefined;
                         };
 
-                        const sku = findVal(['商品コード', '商品ｺｰﾄﾞ', '商品コード（SKU）', 'SKU']);
-                        const name = findVal(['商品名', '商品名称']);
-                        const qty = findVal(['受注数', '数量']);
-                        const amount = findVal(['売上金額（税込）', '金額', '小計']);
+                        if (isAmazon) {
+                            // Amazon形式のパース
+                            const asin = findVal(['（親）ASIN', '(親)ASIN', 'ASIN']);
+                            const title = findVal(['タイトル']);
+                            const totalQtyRaw = findVal(['注文された商品点数']);
+                            const b2bQtyRaw = findVal(['注文点数 - B2B']);
+                            const totalAmtRaw = findVal(['注文商品の売上額']);
+                            const b2bAmtRaw = findVal(['注文商品の売上額 - B2B']);
 
-                        if (sku && qty && amount) {
-                            tempRows.push({
-                                productCode: sku,
-                                productName: name || '',
-                                quantity: parseInt(String(qty).replace(/,/g, ''), 10),
-                                salesAmount税込: parseFloat(String(amount).replace(/,/g, '')),
-                            });
+                            if (asin) {
+                                const totalQty = parseNumericalValue(totalQtyRaw || '0');
+                                const b2bQty = parseNumericalValue(b2bQtyRaw || '0');
+                                const qty = Math.max(0, totalQty - b2bQty);
+
+                                const totalAmt = parseNumericalValue(totalAmtRaw || '0');
+                                const b2bAmt = parseNumericalValue(b2bAmtRaw || '0');
+                                const amt = Math.max(0, totalAmt - b2bAmt);
+
+                                tempRows.push({
+                                    productCode: String(asin), // ASINをコードとして表示
+                                    productName: title || '',
+                                    quantity: qty,
+                                    salesAmount税込: amt,
+                                });
+                            }
+                        } else {
+                            // NE形式のパース
+                            const sku = findVal(['商品コード', '商品ｺｰﾄﾞ', '商品コード（SKU）', 'SKU']);
+                            const name = findVal(['商品名', '商品名称']);
+                            const qty = findVal(['受注数', '数量']);
+                            const amount = findVal(['売上金額（税込）', '金額', '小計']);
+
+                            if (sku) {
+                                tempRows.push({
+                                    productCode: String(sku),
+                                    productName: name || '',
+                                    quantity: parseNumericalValue(qty || '0'),
+                                    salesAmount税込: parseNumericalValue(amount || '0'),
+                                });
+                            }
                         }
                     });
 
@@ -123,3 +151,16 @@ export async function parseSalesCsv(file: File): Promise<SalesCsvRow[]> {
         reader.readAsArrayBuffer(file);
     });
 }
+
+/**
+ * 数値文字列からカンマや通貨記号を除去してパース
+ */
+function parseNumericalValue(value: any): number {
+    if (value === undefined || value === null || value === '') return 0;
+    const str = String(value);
+    // ￥, ¥, カンマを除去
+    const cleaned = str.replace(/[￥¥,]/g, '');
+    const num = parseFloat(cleaned);
+    return isNaN(num) ? 0 : num;
+}
+
