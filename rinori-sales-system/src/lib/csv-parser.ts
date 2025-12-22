@@ -63,7 +63,12 @@ export async function parseSalesCsv(file: File): Promise<SalesCsvRow[]> {
                 const buffer = event.target?.result as ArrayBuffer;
                 // Shift_JIS rendering
                 const decoder = new TextDecoder('shift-jis');
-                const csvText = decoder.decode(buffer);
+                let csvText = decoder.decode(buffer);
+
+                // Fix for malformed quotes (e.g., "在庫数"" at the end of header)
+                // Remove redundant quotes at the end of lines or before commas
+                csvText = csvText.replace(/""(\r?\n|$)/g, '"$1');
+                csvText = csvText.replace(/""/g, '"'); // General fallback for double-double quotes if any
 
                 Papa.parse(csvText, {
                     header: true,
