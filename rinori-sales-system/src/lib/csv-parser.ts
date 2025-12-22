@@ -61,71 +61,60 @@ export async function parseSalesCsv(file: File): Promise<SalesCsvRow[]> {
         reader.onload = (event) => {
             try {
                 const buffer = event.target?.result as ArrayBuffer;
-                // Shift_JIS rendering
-                const decoder = new TextDecoder('shift-jis');
-                let csvText = decoder.decode(buffer);
 
-                // Fix for malformed quotes (e.g., "在庫数"" at the end of header or data fields)
-                // We only replace "" if it's NOT an empty field (i.e., preceded by something other than a comma)
-                // This preserves valid empty fields like ,"", while fixing things like "Value""
-                csvText = csvText.replace(/([^, \t\r\n])""/g, '$1"');
-                // Also handle "" at the end of lines specifically if not caught
-                csvText = csvText.replace(/([^, \t\r\n])""(\r?\n|$)/g, '$1"$2');
+                // Try UTF-8 first, then Shift-JIS
+                const encodings = ['utf-8', 'shift-jis'];
+                let rows: SalesCsvRow[] = [];
+                let success = false;
 
-                Papa.parse(csvText, {
-                    header: true,
-                    skipEmptyLines: true,
-                    complete: (results) => {
-                        const rows: SalesCsvRow[] = [];
-                        if (results.errors.length > 0) {
-                            console.warn("CSV parse errors:", results.errors);
-                        }
+                for (const encoding of encodings) {
+                    const decoder = new TextDecoder(encoding);
+                    let csvText = decoder.decode(buffer);
 
-                        // Mapping columns based on index or header name?
-                        // Spec says:
-                        // 1: 商品コード（SKU）
-                        // 2: 商品名
-                        // 3: 受注数
-                        // 4: 売上金額（税込）
-                        // Ne headers are typically Japanese.
-                        // We can assume standard NE headers or just map by order if headers missing?
-                        // "CSVはヘッダー行を含む" (Spec 1.1)
-                        // Verify header names from user provided sample later.
-                        // For now trust header names in results.meta.fields or map manually?
-                        // Safe approach: map by standard expected headers.
-                        // Common NE headers: "商品コード", "商品名", "受注数", "受注単価"??
-                        // Spec table: "商品コード（SKU）", "商品名", "受注数", "売上金額（税込）"
-                        // But real NE CSV might have different names.
-                        // Let's rely on column INDEX if possible or flexible matching.
-                        // Papaparse with header: true uses header names.
+                    // Fix for malformed quotes (e.g., "在庫数"" at the end of header or data fields)
+                    csvText = csvText.replace(/([^, \t\r\n])""/g, '$1"');
+                    csvText = csvText.replace(/([^, \t\r\n])""(\r?\n|$)/g, '$1"$2');
 
-                        results.data.forEach((row: any) => {
-                            // Helper to find value by potential keys
-                            const findVal = (keys: string[]) => {
-                                for (const k of keys) {
-                                    if (row[k] !== undefined) return row[k];
-                                }
-                                return undefined;
-                            };
+                    const results = Papa.parse(csvText, {
+                        header: true,
+                        skipEmptyLines: true,
+                    });
 
-                            const sku = findVal(['商品コード', '商品ｺｰﾄﾞ', '商品コード（SKU）', 'SKU']);
-                            const name = findVal(['商品名', '商品名称']);
-                            const qty = findVal(['受注数', '数量']);
-                            const amount = findVal(['売上金額（税込）', '金額', '小計']);
-
-                            if (sku && qty && amount) {
-                                rows.push({
-                                    productCode: sku,
-                                    productName: name || '',
-                                    quantity: parseInt(String(qty).replace(/,/g, ''), 10),
-                                    salesAmount税込: parseFloat(String(amount).replace(/,/g, '')),
-                                });
+                    const tempRows: SalesCsvRow[] = [];
+                    results.data.forEach((row: any) => {
+                        const findVal = (keys: string[]) => {
+                            for (const k of keys) {
+                                if (row[k] !== undefined) return row[k];
                             }
-                        });
-                        resolve(rows);
-                    },
-                    error: (err: any) => reject(err),
-                });
+                            return undefined;
+                        };
+
+                        const sku = findVal(['商品コード', '商品ｺｰﾄﾞ', '商品コード（SKU）', 'SKU']);
+                        const name = findVal(['商品名', '商品名称']);
+                        const qty = findVal(['受注数', '数量']);
+                        const amount = findVal(['売上金額（税込）', '金額', '小計']);
+
+                        if (sku && qty && amount) {
+                            tempRows.push({
+                                productCode: sku,
+                                productName: name || '',
+                                quantity: parseInt(String(qty).replace(/,/g, ''), 10),
+                                salesAmount税込: parseFloat(String(amount).replace(/,/g, '')),
+                            });
+                        }
+                    });
+
+                    if (tempRows.length > 0) {
+                        rows = tempRows;
+                        success = true;
+                        break;
+                    }
+                }
+
+                if (!success) {
+                    console.warn("Could not find data with UTF-8 or Shift-JIS parsing.");
+                }
+                resolve(rows);
             } catch (e) {
                 reject(e);
             }
