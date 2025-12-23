@@ -69,11 +69,7 @@ export async function parseSalesCsv(file: File, isAmazon: boolean = false): Prom
 
                 for (const encoding of encodings) {
                     const decoder = new TextDecoder(encoding);
-                    let csvText = decoder.decode(buffer);
-
-                    // Fix for malformed quotes
-                    csvText = csvText.replace(/([^, \t\r\n])""/g, '$1"');
-                    csvText = csvText.replace(/([^, \t\r\n])""(\r?\n|$)/g, '$1"$2');
+                    const csvText = decoder.decode(buffer);
 
                     const results = Papa.parse(csvText, {
                         header: true,
