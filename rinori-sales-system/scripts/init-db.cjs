@@ -64,10 +64,32 @@ function resolveDbPath(databaseUrl) {
                 if (!exists) missing.push(t);
             }
 
-            if (missing.length === 0) {
-                console.log("✅ Required tables exist. Skipping initialization.");
+            // 3) V1.51マイグレーションチェック: products テーブルに asin カラムがあるか
+            const hasAsinColumn = await new Promise((resolve) => {
+                db.all(
+                    `PRAGMA table_info(products)`,
+                    [],
+                    (err, rows) => {
+                        if (err) {
+                            console.error("⚠️  Query error:", err.message);
+                            resolve(false);
+                        } else {
+                            const asinCol = rows.find(r => r.name === 'asin');
+                            resolve(!!asinCol);
+                        }
+                    }
+                );
+            });
+
+            if (missing.length === 0 && hasAsinColumn) {
+                console.log("✅ Required tables exist and schema is up-to-date. Skipping initialization.");
             } else {
-                console.log(`❌ Missing tables: ${missing.join(", ")}`);
+                if (missing.length > 0) {
+                    console.log(`❌ Missing tables: ${missing.join(", ")}`);
+                }
+                if (!hasAsinColumn) {
+                    console.log(`❌ Schema outdated: 'products' table missing 'asin' column`);
+                }
                 needsInit = true;
             }
         } finally {
