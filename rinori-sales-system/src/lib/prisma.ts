@@ -12,11 +12,10 @@ const datasourceUrl = process.env.RUNTIME_DATABASE_URL ?? process.env.DATABASE_U
 export const prisma =
     globalForPrisma.prisma ??
     new PrismaClient(
-        // 環境変数が設定されていない場合は従来どおりデフォルト設定で生成
-        datasourceUrl
+        process.env.RUNTIME_DATABASE_URL
             ? {
                 datasources: {
-                    db: { url: datasourceUrl }
+                    db: { url: process.env.RUNTIME_DATABASE_URL }
                 }
             }
             : undefined
