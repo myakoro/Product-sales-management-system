@@ -3,86 +3,159 @@
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 
+type SettingItem = {
+    title: string;
+    description: string;
+    href: string;
+    icon: string;
+    color: string;
+};
+
 export default function SettingsPage() {
     const { data: session } = useSession();
     const user = session?.user as any;
 
-    return (
-        <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', marginBottom: '2rem' }}>設定</h1>
+    const generalSettings: SettingItem[] = [
+        {
+            title: 'アカウント設定',
+            description: 'ユーザー名、パスワードの変更',
+            href: '/settings/account',
+            icon: '👤',
+            color: 'from-blue-400 to-blue-600'
+        }
+    ];
 
-            <div style={{ display: 'grid', gap: '1.5rem' }}>
+    const masterSettings: SettingItem[] = [
+        {
+            title: '販路マスタ',
+            description: '販売チャネルの登録・管理',
+            href: '/settings/sales-channels',
+            icon: '🏪',
+            color: 'from-green-400 to-emerald-600'
+        },
+        {
+            title: '広告カテゴリー',
+            description: '広告費の分類カテゴリー管理',
+            href: '/ad-expenses?tab=categories',
+            icon: '📢',
+            color: 'from-orange-400 to-red-600'
+        },
+        {
+            title: '除外キーワード設定',
+            description: '売上取込時の除外ルール設定',
+            href: '/settings/exclusion-keywords',
+            icon: '🚫',
+            color: 'from-red-400 to-rose-600'
+        },
+        {
+            title: '商品予算設定',
+            description: '商品別の販売目標数量設定',
+            href: '/budget',
+            icon: '🎯',
+            color: 'from-purple-400 to-violet-600'
+        }
+    ];
+
+    const systemSettings: SettingItem[] = [
+        {
+            title: 'ユーザー管理',
+            description: 'システムユーザーの追加・編集',
+            href: '/settings/users',
+            icon: '👥',
+            color: 'from-cyan-400 to-blue-600'
+        },
+        {
+            title: '税率設定',
+            description: '消費税率の設定',
+            href: '/settings/tax-rates',
+            icon: '💹',
+            color: 'from-indigo-400 to-purple-600'
+        },
+        {
+            title: 'データエクスポート',
+            description: 'データベースのバックアップ',
+            href: '/settings/export',
+            icon: '📤',
+            color: 'from-teal-400 to-cyan-600'
+        },
+        {
+            title: 'データ復元',
+            description: 'バックアップからの復元',
+            href: '/settings/import',
+            icon: '📥',
+            color: 'from-pink-400 to-rose-600'
+        }
+    ];
+
+    const renderSettingCard = (item: SettingItem) => (
+        <Link
+            key={item.href}
+            href={item.href}
+            className="group block bg-white rounded-xl shadow-lg border-2 border-neutral-200 p-6 hover:shadow-2xl hover:scale-[1.03] transition-all duration-300"
+        >
+            <div className="flex items-start gap-4">
+                <div className={`w-14 h-14 bg-gradient-to-br ${item.color} rounded-xl flex items-center justify-center text-2xl shadow-md group-hover:scale-110 transition-transform flex-shrink-0`}>
+                    {item.icon}
+                </div>
+                <div className="flex-1 min-w-0">
+                    <h3 className="text-lg font-bold text-[#00214d] mb-1 group-hover:text-[#d4af37] transition-colors">
+                        {item.title}
+                    </h3>
+                    <p className="text-sm text-neutral-600 line-clamp-2">
+                        {item.description}
+                    </p>
+                </div>
+                <div className="text-neutral-400 group-hover:text-[#d4af37] group-hover:translate-x-1 transition-all text-xl flex-shrink-0">
+                    →
+                </div>
+            </div>
+        </Link>
+    );
+
+    return (
+        <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-50">
+            <main className="max-w-[1400px] mx-auto px-6 py-8">
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold text-[#00214d] mb-2">設定</h1>
+                    <p className="text-neutral-600">システムの各種設定を管理します</p>
+                </div>
+
                 {/* 一般設定 */}
-                <section style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                    <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>一般</h2>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <li>
-                            <Link href="/settings/account" style={{ color: '#0070f3', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span>アカウント設定</span>
-                                <span style={{ color: '#ccc' }}>&gt;</span>
-                            </Link>
-                        </li>
-                    </ul>
+                <section className="mb-10">
+                    <h2 className="text-xl font-bold text-[#00214d] mb-4 flex items-center gap-2">
+                        <span className="w-1 h-6 bg-[#d4af37] rounded-full"></span>
+                        一般設定
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {generalSettings.map(renderSettingCard)}
+                    </div>
                 </section>
 
                 {/* マスター管理 */}
-                <section style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                    <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>マスター管理</h2>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <li>
-                            <Link href="/settings/sales-channels" style={{ color: '#0070f3', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span>販路マスタ</span>
-                                <span style={{ color: '#ccc' }}>&gt;</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/ad-expenses?tab=categories" style={{ color: '#0070f3', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span>広告カテゴリー</span>
-                                <span style={{ color: '#ccc' }}>&gt;</span>
-                            </Link>
-                        </li>
-                        <li>
-                            <Link href="/settings/exclusion-keywords" style={{ color: '#0070f3', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span>除外キーワード設定</span>
-                                <span style={{ color: '#ccc' }}>&gt;</span>
-                            </Link>
-                        </li>
-                    </ul>
+                <section className="mb-10">
+                    <h2 className="text-xl font-bold text-[#00214d] mb-4 flex items-center gap-2">
+                        <span className="w-1 h-6 bg-[#d4af37] rounded-full"></span>
+                        マスター管理
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {masterSettings.map(renderSettingCard)}
+                    </div>
                 </section>
 
                 {/* システム管理 (マスター権限のみ) */}
                 {user?.role === 'master' && (
-                    <section style={{ backgroundColor: 'white', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-                        <h2 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '1rem', borderBottom: '1px solid #eee', paddingBottom: '0.5rem' }}>システム管理</h2>
-                        <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                            <li>
-                                <Link href="/settings/users" style={{ color: '#0070f3', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span>ユーザー管理</span>
-                                    <span style={{ color: '#ccc' }}>&gt;</span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/settings/tax-rates" style={{ color: '#0070f3', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span>税率設定</span>
-                                    <span style={{ color: '#ccc' }}>&gt;</span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/settings/export" style={{ color: '#0070f3', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span>データエクスポート</span>
-                                    <span style={{ color: '#ccc' }}>&gt;</span>
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/settings/import" style={{ color: '#0070f3', textDecoration: 'none', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span>データ復元</span>
-                                    <span style={{ color: '#ccc' }}>&gt;</span>
-                                </Link>
-                            </li>
-                        </ul>
+                    <section>
+                        <h2 className="text-xl font-bold text-[#00214d] mb-4 flex items-center gap-2">
+                            <span className="w-1 h-6 bg-[#d4af37] rounded-full"></span>
+                            システム管理
+                            <span className="ml-2 px-3 py-1 bg-[#d4af37] text-[#00214d] rounded-full text-xs font-bold">マスター限定</span>
+                        </h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {systemSettings.map(renderSettingCard)}
+                        </div>
                     </section>
                 )}
-            </div>
+            </main>
         </div>
     );
 }

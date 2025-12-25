@@ -139,9 +139,9 @@ export default function SalesImportPage() {
 
                 <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-4">
                     <p className="text-sm text-blue-800">
-                        ネクストエンジンの売上CSVをアップロードすると、月次PL・商品別PL・予算vs実績が即時更新されます。
+                        ネクストエンジン・Amazonの売上CSVをアップロードすると、月次PL・商品別PL分析・商品予算vs商品実績が即時更新されます。
                         <br />
-                        ※CSVには「商品コード（SKU）」「商品名」「受注日」「受注数」「売上金額（税込）」が含まれている必要があります。
+                        ※CSVの項目に基づき、親コード変換および除外キーワードチェックが行われます。
                     </p>
                 </div>
 

@@ -14,15 +14,8 @@ export default function PeriodNavigator({ startYm, endYm, onChange, className = 
         const startDate = new Date(start + "-01");
         const endDate = new Date(end + "-01");
 
-        // Calculate duration in months
-        const monthsDiff = (endDate.getFullYear() - startDate.getFullYear()) * 12 + (endDate.getMonth() - startDate.getMonth()) + 1;
-
-        // Shift amount: If expected range (duration > 1), shift by duration. If single month, shift by 1.
-        // Wait, requirement example: "10~12 (3 months) -> 1~3". This is a shift by 3 months.
-        // "10 (1 month) -> 11". Shift by 1.
-        // So shift amount = monthsDiff.
-
-        const shiftMonth = monthsDiff * direction;
+        // Shift amount: Requirement is now "always shift by 1 month"
+        const shiftMonth = direction;
 
         const newStart = new Date(startDate);
         newStart.setMonth(newStart.getMonth() + shiftMonth);

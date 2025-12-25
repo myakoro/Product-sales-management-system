@@ -46,8 +46,13 @@ function getProductCodePriority(code: string): number {
 type SortKey = keyof ProductResult;
 
 export default function BudgetVsActualPage() {
-    const [startYm, setStartYm] = useState('');
-    const [endYm, setEndYm] = useState('');
+    const getDateString = (date: Date) => date.toISOString().slice(0, 7);
+    const lastMonthDate = new Date();
+    lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
+    const lastMonthStr = getDateString(lastMonthDate);
+
+    const [startYm, setStartYm] = useState(lastMonthStr);
+    const [endYm, setEndYm] = useState(lastMonthStr);
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState<ProductResult[]>([]);
     const [summary, setSummary] = useState<Summary | null>(null);
@@ -86,15 +91,20 @@ export default function BudgetVsActualPage() {
     };
 
     const getAchievementColor = (rate: number): string => {
-        if (rate >= 100) return '#28a745'; // 緑
-        if (rate >= 80) return '#ffc107'; // 黄
-        return '#dc3545'; // 赤
+        if (rate >= 100) return '#28a745';
+        if (rate >= 80) return '#ffc107';
+        return '#dc3545';
     };
 
     const getAchievementBgColor = (rate: number): string => {
-        if (rate >= 100) return '#d4edda'; // 薄緑
-        if (rate >= 80) return '#fff3cd'; // 薄黄
-        return '#f8d7da'; // 薄赤
+        if (rate >= 100) return '#d4edda';
+        if (rate >= 80) return '#fff3cd';
+        return '#f8d7da';
+    };
+
+    const getSortIcon = (key: SortKey) => {
+        if (sortKey !== key) return '⇅';
+        return sortDirection === 'desc' ? '↓' : '↑';
     };
 
     const handleSort = (key: SortKey) => {
@@ -296,118 +306,145 @@ export default function BudgetVsActualPage() {
                                 予算が設定されている商品がありません
                             </div>
                         ) : (
-                            <div style={{ overflowX: 'auto' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '1.1rem' }}>
-                                    <thead>
-                                        <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
-                                            <th
-                                                style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', cursor: 'pointer' }}
-                                                onClick={() => handleSort('productCode')}
-                                            >
-                                                商品コード
+                            <div className="overflow-x-auto rounded-xl border-2 border-neutral-200">
+                                <table className="w-full text-sm">
+                                    <thead className="bg-gradient-to-r from-[#00214d] to-[#002855] text-white">
+                                        <tr>
+                                            <th className="px-4 py-4 text-left cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('productCode')}>
+                                                <div className="flex items-center gap-2">
+                                                    <span>商品コード</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('productCode')}</span>
+                                                </div>
                                             </th>
-                                            <th
-                                                style={{ padding: '0.75rem', textAlign: 'left', fontWeight: '600', cursor: 'pointer' }}
-                                                onClick={() => handleSort('productName')}
-                                            >
-                                                商品名
+                                            <th className="px-4 py-4 text-left cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('productName')}>
+                                                <div className="flex items-center gap-2">
+                                                    <span>商品名</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('productName')}</span>
+                                                </div>
                                             </th>
-                                            <th
-                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
-                                                onClick={() => handleSort('budgetQuantity')}
-                                            >
-                                                予算数量
+                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('budgetQuantity')}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <span>予算数量</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('budgetQuantity')}</span>
+                                                </div>
                                             </th>
-                                            <th
-                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
-                                                onClick={() => handleSort('actualQuantity')}
-                                            >
-                                                実績数量
+                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('actualQuantity')}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <span>実績数量</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('actualQuantity')}</span>
+                                                </div>
                                             </th>
-                                            <th
-                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
-                                                onClick={() => handleSort('quantityAchievementRate')}
-                                            >
-                                                数量達成率
+                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('quantityAchievementRate')}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <span>数量達成率</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('quantityAchievementRate')}</span>
+                                                </div>
                                             </th>
-                                            <th
-                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
-                                                onClick={() => handleSort('budgetSales')}
-                                            >
-                                                予算売上
+                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('budgetSales')}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <span>予算売上</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('budgetSales')}</span>
+                                                </div>
                                             </th>
-                                            <th
-                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
-                                                onClick={() => handleSort('actualSales')}
-                                            >
-                                                実績売上
+                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('actualSales')}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <span>実績売上</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('actualSales')}</span>
+                                                </div>
                                             </th>
-                                            <th
-                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
-                                                onClick={() => handleSort('salesAchievementRate')}
-                                            >
-                                                売上達成率
+                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('salesAchievementRate')}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <span>売上達成率</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('salesAchievementRate')}</span>
+                                                </div>
                                             </th>
-                                            <th
-                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
-                                                onClick={() => handleSort('budgetGrossProfit')}
-                                            >
-                                                予算粗利
+                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('budgetGrossProfit')}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <span>予算粗利</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('budgetGrossProfit')}</span>
+                                                </div>
                                             </th>
-                                            <th
-                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
-                                                onClick={() => handleSort('actualGrossProfit')}
-                                            >
-                                                実績粗利
+                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('actualGrossProfit')}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <span>実績粗利</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('actualGrossProfit')}</span>
+                                                </div>
                                             </th>
-                                            <th
-                                                style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', cursor: 'pointer' }}
-                                                onClick={() => handleSort('grossProfitAchievementRate')}
-                                            >
-                                                粗利達成率
+                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('grossProfitAchievementRate')}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <span>粗利達成率</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('grossProfitAchievementRate')}</span>
+                                                </div>
                                             </th>
                                         </tr>
                                     </thead>
-                                    <tbody>
+                                    <tbody className="divide-y divide-neutral-100">
                                         {sortedProducts.map((product) => (
-                                            <tr key={product.productCode} style={{ borderBottom: '1px solid #eee' }}>
-                                                <td style={{ padding: '0.75rem', fontWeight: '500' }}>{product.productCode}</td>
-                                                <td style={{ padding: '0.75rem' }}>{product.productName}</td>
-                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>{product.budgetQuantity.toLocaleString()}</td>
-                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>{product.actualQuantity.toLocaleString()}</td>
-                                                <td style={{
-                                                    padding: '0.75rem',
-                                                    textAlign: 'right',
-                                                    fontWeight: '600',
-                                                    backgroundColor: getAchievementBgColor(product.quantityAchievementRate),
-                                                    color: getAchievementColor(product.quantityAchievementRate),
-                                                    fontSize: '1.15rem'
-                                                }}>
-                                                    {product.quantityAchievementRate.toFixed(1)}%
+                                            <tr key={product.productCode} className="hover:bg-neutral-50 transition-colors">
+                                                <td className="px-4 py-4 font-mono font-semibold text-[#00214d]">{product.productCode}</td>
+                                                <td className="px-4 py-4 text-neutral-700">{product.productName}</td>
+                                                <td className="px-4 py-4 text-right text-neutral-600">{product.budgetQuantity.toLocaleString()}</td>
+                                                <td className="px-4 py-4 text-right font-semibold text-neutral-800">{product.actualQuantity.toLocaleString()}</td>
+                                                <td className="px-4 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">
+                                                            <div 
+                                                                className={`h-full transition-all duration-500 ${
+                                                                    product.quantityAchievementRate >= 100 ? 'bg-green-500' :
+                                                                    product.quantityAchievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
+                                                                }`}
+                                                                style={{ width: `${Math.min(product.quantityAchievementRate, 100)}%` }}
+                                                            />
+                                                        </div>
+                                                        <span className={`font-bold text-sm ${
+                                                            product.quantityAchievementRate >= 100 ? 'text-green-600' :
+                                                            product.quantityAchievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
+                                                        }`}>
+                                                            {product.quantityAchievementRate.toFixed(1)}%
+                                                        </span>
+                                                    </div>
                                                 </td>
-                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>¥{Math.round(product.budgetSales).toLocaleString()}</td>
-                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>¥{Math.round(product.actualSales).toLocaleString()}</td>
-                                                <td style={{
-                                                    padding: '0.75rem',
-                                                    textAlign: 'right',
-                                                    fontWeight: '600',
-                                                    backgroundColor: getAchievementBgColor(product.salesAchievementRate),
-                                                    color: getAchievementColor(product.salesAchievementRate),
-                                                    fontSize: '1.15rem'
-                                                }}>
-                                                    {product.salesAchievementRate.toFixed(1)}%
+                                                <td className="px-4 py-4 text-right text-neutral-600">¥{Math.round(product.budgetSales).toLocaleString()}</td>
+                                                <td className="px-4 py-4 text-right font-semibold text-neutral-800">¥{Math.round(product.actualSales).toLocaleString()}</td>
+                                                <td className="px-4 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">
+                                                            <div 
+                                                                className={`h-full transition-all duration-500 ${
+                                                                    product.salesAchievementRate >= 100 ? 'bg-green-500' :
+                                                                    product.salesAchievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
+                                                                }`}
+                                                                style={{ width: `${Math.min(product.salesAchievementRate, 100)}%` }}
+                                                            />
+                                                        </div>
+                                                        <span className={`font-bold text-sm ${
+                                                            product.salesAchievementRate >= 100 ? 'text-green-600' :
+                                                            product.salesAchievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
+                                                        }`}>
+                                                            {product.salesAchievementRate.toFixed(1)}%
+                                                        </span>
+                                                    </div>
                                                 </td>
-                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>¥{Math.round(product.budgetGrossProfit).toLocaleString()}</td>
-                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>¥{Math.round(product.actualGrossProfit).toLocaleString()}</td>
-                                                <td style={{
-                                                    padding: '0.75rem',
-                                                    textAlign: 'right',
-                                                    fontWeight: '600',
-                                                    backgroundColor: getAchievementBgColor(product.grossProfitAchievementRate),
-                                                    color: getAchievementColor(product.grossProfitAchievementRate),
-                                                    fontSize: '1.15rem'
-                                                }}>
-                                                    {product.grossProfitAchievementRate.toFixed(1)}%
+                                                <td className="px-4 py-4 text-right text-neutral-600">¥{Math.round(product.budgetGrossProfit).toLocaleString()}</td>
+                                                <td className="px-4 py-4 text-right font-semibold text-neutral-800">¥{Math.round(product.actualGrossProfit).toLocaleString()}</td>
+                                                <td className="px-4 py-4 text-right">
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">
+                                                            <div 
+                                                                className={`h-full transition-all duration-500 ${
+                                                                    product.grossProfitAchievementRate >= 100 ? 'bg-green-500' :
+                                                                    product.grossProfitAchievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
+                                                                }`}
+                                                                style={{ width: `${Math.min(product.grossProfitAchievementRate, 100)}%` }}
+                                                            />
+                                                        </div>
+                                                        <span className={`font-bold text-sm ${
+                                                            product.grossProfitAchievementRate >= 100 ? 'text-green-600' :
+                                                            product.grossProfitAchievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
+                                                        }`}>
+                                                            {product.grossProfitAchievementRate.toFixed(1)}%
+                                                        </span>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         ))}

@@ -257,7 +257,7 @@ export default function BudgetPage() {
             </header>
 
             <main className="max-w-[1600px] mx-auto px-6 py-8">
-                <h2 className="text-2xl font-semibold mb-6">予算設定</h2>
+                <h2 className="text-2xl font-semibold mb-6">商品予算設定</h2>
 
                 {message && (
                     <div className={`p-4 mb-4 rounded ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>

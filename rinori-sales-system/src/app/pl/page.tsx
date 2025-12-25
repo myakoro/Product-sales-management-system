@@ -154,7 +154,7 @@ export default function PlPage() {
                 <div className="flex justify-between items-end mb-6">
                     <h2 className="text-2xl font-semibold">損益計算書 (PL)</h2>
                     <Link href="/pl/products" className="text-primary hover:underline text-sm font-medium">
-                        商品別PLはこちら &rarr;
+                        商品別PL分析はこちら &rarr;
                     </Link>
                 </div>
 
