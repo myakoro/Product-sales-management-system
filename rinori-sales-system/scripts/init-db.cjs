@@ -43,7 +43,7 @@ function resolveDbPath(databaseUrl) {
 
         try {
             // 2) 必須テーブルの存在確認
-            const mustHaveTables = ["sales_channels", "ad_categories", "users", "exclusion_keywords"];
+            const mustHaveTables = ["sales_channels", "ad_categories", "users", "exclusion_keywords", "ad_budgets"];
             const missing = [];
 
             for (const t of mustHaveTables) {
