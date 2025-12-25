@@ -333,7 +333,7 @@ export default function HomePage() {
                                 </li>
                                 <li>
                                     <Link href="/budget/vs-actual" style={{ display: 'block', color: '#0070f3', textDecoration: 'none', fontSize: '1.1rem', padding: '1rem 1.5rem', border: '1px solid #e5e7eb', borderRadius: '8px', textAlign: 'center', backgroundColor: 'white', transition: 'all 0.2s' }}>
-                                        予算 vs 実績
+                                        商品予算 vs 商品実績
                                     </Link>
                                 </li>
                                 <li>

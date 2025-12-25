@@ -3,14 +3,22 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 
+// 商品コードの並び順を制御するための優先度関数
+function getProductCodePriority(code: string): number {
+    if (code.startsWith('RINO-FR')) return 1;
+    if (code.startsWith('RINOBG')) return 2;
+    if (code.startsWith('RINO-SY')) return 3;
+    return 4;
+}
+
 export default function ProductPLPage() {
     const [startYm, setStartYm] = useState("2025-10");
     const [endYm, setEndYm] = useState("2025-10");
     const [typeFilter, setTypeFilter] = useState("all");
     const [plData, setPlData] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [sortKey, setSortKey] = useState("sales");
-    const [sortDesc, setSortDesc] = useState(true);
+    const [sortKey, setSortKey] = useState("productCode"); // Default sort key changed
+    const [sortDesc, setSortDesc] = useState(false); // Default asc for product code
     const [channels, setChannels] = useState<{ id: number, name: string }[]>([]);
     const [salesChannelId, setSalesChannelId] = useState("all");
 
@@ -54,6 +62,15 @@ export default function ProductPLPage() {
     };
 
     const sortedData = [...plData].sort((a, b) => {
+        if (sortKey === 'productCode') {
+            const pa = getProductCodePriority(a.productCode);
+            const pb = getProductCodePriority(b.productCode);
+            if (pa !== pb) {
+                return sortDesc ? pb - pa : pa - pb;
+            }
+            return sortDesc ? b.productCode.localeCompare(a.productCode) : a.productCode.localeCompare(b.productCode);
+        }
+
         const valA = a[sortKey];
         const valB = b[sortKey];
         if (typeof valA === 'string') {

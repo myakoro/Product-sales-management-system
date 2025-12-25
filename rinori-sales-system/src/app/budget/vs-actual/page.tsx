@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import PeriodNavigator from '@/components/PeriodNavigator';
 
 type ProductResult = {
     productCode: string;
@@ -146,7 +147,7 @@ export default function BudgetVsActualPage() {
                 </Link>
             </div>
 
-            <h1 style={{ marginBottom: '2rem' }}>予算 vs 実績 (SC-11)</h1>
+            <h1 style={{ marginBottom: '2rem' }}>商品予算 vs 商品実績 (SC-11)</h1>
 
             <form onSubmit={handleSubmit} style={{
                 backgroundColor: 'white',
@@ -160,41 +161,20 @@ export default function BudgetVsActualPage() {
                 </h2>
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '1rem', alignItems: 'end' }}>
-                    <div>
+                    <div style={{ gridColumn: '1 / 3' }}>
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                            開始年月 <span style={{ color: 'red' }}>*</span>
+                            期間設定 <span style={{ color: 'red' }}>*</span>
                         </label>
-                        <input
-                            type="month"
-                            value={startYm}
-                            onChange={(e) => setStartYm(e.target.value)}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '0.5rem',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px'
+                        <PeriodNavigator
+                            startYm={startYm}
+                            endYm={endYm}
+                            onChange={(start, end) => {
+                                setStartYm(start);
+                                setEndYm(end);
                             }}
                         />
                     </div>
 
-                    <div>
-                        <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                            終了年月 <span style={{ color: 'red' }}>*</span>
-                        </label>
-                        <input
-                            type="month"
-                            value={endYm}
-                            onChange={(e) => setEndYm(e.target.value)}
-                            required
-                            style={{
-                                width: '100%',
-                                padding: '0.5rem',
-                                border: '1px solid #ddd',
-                                borderRadius: '4px'
-                            }}
-                        />
-                    </div>
 
                     <button
                         type="submit"

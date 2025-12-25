@@ -208,6 +208,16 @@ model NewProductCandidate {
   status      String   @default("pending") // 'pending', 'registered', 'ignored'
   detectedAt  DateTime @default(now()) @map("detected_at")
 
-  @@unique([productCode, sampleSku])
   @@map("new_product_candidates")
 }
+
+// v1.52 除外キーワード
+model ExclusionKeyword {
+  id        Int      @id @default(autoincrement())
+  keyword   String   @unique
+  matchType String   @default("startsWith") @map("match_type") // 'startsWith' or 'contains'
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("exclusion_keywords")
+}
+

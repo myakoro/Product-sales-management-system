@@ -1,11 +1,13 @@
-
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-export async function GET() {
+export async function GET(request: Request) {
+    const { searchParams } = new URL(request.url);
+    const status = searchParams.get('status') || 'pending';
+
     try {
         const candidates = await prisma.newProductCandidate.findMany({
-            where: { status: 'pending' },
+            where: { status: status },
             orderBy: { detectedAt: 'desc' }
         });
         return NextResponse.json(candidates);

@@ -181,7 +181,15 @@ export async function POST(request: Request) {
         // 親コードMapとASIN Mapの両方を用意
         const productMap = new Map((allProducts as any[]).map(p => [p.productCode, p]));
         const asinMap = new Map((allProducts as any[]).filter(p => p.asin).map(p => [p.asin!, p]));
-        console.log('[売上CSV取込] 商品マスタ件数:', allProducts.length);
+
+        // 【v1.52追加】除外キーワード取得
+        console.log('[売上CSV取込] 除外キーワード取得中');
+        const exclusionKeywords = await prisma.exclusionKeyword.findMany();
+        console.log('[売上CSV取込] 商品マスタ件数:', allProducts.length, ' / 除外ルール:', exclusionKeywords.length);
+
+        let excludedCount = 0;
+        const excludedLogs: any[] = [];
+
 
         for (const row of parsedData) {
             let parentCode: string = '';
@@ -195,6 +203,17 @@ export async function POST(request: Request) {
                 if (!asin) continue;
                 originalKey = asin;
                 productName = findCol(row, AMAZON_COL_MAPPING.title);
+
+                // 【v1.52追加】除外チェック (Amazon)
+                const exclusionMatch = exclusionKeywords.find(k =>
+                    k.matchType === 'startsWith' ? originalKey.startsWith(k.keyword) : originalKey.includes(k.keyword)
+                );
+                if (exclusionMatch) {
+                    excludedCount++;
+                    excludedLogs.push({ key: originalKey, rule: exclusionMatch.keyword });
+                    // console.log(`[売上CSV取込] 除外ルール適用: ${originalKey} (ルール: ${exclusionMatch.keyword})`);
+                    continue;
+                }
 
                 // B2B売上を除外（合計 - B2B）
                 const totalQty = parseAmazonNumber(findCol(row, AMAZON_COL_MAPPING.quantity) || '0');
@@ -223,6 +242,19 @@ export async function POST(request: Request) {
                 const originalSku = findCol(row, COL_MAPPING.productCode);
                 if (!originalSku) continue;
                 originalKey = originalSku;
+
+                // 【v1.52追加】除外チェック (NE)
+                // SKU変換前にチェック
+                const exclusionMatch = exclusionKeywords.find(k =>
+                    k.matchType === 'startsWith' ? originalKey.startsWith(k.keyword) : originalKey.includes(k.keyword)
+                );
+                if (exclusionMatch) {
+                    excludedCount++;
+                    excludedLogs.push({ key: originalKey, rule: exclusionMatch.keyword });
+                    // console.log(`[売上CSV取込] 除外ルール適用: ${originalKey} (ルール: ${exclusionMatch.keyword})`);
+                    continue;
+                }
+
                 parentCode = convertSkuToParentCode(originalSku);
                 productName = findCol(row, COL_MAPPING.productName);
                 qty = parseInt(findCol(row, COL_MAPPING.quantity) || '0', 10);
@@ -282,8 +314,10 @@ export async function POST(request: Request) {
 
         console.log('[売上CSV取込] データ準備完了:', {
             validRecords: recordsToCreate.length,
-            newCandidates: newProductCandidates.size
+            newCandidates: newProductCandidates.size,
+            excludedCount: excludedCount
         });
+
 
         console.log('[売上CSV取込] トランザクション開始');
         await prisma.$transaction(async (tx) => {
@@ -381,8 +415,10 @@ export async function POST(request: Request) {
             success: true,
             importedCount: recordsToCreate.length,
             skippedCount: skippedCodes.length,
+            excludedCount: excludedCount, // v1.52追加
             skippedCodes
         });
+
 
     } catch (error: any) {
         console.error('[売上CSV取込] エラー発生:', error);

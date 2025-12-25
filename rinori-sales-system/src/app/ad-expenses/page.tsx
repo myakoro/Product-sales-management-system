@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import DateNavigator from "@/components/DateNavigator";
 
 // Types
 type AdCategory = {
@@ -62,13 +63,27 @@ function AdExpensesContent() {
     // --- Initial Load ---
     useEffect(() => {
         fetchCategories();
-        setDate(`${month}-01`);
+        fetchCategories();
+        // Initial date set will be handled by the effect on 'month'
+        const today = new Date();
+        const currentMonth = today.toISOString().slice(0, 7);
+        if (month === currentMonth) {
+            setDate(today.toISOString().slice(0, 10));
+        } else {
+            setDate(`${month}-01`);
+        }
     }, []);
 
     useEffect(() => {
         if (activeTab === 'expenses') {
             fetchExpenses();
-            if (!date.startsWith(month)) {
+            // If selected month is current month, set to today, otherwise 1st of month
+            const today = new Date();
+            const currentMonth = today.toISOString().slice(0, 7);
+
+            if (month === currentMonth) {
+                setDate(today.toISOString().slice(0, 10));
+            } else if (!date.startsWith(month)) {
                 setDate(`${month}-01`);
             }
         } else {
@@ -337,12 +352,10 @@ function AdExpensesContent() {
                             <div className="flex justify-between items-center mb-4">
                                 <h2 className="text-xl font-bold">広告費一覧</h2>
                                 <div className="flex items-center gap-2">
-                                    <label className="text-lg font-medium">対象月</label>
-                                    <input
-                                        type="month"
-                                        value={month}
-                                        onChange={(e) => setMonth(e.target.value)}
-                                        className="px-3 py-1.5 border border-gray-300 rounded text-lg"
+                                    <DateNavigator
+                                        date={month}
+                                        onChange={setMonth}
+                                        label="対象月"
                                     />
                                 </div>
                             </div>

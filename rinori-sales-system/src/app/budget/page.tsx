@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import PeriodNavigator from "@/components/PeriodNavigator";
 
 // 月のリストを生成（開始月から終了月まで）
 function generateMonths(startYm: string, endYm: string) {
@@ -267,24 +268,18 @@ export default function BudgetPage() {
                 {/* 期間設定・検索エリア */}
                 <div className="bg-white border border-gray-200 rounded p-4 mb-4">
                     <div className="grid grid-cols-4 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-2">開始年月</label>
-                            <input
-                                type="month"
-                                value={startYm}
-                                onChange={(e) => setStartYm(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded"
+                        <div className="col-span-2">
+                            <label className="block text-sm font-medium mb-2">期間設定</label>
+                            <PeriodNavigator
+                                startYm={startYm}
+                                endYm={endYm}
+                                onChange={(start, end) => {
+                                    setStartYm(start);
+                                    setEndYm(end);
+                                }}
                             />
                         </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-2">終了年月</label>
-                            <input
-                                type="month"
-                                value={endYm}
-                                onChange={(e) => setEndYm(e.target.value)}
-                                className="w-full px-3 py-2 border border-gray-300 rounded"
-                            />
-                        </div>
+
                         <div>
                             <label className="block text-sm font-medium mb-2">商品検索</label>
                             <input

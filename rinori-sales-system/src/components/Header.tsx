@@ -18,6 +18,7 @@ export default function Header() {
         { label: '予算設定', href: '/budget' },
         { label: 'PL分析', href: '/pl/monthly' },
         { label: '広告費管理', href: '/ad-expenses' },
+        { label: '設定', href: '/settings' },
     ];
 
     return (

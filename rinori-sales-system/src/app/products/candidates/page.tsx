@@ -25,17 +25,20 @@ export default function NewProductCandidatesPage() {
     const [bulkProductType, setBulkProductType] = useState<'own' | 'purchased'>('own');
     const [bulkManagementStatus, setBulkManagementStatus] = useState<'managed' | 'unmanaged'>('managed');
     const [bulkProcessing, setBulkProcessing] = useState(false);
+    const [activeTab, setActiveTab] = useState<'pending' | 'ignored'>('pending');
 
     useEffect(() => {
         fetchCandidates();
-    }, []);
+    }, [activeTab]); // Fetch when tab changes
 
     const fetchCandidates = async () => {
+        setLoading(true);
         try {
-            const res = await fetch('/api/products/candidates');
+            const res = await fetch(`/api/products/candidates?status=${activeTab}`);
             if (res.ok) {
                 const data = await res.json();
                 setCandidates(data);
+                setSelectedIds([]); // Clear selection on tab change
             }
         } catch (error) {
             console.error('候補取得エラー:', error);
@@ -125,24 +128,34 @@ export default function NewProductCandidatesPage() {
         if (!confirm(`商品コード「${productCode}」を無視しますか？\nこの候補は一覧から削除されます。`)) {
             return;
         }
+        updateStatus(candidateId, productCode, 'ignored');
+    };
 
-        setProcessing(productCode);
+    const handleRestore = async (candidateId: number, productCode: string) => {
+        if (!confirm(`商品コード「${productCode}」を未登録に戻しますか？`)) {
+            return;
+        }
+        updateStatus(candidateId, productCode, 'pending');
+    };
+
+    const updateStatus = async (id: number, code: string, status: string) => {
+        setProcessing(code);
         try {
-            const res = await fetch(`/api/products/candidates/${candidateId}`, {
+            const res = await fetch(`/api/products/candidates/${id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: 'ignored' })
+                body: JSON.stringify({ status })
             });
 
             if (res.ok) {
-                alert('候補を無視しました。');
+                alert(status === 'ignored' ? '候補を無視しました。' : '候補を未登録に戻しました。');
                 fetchCandidates();
             } else {
                 const error = await res.json();
-                alert('エラー: ' + (error.error || '無視処理に失敗しました'));
+                alert('エラー: ' + (error.error || 'ステータス更新に失敗しました'));
             }
         } catch (error) {
-            console.error('無視処理エラー:', error);
+            console.error('更新エラー:', error);
             alert('通信エラーが発生しました');
         } finally {
             setProcessing(null);
@@ -151,307 +164,238 @@ export default function NewProductCandidatesPage() {
 
     if (loading) {
         return (
-            <div style={{ padding: '2rem' }}>
-                <h1>新商品候補一覧 (SC-07)</h1>
-                <p>読み込み中...</p>
+            <div className="min-h-screen bg-neutral-50">
+                <header className="bg-rinori-navy border-b-2 border-rinori-gold px-6 py-4 shadow-md mb-8">
+                    <div className="max-w-7xl mx-auto">
+                        <h1 className="text-xl font-semibold text-white">新商品候補一覧</h1>
+                    </div>
+                </header>
+                <div className="max-w-7xl mx-auto px-6 py-12 text-center">
+                    <svg className="animate-spin h-8 w-8 text-rinori-navy mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p className="text-neutral-500">読み込み中...</p>
+                </div>
             </div>
         );
     }
 
     return (
-        <div style={{ padding: '2rem' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                <h1>新商品候補一覧 (SC-07)</h1>
-                <Link href="/products" style={{ color: '#0070f3', textDecoration: 'none' }}>
-                    商品マスタ一覧へ戻る
-                </Link>
-            </div>
+        <div className="min-h-screen bg-neutral-50">
+            <header className="bg-rinori-navy border-b-2 border-rinori-gold px-6 py-4 shadow-md mb-8">
+                <div className="max-w-7xl mx-auto flex justify-between items-center">
+                    <h1 className="text-xl font-semibold text-white">新商品候補一覧</h1>
+                    <Link href="/products" className="px-4 py-2 text-white hover:text-rinori-gold transition-colors duration-200 font-medium">
+                        商品マスタ一覧へ戻る
+                    </Link>
+                </div>
+            </header>
 
-            {selectedIds.length > 0 && (
-                <div style={{ marginBottom: '1rem', padding: '1rem', backgroundColor: '#e3f2fd', borderRadius: '4px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontWeight: '500' }}>{selectedIds.length}件選択中</span>
+            <main className="max-w-7xl mx-auto px-6">
+                <div className="flex gap-4 mb-6 border-b-2 border-neutral-200">
                     <button
-                        onClick={() => setShowBulkModal(true)}
-                        style={{
-                            padding: '0.5rem 1rem',
-                            backgroundColor: '#28a745',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontWeight: '500'
-                        }}
+                        className={`px-6 py-3 border-b-2 font-semibold transition-colors duration-200 ${activeTab === 'pending' ? 'border-rinori-gold text-rinori-navy' : 'border-transparent text-neutral-500 hover:text-rinori-navy'}`}
+                        onClick={() => setActiveTab('pending')}
                     >
-                        選択した商品を管理中として一括登録
+                        未登録
+                    </button>
+                    <button
+                        className={`px-6 py-3 border-b-2 font-semibold transition-colors duration-200 ${activeTab === 'ignored' ? 'border-rinori-gold text-rinori-navy' : 'border-transparent text-neutral-500 hover:text-rinori-navy'}`}
+                        onClick={() => setActiveTab('ignored')}
+                    >
+                        無視リスト
                     </button>
                 </div>
-            )}
 
-            {candidates.length === 0 ? (
-                <div style={{
-                    padding: '3rem',
-                    textAlign: 'center',
-                    backgroundColor: '#f9f9f9',
-                    borderRadius: '8px',
-                    border: '1px solid #e0e0e0'
-                }}>
-                    新商品候補はありません。
-                </div>
-            ) : (
-                <table style={{
-                    width: '100%',
-                    borderCollapse: 'collapse',
-                    backgroundColor: 'white',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-                }}>
-                    <thead>
-                        <tr style={{ backgroundColor: '#f5f5f5', borderBottom: '2px solid #ddd' }}>
-                            <th style={{ padding: '1rem', textAlign: 'center', fontWeight: '600', width: '50px' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={selectedIds.length === candidates.length}
-                                    onChange={(e) => handleSelectAll(e.target.checked)}
-                                    style={{ cursor: 'pointer', width: '18px', height: '18px' }}
-                                />
-                            </th>
-                            <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>検出日時</th>
-                            <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>商品コード</th>
-                            <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>サンプルSKU</th>
-                            <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>商品名</th>
-                            <th style={{ padding: '1rem', textAlign: 'left', fontWeight: '600' }}>ステータス</th>
-                            <th style={{ padding: '1rem', textAlign: 'center', fontWeight: '600' }}>操作</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {candidates.map((candidate) => (
-                            <tr key={candidate.id} style={{ borderBottom: '1px solid #eee' }}>
-                                <td style={{ padding: '1rem', textAlign: 'center' }}>
+                {selectedIds.length > 0 && (
+                    <div className="mb-6 p-4 bg-rinori-gold/10 border-2 border-rinori-gold rounded-lg flex justify-between items-center">
+                        <span className="font-semibold text-rinori-navy">{selectedIds.length}件選択中</span>
+                        <button
+                            onClick={() => setShowBulkModal(true)}
+                            className="px-5 py-2.5 bg-rinori-navy text-white rounded-md hover:bg-rinori-navy/90 shadow-md hover:shadow-lg transition-all duration-200 font-medium"
+                        >
+                            選択した商品を管理中として一括登録
+                        </button>
+                    </div>
+                )}
+
+                {candidates.length === 0 ? (
+                    <div className="py-12 text-center bg-white rounded-lg border-2 border-neutral-200">
+                        <svg className="w-16 h-16 text-neutral-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <p className="text-neutral-400">新商品候補はありません。</p>
+                    </div>
+                ) : (
+                    <div className="bg-white rounded-lg shadow-md border-2 border-neutral-200 overflow-hidden">
+                        <table className="w-full">
+                            <thead className="bg-rinori-navy text-white">
+                                <tr>
+                                    <th className="px-4 py-3 text-center font-semibold w-12">
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedIds.length === candidates.length}
+                                            onChange={(e) => handleSelectAll(e.target.checked)}
+                                            className="cursor-pointer w-4 h-4"
+                                        />
+                                    </th>
+                                    <th className="px-4 py-3 text-left font-semibold">検出日時</th>
+                                    <th className="px-4 py-3 text-left font-semibold">商品コード</th>
+                                    <th className="px-4 py-3 text-left font-semibold">サンプルSKU</th>
+                                    <th className="px-4 py-3 text-left font-semibold">商品名</th>
+                                    <th className="px-4 py-3 text-left font-semibold">ステータス</th>
+                                    <th className="px-4 py-3 text-center font-semibold">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody className="divide-y divide-neutral-100">
+                                {candidates.map((candidate) => (
+                                    <tr key={candidate.id} className="hover:bg-rinori-cream/30 transition-colors">
+                                        <td className="px-4 py-3 text-center">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedIds.includes(candidate.id)}
+                                                onChange={(e) => handleSelectOne(candidate.id, e.target.checked)}
+                                                className="cursor-pointer w-4 h-4"
+                                            />
+                                        </td>
+                                        <td className="px-4 py-3 text-sm text-neutral-600">
+                                            {new Date(candidate.detectedAt).toLocaleString('ja-JP')}
+                                        </td>
+                                        <td className="px-4 py-3 text-sm font-mono font-medium text-neutral-800">{candidate.productCode}</td>
+                                        <td className="px-4 py-3 text-sm text-neutral-600">{candidate.sampleSku || '-'}</td>
+                                        <td className="px-4 py-3 text-sm text-neutral-600">{candidate.productName || '-'}</td>
+                                        <td className="px-4 py-3">
+                                            <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-300">
+                                                {activeTab === 'pending' ? '未登録' : '無視'}
+                                            </span>
+                                        </td>
+                                        <td className="px-4 py-3 text-center">
+                                            <div className="flex gap-2 justify-center flex-wrap">
+                                                {activeTab === 'pending' ? (
+                                                    <>
+                                                        <button
+                                                            onClick={() => handleRegisterAsManaged(candidate)}
+                                                            disabled={processing === candidate.productCode}
+                                                            className="px-3 py-1.5 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-xs whitespace-nowrap transition-all duration-200"
+                                                        >
+                                                            管理中として登録
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleRegisterAsUnmanaged(candidate)}
+                                                            disabled={processing === candidate.productCode}
+                                                            className="px-3 py-1.5 bg-neutral-600 text-white rounded-md hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-xs whitespace-nowrap transition-all duration-200"
+                                                        >
+                                                            管理外として登録
+                                                        </button>
+                                                        <button
+                                                            onClick={() => handleIgnore(candidate.id, candidate.productCode)}
+                                                            disabled={processing === candidate.productCode}
+                                                            className="px-3 py-1.5 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-xs whitespace-nowrap transition-all duration-200"
+                                                        >
+                                                            無視
+                                                        </button>
+                                                    </>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleRestore(candidate.id, candidate.productCode)}
+                                                        disabled={processing === candidate.productCode}
+                                                        className="px-3 py-1.5 bg-rinori-navy text-white rounded-md hover:bg-rinori-navy/90 disabled:opacity-50 disabled:cursor-not-allowed font-medium text-xs whitespace-nowrap transition-all duration-200"
+                                                    >
+                                                        未登録に戻す (復活)
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+
+                {/* Bulk Registration Modal */}
+                {showBulkModal && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-50 animate-fadeIn">
+                        <div className="bg-white p-8 rounded-lg max-w-lg w-full mx-4 shadow-2xl border-2 border-neutral-200 animate-slideIn">
+                            <h2 className="text-xl font-bold text-rinori-navy mb-6">一括登録設定</h2>
+
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                                        販売価格（税抜）<span className="text-neutral-500 text-xs ml-2">(任意)</span>
+                                    </label>
                                     <input
-                                        type="checkbox"
-                                        checked={selectedIds.includes(candidate.id)}
-                                        onChange={(e) => handleSelectOne(candidate.id, e.target.checked)}
-                                        style={{ cursor: 'pointer', width: '18px', height: '18px' }}
+                                        type="number"
+                                        value={bulkSalesPrice}
+                                        onChange={(e) => setBulkSalesPrice(e.target.value)}
+                                        placeholder="例: 1000"
+                                        className="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-md focus:border-rinori-gold focus:ring-2 focus:ring-rinori-gold/20 transition-all duration-200"
                                     />
-                                </td>
-                                <td style={{ padding: '1rem' }}>
-                                    {new Date(candidate.detectedAt).toLocaleString('ja-JP')}
-                                </td>
-                                <td style={{ padding: '1rem', fontWeight: '500' }}>{candidate.productCode}</td>
-                                <td style={{ padding: '1rem', color: '#666' }}>{candidate.sampleSku || '-'}</td>
-                                <td style={{ padding: '1rem', color: '#666' }}>{candidate.productName || '-'}</td>
-                                <td style={{ padding: '1rem' }}>
-                                    <span style={{
-                                        padding: '0.25rem 0.75rem',
-                                        borderRadius: '12px',
-                                        fontSize: '0.875rem',
-                                        backgroundColor: '#fff3cd',
-                                        color: '#856404',
-                                        fontWeight: '500'
-                                    }}>
-                                        未登録
-                                    </span>
-                                </td>
-                                <td style={{ padding: '1rem', textAlign: 'center' }}>
-                                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-                                        <button
-                                            onClick={() => handleRegisterAsManaged(candidate)}
-                                            disabled={processing === candidate.productCode}
-                                            style={{
-                                                padding: '0.5rem 0.75rem',
-                                                backgroundColor: '#28a745',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '4px',
-                                                cursor: processing === candidate.productCode ? 'not-allowed' : 'pointer',
-                                                fontWeight: '500',
-                                                fontSize: '0.8rem',
-                                                opacity: processing === candidate.productCode ? 0.6 : 1,
-                                                whiteSpace: 'nowrap'
-                                            }}
-                                        >
-                                            管理中として登録
-                                        </button>
-                                        <button
-                                            onClick={() => handleRegisterAsUnmanaged(candidate)}
-                                            disabled={processing === candidate.productCode}
-                                            style={{
-                                                padding: '0.5rem 0.75rem',
-                                                backgroundColor: '#6c757d',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '4px',
-                                                cursor: processing === candidate.productCode ? 'not-allowed' : 'pointer',
-                                                fontWeight: '500',
-                                                fontSize: '0.8rem',
-                                                opacity: processing === candidate.productCode ? 0.6 : 1,
-                                                whiteSpace: 'nowrap'
-                                            }}
-                                        >
-                                            管理外として登録
-                                        </button>
-                                        <button
-                                            onClick={() => handleIgnore(candidate.id, candidate.productCode)}
-                                            disabled={processing === candidate.productCode}
-                                            style={{
-                                                padding: '0.5rem 0.75rem',
-                                                backgroundColor: '#dc3545',
-                                                color: 'white',
-                                                border: 'none',
-                                                borderRadius: '4px',
-                                                cursor: processing === candidate.productCode ? 'not-allowed' : 'pointer',
-                                                fontWeight: '500',
-                                                fontSize: '0.8rem',
-                                                opacity: processing === candidate.productCode ? 0.6 : 1,
-                                                whiteSpace: 'nowrap'
-                                            }}
-                                        >
-                                            無視
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            )}
+                                </div>
 
-            {/* Bulk Registration Modal */}
-            {showBulkModal && (
-                <div style={{
-                    position: 'fixed',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    zIndex: 1000
-                }}>
-                    <div style={{
-                        backgroundColor: 'white',
-                        padding: '2rem',
-                        borderRadius: '8px',
-                        maxWidth: '500px',
-                        width: '90%',
-                        boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
-                    }}>
-                        <h2 style={{ marginTop: 0, marginBottom: '1.5rem' }}>一括登録設定</h2>
+                                <div>
+                                    <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                                        原価（税抜）<span className="text-neutral-500 text-xs ml-2">(任意)</span>
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={bulkCost}
+                                        onChange={(e) => setBulkCost(e.target.value)}
+                                        placeholder="例: 500"
+                                        className="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-md focus:border-rinori-gold focus:ring-2 focus:ring-rinori-gold/20 transition-all duration-200"
+                                    />
+                                </div>
 
-                        <div style={{ marginBottom: '1rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                販売価格（税抜）<span style={{ color: '#666', fontSize: '0.875rem', marginLeft: '0.5rem' }}>(任意)</span>
-                            </label>
-                            <input
-                                type="number"
-                                value={bulkSalesPrice}
-                                onChange={(e) => setBulkSalesPrice(e.target.value)}
-                                placeholder="例: 1000"
-                                style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    border: '1px solid #ddd',
-                                    borderRadius: '4px',
-                                    fontSize: '1rem'
-                                }}
-                            />
-                        </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                                        商品タイプ
+                                    </label>
+                                    <select
+                                        value={bulkProductType}
+                                        onChange={(e) => setBulkProductType(e.target.value as 'own' | 'purchased')}
+                                        className="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-md bg-white focus:border-rinori-gold focus:ring-2 focus:ring-rinori-gold/20 transition-all duration-200 font-medium"
+                                    >
+                                        <option value="own">自社</option>
+                                        <option value="purchased">仕入</option>
+                                    </select>
+                                </div>
 
-                        <div style={{ marginBottom: '1rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                原価（税抜）<span style={{ color: '#666', fontSize: '0.875rem', marginLeft: '0.5rem' }}>(任意)</span>
-                            </label>
-                            <input
-                                type="number"
-                                value={bulkCost}
-                                onChange={(e) => setBulkCost(e.target.value)}
-                                placeholder="例: 500"
-                                style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    border: '1px solid #ddd',
-                                    borderRadius: '4px',
-                                    fontSize: '1rem'
-                                }}
-                            />
-                        </div>
+                                <div>
+                                    <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                                        管理ステータス
+                                    </label>
+                                    <select
+                                        value={bulkManagementStatus}
+                                        onChange={(e) => setBulkManagementStatus(e.target.value as 'managed' | 'unmanaged')}
+                                        className="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-md bg-white focus:border-rinori-gold focus:ring-2 focus:ring-rinori-gold/20 transition-all duration-200 font-medium"
+                                    >
+                                        <option value="managed">管理中</option>
+                                        <option value="unmanaged">管理外</option>
+                                    </select>
+                                </div>
+                            </div>
 
-                        <div style={{ marginBottom: '1rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                商品タイプ
-                            </label>
-                            <select
-                                value={bulkProductType}
-                                onChange={(e) => setBulkProductType(e.target.value as 'own' | 'purchased')}
-                                style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    border: '1px solid #ddd',
-                                    borderRadius: '4px',
-                                    fontSize: '1rem'
-                                }}
-                            >
-                                <option value="own">自社</option>
-                                <option value="purchased">仕入</option>
-                            </select>
-                        </div>
-
-                        <div style={{ marginBottom: '1.5rem' }}>
-                            <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
-                                管理ステータス
-                            </label>
-                            <select
-                                value={bulkManagementStatus}
-                                onChange={(e) => setBulkManagementStatus(e.target.value as 'managed' | 'unmanaged')}
-                                style={{
-                                    width: '100%',
-                                    padding: '0.5rem',
-                                    border: '1px solid #ddd',
-                                    borderRadius: '4px',
-                                    fontSize: '1rem'
-                                }}
-                            >
-                                <option value="managed">管理中</option>
-                                <option value="unmanaged">管理外</option>
-                            </select>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
-                            <button
-                                onClick={() => setShowBulkModal(false)}
-                                disabled={bulkProcessing}
-                                style={{
-                                    padding: '0.5rem 1rem',
-                                    backgroundColor: '#6c757d',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: bulkProcessing ? 'not-allowed' : 'pointer',
-                                    fontWeight: '500'
-                                }}
-                            >
-                                キャンセル
-                            </button>
-                            <button
-                                onClick={handleBulkRegister}
-                                disabled={bulkProcessing}
-                                style={{
-                                    padding: '0.5rem 1rem',
-                                    backgroundColor: '#0070f3',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: bulkProcessing ? 'not-allowed' : 'pointer',
-                                    fontWeight: '500'
-                                }}
-                            >
-                                {bulkProcessing ? '登録中...' : '一括登録'}
-                            </button>
+                            <div className="flex gap-4 mt-8 pt-6 border-t-2 border-neutral-200">
+                                <button
+                                    onClick={() => setShowBulkModal(false)}
+                                    disabled={bulkProcessing}
+                                    className="flex-1 px-6 py-2.5 border-2 border-neutral-300 rounded-md hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-all duration-200"
+                                >
+                                    キャンセル
+                                </button>
+                                <button
+                                    onClick={handleBulkRegister}
+                                    disabled={bulkProcessing}
+                                    className="flex-1 px-6 py-2.5 bg-rinori-navy text-white rounded-md hover:bg-rinori-navy/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg font-medium transition-all duration-200"
+                                >
+                                    {bulkProcessing ? '登録中...' : '一括登録'}
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )}
+            </main>
         </div>
     );
 }

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
+import PeriodNavigator from "@/components/PeriodNavigator";
 
 export default function MonthlyPLPage() {
     const { data: session } = useSession();
@@ -60,24 +61,17 @@ export default function MonthlyPLPage() {
             <main className="max-w-4xl mx-auto px-6 py-8">
                 <div className="bg-white p-4 rounded shadow-sm border border-gray-200 mb-8 flex gap-4 items-end">
                     <div>
-                        <label className="block text-sm font-medium mb-1">開始年月</label>
-                        <input
-                            type="month"
-                            value={startYm}
-                            onChange={(e) => setStartYm(e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded"
+                        <label className="block text-sm font-medium mb-1">期間設定</label>
+                        <PeriodNavigator
+                            startYm={startYm}
+                            endYm={endYm}
+                            onChange={(start, end) => {
+                                setStartYm(start);
+                                setEndYm(end);
+                            }}
                         />
                     </div>
-                    <span className="mb-3">〜</span>
-                    <div>
-                        <label className="block text-sm font-medium mb-1">終了年月</label>
-                        <input
-                            type="month"
-                            value={endYm}
-                            onChange={(e) => setEndYm(e.target.value)}
-                            className="px-3 py-2 border border-gray-300 rounded"
-                        />
-                    </div>
+
                     <div>
                         <label className="block text-sm font-medium mb-1">販路</label>
                         <select
@@ -106,12 +100,21 @@ export default function MonthlyPLPage() {
                 ) : (
                     <div className="bg-white rounded shadow border border-gray-200 overflow-hidden">
                         <div className="p-6 border-b border-gray-200 bg-gray-50">
-                            <h2 className="text-xl font-bold flex justify-between">
-                                <span>損益計算書 (PL)</span>
-                                <span className="text-sm font-normal text-gray-500 mt-1">
-                                    期間: {startYm} 〜 {endYm}
-                                </span>
-                            </h2>
+                            <div className="flex justify-between items-center mb-4">
+                                <div>
+                                    <h2 className="text-xl font-bold inline-block">损益計算書 (PL)</h2>
+                                    <span className="text-sm font-normal text-gray-500 ml-4">
+                                        期間: {startYm} 〜 {endYm}
+                                    </span>
+                                </div>
+                                <Link
+                                    href={`/pl/products?startYm=${startYm}&endYm=${endYm}&salesChannelId=${salesChannelId}`}
+                                    className="text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded hover:bg-blue-100 transition-colors"
+                                >
+                                    商品別PLを見る →
+                                </Link>
+                            </div>
+
                         </div>
 
                         {userRole === 'staff' ? (
