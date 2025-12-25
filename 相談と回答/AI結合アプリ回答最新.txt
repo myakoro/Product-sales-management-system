@@ -1,0 +1,171 @@
+以下、提示いただいた状況から合理的に説明できる原因と、最短で直すための正攻法をまとめます（結論：**CSVそのものの問題ではなく、フロントのfetchが「レスポンスJSONを読みに行って失敗している」**可能性が高いです）。
+
+---
+
+## 1. なぜ undici が「CSVをJSONとして解釈」しようとするのか？
+
+undici（Nodeのfetch実装）は、**自動で「送信したFormData中のファイル」をJSONとしてパースしません**。  
+このエラー：
+
+```
+SyntaxError: No number after minus sign in JSON at position 1
+at JSON.parse ...
+at parseJSONFromBytes (undici)
+```
+
+はほぼ確実に、
+
+- フロント側（またはサーバ側）が `response.json()` を呼んだ  
+  あるいは
+- Next側で `request.json()` を呼んだ
+
+のどちらかが実行され、**その対象がJSONではなかった**（＝CSVやエラーHTML、あるいは単なるテキスト）ために起きています。
+
+特に `No number after minus sign` は、JSONとして読もうとした先頭付近が `-` だったケースでよく出ます（例：`-` から始まるテキスト、CSVの値、あるいは `-----WebKitFormBoundary...` 断片など）。
+
+> つまり「FormDataの中身をundiciがJSONとして解釈」ではなく、**どこかの `.json()` が「レスポンス本文」をJSONとして解釈して爆発している**のが本筋です。
+
+---
+
+## 2. FormDataの送信方法／Next.js Routeでの受信方法に問題があるか？
+
+典型的に問題になるのはここです。
+
+### A. フロント側で `Content-Type` を手で付けてしまう
+FormData送信で、次のようにやると壊れます：
+
+```ts
+fetch(url, {
+  method: "POST",
+  headers: { "Content-Type": "multipart/form-data" }, // ←これがNG
+  body: formData,
+})
+```
+
+この場合 boundary が付かないので、サーバが正しく解釈できず、結果としてサーバがエラーを返し、フロントが `res.json()` して落ちる…という流れになりがちです。
+
+**対処**：FormDataのときは `Content-Type` を自分で設定しない（ブラウザに任せる）。
+
+---
+
+### B. API Route側で `await request.json()` を呼んでしまっている
+Route Handlerでこれをやると、multipart/form-data をJSONとして読みに行って即死します。
+
+**FormDataを受けるなら**：
+
+```ts
+const form = await request.formData()
+const file = form.get("file") as File | null
+```
+
+が正解です。
+
+---
+
+### C. サーバがJSONを返していないのにフロントが `res.json()` している
+サーバが `return new Response("Import failed", { status: 500 })` のように**テキスト**で返しているのに、フロントが `await res.json()` すると undici/JSON.parse で落ちます。
+
+**対処**（どちらかに揃える）：
+
+- サーバは成功も失敗も **必ず `NextResponse.json()`** で返す  
+- フロントは **`res.headers.get("content-type")` を見て `json()` / `text()` を切り替える**
+
+---
+
+## 3. 正しい解決アプローチ（実装方針）
+
+最短で直す「正攻法」は次の3点セットです。
+
+---
+
+### (1) フロント：FormData送信ではContent-Typeを付けない
+```ts
+const fd = new FormData()
+fd.append("file", file)
+fd.append("format", format) // "ne" | "amazon" など
+
+const res = await fetch("/api/sales/import", {
+  method: "POST",
+  body: fd,
+})
+```
+
+---
+
+### (2) サーバ：`request.formData()` で受け、**必ずJSONで返す**
+```ts
+import { NextResponse } from "next/server"
+
+export async function POST(request: Request) {
+  try {
+    const form = await request.formData()
+    const file = form.get("file")
+    const format = String(form.get("format") ?? "")
+
+    if (!(file instanceof File)) {
+      return NextResponse.json({ ok: false, error: "file is required" }, { status: 400 })
+    }
+
+    const csvText = await file.text()
+
+    // ここで format に応じて NE / Amazon のパース・取り込み
+    // ...
+
+    return NextResponse.json({ ok: true })
+  } catch (e: any) {
+    return NextResponse.json(
+      { ok: false, error: e?.message ?? "unknown error" },
+      { status: 500 }
+    )
+  }
+}
+```
+
+---
+
+### (3) フロント：レスポンスを決め打ちで `res.json()` しない（またはサーバを必ずJSONに統一）
+サーバを上記のように統一できるなら、フロントは `res.json()` 決め打ちでOKです。
+
+```ts
+const data = await res.json()
+if (!res.ok || !data.ok) throw new Error(data.error ?? "import failed")
+```
+
+---
+
+## 補足：NE形式とAmazon形式を両方実装する設計（おすすめ）
+
+- APIは1本：`POST /api/sales/import`
+- `format`（"ne" / "amazon"）をFormDataに含める
+- サーバ側で `format` に応じて
+  - `parseNe(csvText)`
+  - `parseAmazon(csvText)`
+  を呼ぶ
+
+こうするとUI追加・テストもしやすいです。
+
+---
+
+## 切り分けのために確認したい「最重要」ポイント（これだけ教えてください）
+
+次の2点を貼ってもらえれば、ほぼ確実に原因箇所を特定できます。
+
+1) フロントのfetch部分（FormDataをPOSTしているコード）  
+- `headers` を付けているか  
+- 受け側で `res.json()` を呼んでいるか
+
+2) `src/app/api/sales/import/route.ts` のPOST実装  
+- `request.json()` を呼んでいないか  
+- エラー時に `NextResponse.json` で返しているか / 単なる `new Response(text)` か
+
+---
+
+## 直接回答（質問1〜3）
+
+1. **undiciがFormDataのCSVをJSONとして解釈しているのではなく**、`request.json()` または `response.json()` が呼ばれていて、JSONではない本文をパースしようとして失敗しています。  
+2. よくある問題は **FormData送信でContent-Typeを手で付けている**、または **Route側でrequest.json()している**、または **サーバがJSONを返していないのにフロントがres.json()している** のいずれかです。  
+3. 解決策は、**multipartは `request.formData()` で受ける**、**FormData送信時はContent-Typeを指定しない**、**レスポンス形式（JSON）をサーバ/フロントで揃える**、の3点です。
+
+---
+
+必要なら、該当ファイル（`csv-parser.ts`, `page.tsx`のfetch部分, `route.ts`）を貼っていただければ、NE/Amazonのパース分岐も含めて「この形に直せば動く」という差分レベルで具体化します。

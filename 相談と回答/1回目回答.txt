@@ -1,0 +1,167 @@
+添付の問題サマリーを確認した上で、質問①〜③に 原因 → 仕組み → 正しい解決アプローチ の順で回答します。
+（以下の回答は、添付ドキュメントの内容に基づいています 
+
+CSV取込エラー_問題サマリー_20251223
+
+）
+
+① なぜ undici が FormData の CSV を JSON として解釈しようとするのか？
+結論
+
+「CSVをJSONとして解釈している」のは undici ではなく、Next.js 側の API Route の実装です。
+
+undici は Next.js の内部 HTTP クライアントですが、
+
+No number after minus sign in JSON at position 1
+
+
+というエラーは 必ず JSON.parse() が呼ばれた時にしか出ません。
+
+スタックトレースでも：
+
+at JSON.parse (<anonymous>)
+at parseJSONFromBytes (node:internal/deps/undici/undici:6433:19)
+
+
+となっており、
+
+👉 「リクエストボディを JSON として読む処理」がどこかで実行されている
+ということを意味します。
+
+② FormData の送信方法 or API Route の受信方法に問題があるか？
+結論
+
+API Route 側に明確な問題があります。
+
+問題の本質
+
+Next.js App Router (route.ts) では、
+
+await request.json()
+
+
+を呼んだ瞬間に、
+
+Content-Type に関係なく
+
+body を JSON としてパースしようとする
+
+という挙動になります。
+
+そのため、
+
+CSV ファイル（先頭が -2024/01/01,... のような値）
+
+または BOM / 数値マイナス始まりの文字列
+
+を JSON.parse にかけると、
+
+-xxxx
+^
+No number after minus sign
+
+
+というエラーになります。
+
+👉 Papa.parse / dynamicTyping / クォート処理は一切関係ありません
+👉 フロントエンドも問題ありません
+
+③ このエラーを解決する正しいアプローチ
+正解はこれです ✅
+API Route で request.json() を使わない
+
+CSV（FormData）を受け取る場合は 必ず request.formData() を使う必要があります。
+
+✅ 正しい API Route の実装例（重要）
+// src/app/api/sales/import/route.ts
+import { NextResponse } from "next/server";
+
+export async function POST(request: Request) {
+  try {
+    // ❌ request.json() は使わない
+    const formData = await request.formData();
+
+    const file = formData.get("file") as File;
+    if (!file) {
+      return NextResponse.json(
+        { error: "CSVファイルがありません" },
+        { status: 400 }
+      );
+    }
+
+    const csvText = await file.text();
+
+    // ここで初めて Papa.parse
+    // Papa.parse(csvText, ...)
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Import failed" },
+      { status: 500 }
+    );
+  }
+}
+
+🔥 重要ポイントまとめ
+項目	結論
+undiciが勝手にJSONにしている？	❌ 違う
+dynamicTyping の問題？	❌ 無関係
+CSV内容（NE/Amazon）の問題？	❌ 無関係
+フロントの FormData 送信	✅ 正しい
+API Route の受信方法	❌ 誤り
+正解	✅ request.formData()
+🧠 なぜ「V1.5 までは動いていた」のか？
+
+非常に重要な点です。
+
+考えられる理由は以下のどれかです：
+
+Pages Router（旧 API Routes）時代のコードが残っていた
+
+V1.51 で共通化した処理の中に request.json() を入れてしまった
+
+Amazon CSV 対応時に
+
+JSON用のAPI
+
+CSV用のAPI
+を同じエンドポイントで扱おうとした
+
+👉 CSV と JSON は同じエンドポイントで扱ってはいけません
+
+✅ 推奨設計（今後の拡張も考慮）
+パターンA（最も安全）
+
+/api/sales/import/csv
+
+/api/sales/import/json
+
+パターンB（1エンドポイント）
+
+CSV → formData()
+
+JSON → json()
+
+Content-Type を必ず分岐
+
+次のアクション提案 🚀
+
+/api/sales/import/route.ts に request.json() が存在しないか検索
+
+あれば 即削除
+
+request.formData() のみに統一
+
+Amazon / NE CSV の分岐は CSVパース後に行う
+
+必要であれば次に：
+
+NE CSV / Amazon CSV の 判別ロジック
+
+Amazon V1.51 の 正しい列マッピング
+
+Render 本番での注意点（ファイルサイズ・Edge回避）
+
+まで一緒に整理できます。

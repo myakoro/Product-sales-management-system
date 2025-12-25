@@ -1,0 +1,133 @@
+## 1) Route Handler以外で `request.json()` が呼ばれている可能性は？
+
+あります。ただし「Next.jsが勝手にmultipartをjson()する」よりも、実際には次が多いです。
+
+### よくある発生源
+- **別のエンドポイントに当たっている**  
+  いま貼っているのは `fetch("/api/import/sales")` ですが、最初の例では `/api/sales/import` でした。  
+  もし Route Handler が `src/app/api/sales/import/route.ts` なのに、フロントが `/api/import/sales` を叩いているなら、**別ルート**に当たっていて、そこで `request.json()` している／404 HTMLを返している等が起きます。
+  - 確認：`src/app/api/import/sales/route.ts` が存在するか
+  - 確認：Networkタブ（またはサーバログ）で実際のURLとステータスコード
+
+- **Route Handlerの前段で multipart を扱えない環境に落ちている**
+  - `middleware.ts` で `await request.json()` している（認証処理などでありがち）
+  - 何らかの共通関数（`withAuth`/`withApi`）の中で `request.json()` を呼んでいる
+  - **Edge Runtime** で動いていて挙動が違う（後述）
+
+- **「受信時にJSONパース」ではなく、実はフロントの `res.json()` が落ちている**
+  スタックに undici の `parseJSONFromBytes` が出ますが、これは **response.json()** でも出ます。  
+  「リクエスト受信時」と断定せず、まず**どっちのjson()か**を切り分けるのが重要です。
+
+### 切り分け用の最短チェック
+フロントを一旦こう変えてください：
+
+```ts
+const text = await res.text();
+console.log("status", res.status);
+console.log("content-type", res.headers.get("content-type"));
+console.log("body head", text.slice(0, 200));
+```
+
+- ここで HTML（`<!doctype html>`）やエラーページ、あるいは空文字が返ってきていれば、`res.json()` が落ちていただけです。
+
+---
+
+## 2) CSV内容が原因で「JSONと誤認」される？
+
+**CSVの先頭が `-` でも、それ自体が「JSONとして誤認される」ことは通常ありません。**  
+JSONとして読みに行っているコードが存在しない限り、CSV内容は関係しません。
+
+ただし、次のケースでは「CSVが原因に見える」ことがあります：
+
+- サーバ側で例外が発生 → Next.js が **HTMLのエラー画面** を返す → フロントが `res.json()` → JSON parse error  
+  この場合、CSVの内容が「サーバ例外の引き金」になっているだけで、**JSON誤認の本体はフロントの `res.json()`** です。
+
+なので、上の `res.text()` による切り分けが最優先です。
+
+---
+
+## 3) Next.js 14.2.18 の FormData 処理に既知の問題は？
+
+少なくとも「multipartを勝手にJSONパースして落ちる」という既知不具合が一般的に報告されている類ではありません。  
+ただし注意点はあります：
+
+- **Edge Runtime では multipart/form-data の取り扱いが制限/差異**が出ることがあります。  
+  Route が Edge で動いていると、`request.formData()` 周りが期待通りでない/不安定になるケースがあり得ます。
+
+確認・対策：
+- `route.ts` に明示的に Node runtime を指定して挙動を固定
+
+```ts
+export const runtime = "nodejs";
+```
+
+（すでにNodeで動いているなら影響なしですが、切り分けとして有効です）
+
+---
+
+## 4) `file.arrayBuffer()` の前段階で問題が起きている可能性は？
+
+あります。特に：
+
+### A. `file` が `File` ではない（null等）
+`const file = formData.get('file') as File;` のように型アサートしていると、実体が null/文字列でも通ってしまいます。
+
+必ずチェックしてください：
+
+```ts
+const file = formData.get("file");
+if (!(file instanceof File)) {
+  return NextResponse.json({ ok: false, error: "file missing" }, { status: 400 });
+}
+```
+
+### B. そもそも multipart として解釈できていない
+例：実は別エンドポイント、あるいは middleware がボディを先読みしてしまっている、など。  
+この場合 `request.formData()` の時点で落ちたり、`file` が取れなかったりします。
+
+---
+
+# 追加アドバイス（最短で原因を確定する手順）
+
+## 手順1：URLの不一致をまず潰す
+- Route: `src/app/api/sales/import/route.ts`
+- fetch: `/api/import/sales`
+
+**これが一致していない**ので、まずどちらかに統一してください。  
+（Next.jsのパスは `app/api/...` のディレクトリ構造がそのままURLになります）
+
+例：Routeが `app/api/sales/import/route.ts` なら fetch は:
+
+```ts
+fetch("/api/sales/import", ...)
+```
+
+## 手順2：フロントの `res.json()` をやめて実体を確認
+上の `res.text()` にして、返ってきているものがJSONかどうかを確認してください。  
+- 404 HTMLや500 HTMLなら、`res.json()` で落ちます（undiciのJSON.parseエラーになります）
+
+## 手順3：Routeの先頭でログ
+```ts
+console.log("content-type:", request.headers.get("content-type"));
+```
+
+`multipart/form-data; boundary=...` になっているか確認。
+
+## 手順4：middlewareの有無確認
+`src/middleware.ts` があるなら、そこで `request.json()` / `request.text()` を呼んでいないか確認してください。  
+**middlewareがボディを読むと、その後のrouteで読めなくなる/想定外になる**ことがあります。
+
+---
+
+# 質問への簡潔な回答まとめ
+
+1. **可能性はあります**（middleware、別ルート、共通ラッパー、Edge runtimeなど）。特に今回、**fetchのURLとrouteのパスが不一致**に見える点が最重要です。  
+2. CSV先頭が `-` でも、それだけでJSON誤認は起きません。多くは「返却がJSONでないのに `res.json()`」の問題です。  
+3. 14.2.18固有で「勝手にJSONパース」する既知問題というより、**runtime（edge/node）やmiddleware、ルーティング不一致**の方が典型です。`export const runtime="nodejs"` は有効な切り分けです。  
+4. はい。`file` が `File` でない、multipartとして解釈できていない、middlewareが先読みしている、などで `arrayBuffer()` 前に崩れます。
+
+---
+
+次にこちらを教えてください（1つだけで原因がほぼ決まります）：
+- **Networkタブの当該リクエストのURL・ステータスコード・Response本文先頭（200文字）**  
+  もしくは、`res.text()` に切り替えたログ結果。
