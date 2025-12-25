@@ -22,11 +22,27 @@ type Expense = {
     createdBy: { username: string };
 };
 
+type AdBudget = {
+    id: number;
+    periodYm: string;
+    adCategoryId: number;
+    amount: number;
+    adCategory: { categoryName: string };
+};
+
+type BudgetSummary = {
+    totalBudget: number;
+    totalActual: number;
+    remaining: number;
+};
+
 function AdExpensesContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const initialTab = searchParams.get('tab') === 'categories' ? 'categories' : 'expenses';
-    const [activeTab, setActiveTab] = useState<'expenses' | 'categories'>(initialTab);
+    const tabParam = searchParams.get('tab');
+    const initialTab = tabParam === 'categories' ? 'categories' : tabParam === 'budget' ? 'budget' : 'expenses';
+    const [activeTab, setActiveTab] = useState<'expenses' | 'categories' | 'budget'>(initialTab);
+    const [userRole, setUserRole] = useState<string>('');
 
     // --- Expenses Tab State ---
     const [month, setMonth] = useState("2025-10");
@@ -60,13 +76,24 @@ function AdExpensesContent() {
     const [catEditingId, setCatEditingId] = useState<number | null>(null);
     const [catEditName, setCatEditName] = useState("");
 
+    // --- Budget Tab State ---
+    const [budgetMonth, setBudgetMonth] = useState("2025-10");
+    const [budgets, setBudgets] = useState<AdBudget[]>([]);
+    const [budgetInputs, setBudgetInputs] = useState<{ [categoryId: number]: string }>({});
+    const [budgetLoading, setBudgetLoading] = useState(false);
+    const [isSavingBudget, setIsSavingBudget] = useState(false);
+
+    // --- Budget Summary State ---
+    const [budgetSummary, setBudgetSummary] = useState<BudgetSummary | null>(null);
+
     // --- Initial Load ---
     useEffect(() => {
         fetchCategories();
-        fetchCategories();
-        // Initial date set will be handled by the effect on 'month'
+        fetchUserRole();
         const today = new Date();
         const currentMonth = today.toISOString().slice(0, 7);
+        setMonth(currentMonth);
+        setBudgetMonth(currentMonth);
         if (month === currentMonth) {
             setDate(today.toISOString().slice(0, 10));
         } else {
@@ -77,7 +104,7 @@ function AdExpensesContent() {
     useEffect(() => {
         if (activeTab === 'expenses') {
             fetchExpenses();
-            // If selected month is current month, set to today, otherwise 1st of month
+            fetchBudgetSummary();
             const today = new Date();
             const currentMonth = today.toISOString().slice(0, 7);
 
@@ -86,11 +113,12 @@ function AdExpensesContent() {
             } else if (!date.startsWith(month)) {
                 setDate(`${month}-01`);
             }
-        } else {
-            // Refresh categories when switching to categories tab to ensure latest status
+        } else if (activeTab === 'categories') {
             fetchCategories();
+        } else if (activeTab === 'budget') {
+            fetchBudgets();
         }
-    }, [month, activeTab]);
+    }, [month, activeTab, budgetMonth]);
 
     // --- API Calls ---
 
@@ -115,6 +143,18 @@ function AdExpensesContent() {
         }
     };
 
+    const fetchUserRole = async () => {
+        try {
+            const res = await fetch('/api/auth/session');
+            if (res.ok) {
+                const session = await res.json();
+                setUserRole(session?.user?.role || '');
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
     const fetchExpenses = async () => {
         setExpenseLoading(true);
         try {
@@ -127,6 +167,60 @@ function AdExpensesContent() {
             console.error(e);
         } finally {
             setExpenseLoading(false);
+        }
+    };
+
+    const fetchBudgets = async () => {
+        setBudgetLoading(true);
+        try {
+            const res = await fetch(`/api/ad-budgets?periodYm=${budgetMonth}`);
+            if (res.ok) {
+                const data: AdBudget[] = await res.json();
+                setBudgets(data);
+                
+                const inputs: { [categoryId: number]: string } = {};
+                data.forEach(b => {
+                    inputs[b.adCategoryId] = String(b.amount);
+                });
+                
+                activeCategories.forEach(cat => {
+                    if (!inputs[cat.id]) {
+                        inputs[cat.id] = '0';
+                    }
+                });
+                
+                setBudgetInputs(inputs);
+            }
+        } catch (e) {
+            console.error(e);
+        } finally {
+            setBudgetLoading(false);
+        }
+    };
+
+    const fetchBudgetSummary = async () => {
+        try {
+            const budgetRes = await fetch(`/api/ad-budgets?periodYm=${month}`);
+            let totalBudget = 0;
+            if (budgetRes.ok) {
+                const budgetData: AdBudget[] = await budgetRes.json();
+                totalBudget = budgetData.reduce((sum, b) => sum + b.amount, 0);
+            }
+
+            const expenseRes = await fetch(`/api/ad-expenses?month=${month}`);
+            let totalActual = 0;
+            if (expenseRes.ok) {
+                const expenseData: Expense[] = await expenseRes.json();
+                totalActual = expenseData.reduce((sum, e) => sum + e.amount, 0);
+            }
+
+            setBudgetSummary({
+                totalBudget,
+                totalActual,
+                remaining: totalBudget - totalActual
+            });
+        } catch (e) {
+            console.error(e);
         }
     };
 
@@ -286,16 +380,14 @@ function AdExpensesContent() {
     };
 
     const handleToggleCategoryActive = async (id: number, currentStatus: boolean) => {
-        const newStatus = !currentStatus;
-        const action = newStatus ? "有効化" : "無効化";
-
+        const action = currentStatus ? '無効化' : '有効化';
         if (!confirm(`このカテゴリを${action}しますか？`)) return;
 
         try {
             const res = await fetch('/api/ad-categories', {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id, isActive: newStatus })
+                body: JSON.stringify({ id, isActive: !currentStatus })
             });
 
             if (res.ok) {
@@ -306,6 +398,49 @@ function AdExpensesContent() {
             }
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    // --- Budget Handlers ---
+
+    const handleBudgetInputChange = (categoryId: number, value: string) => {
+        setBudgetInputs(prev => ({
+            ...prev,
+            [categoryId]: value
+        }));
+    };
+
+    const handleSaveBudgets = async () => {
+        if (isSavingBudget) return;
+        setIsSavingBudget(true);
+
+        try {
+            const budgetsToSave = activeCategories.map(cat => ({
+                categoryId: cat.id,
+                amount: Number(budgetInputs[cat.id] || 0)
+            }));
+
+            const res = await fetch('/api/ad-budgets', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    periodYm: budgetMonth,
+                    budgets: budgetsToSave
+                })
+            });
+
+            if (res.ok) {
+                alert('予算を保存しました');
+                fetchBudgets();
+            } else {
+                const data = await res.json();
+                alert(data.error || '予算の保存に失敗しました');
+            }
+        } catch (e) {
+            console.error(e);
+            alert('エラーが発生しました');
+        } finally {
+            setIsSavingBudget(false);
         }
     };
 
@@ -327,6 +462,17 @@ function AdExpensesContent() {
                         >
                             📋 広告リスト
                         </button>
+                        {userRole === 'master' && (
+                            <button
+                                onClick={() => setActiveTab('budget')}
+                                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'budget'
+                                    ? 'bg-white text-blue-600 shadow-sm'
+                                    : 'text-gray-500 hover:text-gray-700'
+                                    }`}
+                            >
+                                💰 予算設定
+                            </button>
+                        )}
                         <button
                             onClick={() => setActiveTab('categories')}
                             className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${activeTab === 'categories'
@@ -359,6 +505,26 @@ function AdExpensesContent() {
                                     />
                                 </div>
                             </div>
+
+                            {/* Budget Summary Panel */}
+                            {budgetSummary && (
+                                <div className="grid grid-cols-3 gap-4 mb-6">
+                                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border-2 border-blue-200">
+                                        <div className="text-sm text-blue-600 font-medium mb-1">月間予算</div>
+                                        <div className="text-2xl font-bold text-blue-900">¥{budgetSummary.totalBudget.toLocaleString()}</div>
+                                    </div>
+                                    <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border-2 border-green-200">
+                                        <div className="text-sm text-green-600 font-medium mb-1">実績合計</div>
+                                        <div className="text-2xl font-bold text-green-900">¥{budgetSummary.totalActual.toLocaleString()}</div>
+                                    </div>
+                                    <div className={`bg-gradient-to-br rounded-lg p-4 border-2 ${budgetSummary.remaining >= 0 ? 'from-purple-50 to-purple-100 border-purple-200' : 'from-red-50 to-red-100 border-red-200'}`}>
+                                        <div className={`text-sm font-medium mb-1 ${budgetSummary.remaining >= 0 ? 'text-purple-600' : 'text-red-600'}`}>予算残高</div>
+                                        <div className={`text-2xl font-bold ${budgetSummary.remaining >= 0 ? 'text-purple-900' : 'text-red-900'}`}>
+                                            ¥{budgetSummary.remaining.toLocaleString()}
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="bg-white rounded shadow border border-gray-200 overflow-hidden">
                                 <div className="p-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center">
@@ -566,6 +732,91 @@ function AdExpensesContent() {
                                     </button>
                                 </form>
                             </div>
+                        </div>
+                    </div>
+                ) : activeTab === 'budget' ? (
+                    // --- Budget Tab Content ---
+                    <div className="max-w-4xl mx-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold">広告予算設定</h2>
+                            <DateNavigator
+                                date={budgetMonth}
+                                onChange={setBudgetMonth}
+                                label="対象月"
+                            />
+                        </div>
+
+                        <div className="bg-white rounded-lg shadow-lg border-2 border-neutral-200 overflow-hidden">
+                            <div className="p-6 bg-gradient-to-r from-[#00214d] to-[#002855] border-b-2 border-[#d4af37]">
+                                <h3 className="text-xl font-bold text-white">カテゴリ別予算</h3>
+                                <p className="text-neutral-200 text-sm mt-1">各広告カテゴリの月間予算を設定してください</p>
+                            </div>
+
+                            {budgetLoading ? (
+                                <div className="p-12 text-center">
+                                    <svg className="animate-spin h-8 w-8 text-[#00214d] mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <p className="text-neutral-500">読み込み中...</p>
+                                </div>
+                            ) : activeCategories.length === 0 ? (
+                                <div className="p-12 text-center text-neutral-400">
+                                    有効なカテゴリがありません
+                                </div>
+                            ) : (
+                                <div className="p-6">
+                                    <div className="space-y-4">
+                                        {activeCategories.map((cat) => (
+                                            <div key={cat.id} className="flex items-center gap-4 p-4 bg-neutral-50 rounded-lg border border-neutral-200 hover:border-[#d4af37] transition-colors">
+                                                <div className="flex-1">
+                                                    <label className="block text-lg font-semibold text-[#00214d] mb-1">
+                                                        {cat.categoryName}
+                                                    </label>
+                                                    <p className="text-sm text-neutral-500">カテゴリID: {cat.id}</p>
+                                                </div>
+                                                <div className="w-64">
+                                                    <div className="relative">
+                                                        <span className="absolute left-3 top-3 text-neutral-500 text-lg font-bold">¥</span>
+                                                        <input
+                                                            type="number"
+                                                            min="0"
+                                                            value={budgetInputs[cat.id] || '0'}
+                                                            onChange={(e) => handleBudgetInputChange(cat.id, e.target.value)}
+                                                            className="w-full pl-8 pr-3 py-2.5 border-2 border-neutral-300 rounded-lg text-lg font-semibold text-right focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/20 transition-all"
+                                                            placeholder="0"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="mt-8 pt-6 border-t-2 border-neutral-200">
+                                        <div className="flex items-center justify-between mb-4">
+                                            <div>
+                                                <h4 className="text-lg font-bold text-[#00214d]">合計予算</h4>
+                                                <p className="text-sm text-neutral-500">全カテゴリの予算合計</p>
+                                            </div>
+                                            <div className="text-3xl font-bold text-[#00214d]">
+                                                ¥{activeCategories.reduce((sum, cat) => sum + Number(budgetInputs[cat.id] || 0), 0).toLocaleString()}
+                                            </div>
+                                        </div>
+
+                                        <button
+                                            onClick={handleSaveBudgets}
+                                            disabled={isSavingBudget}
+                                            className={`w-full py-3.5 rounded-lg text-white font-bold text-lg shadow-lg transition-all duration-200 ${
+                                                isSavingBudget
+                                                    ? 'bg-neutral-400 cursor-not-allowed'
+                                                    : 'bg-[#00214d] hover:bg-[#d4af37] hover:text-[#00214d] hover:scale-[1.02]'
+                                            }`}
+                                        >
+                                            {isSavingBudget ? '保存中...' : '💾 予算を保存'}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 ) : (

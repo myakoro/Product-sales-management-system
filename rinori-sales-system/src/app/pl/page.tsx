@@ -10,6 +10,18 @@ type PlData = {
     grossProfit: number;
     adExpense: number | null;
     operatingProfit: number | null;
+    // V1.53: Budget fields
+    grossProfitBudget: number | null;
+    adBudget: number | null;
+    operatingProfitBudget: number | null;
+    // V1.53: Variance fields
+    grossProfitVariance: number | null;
+    adVariance: number | null;
+    operatingProfitVariance: number | null;
+    // V1.53: Achievement rate fields
+    grossProfitAchievementRate: number | null;
+    adAchievementRate: number | null;
+    operatingProfitAchievementRate: number | null;
 };
 
 type SalesChannel = {
@@ -320,6 +332,26 @@ export default function PlPage() {
                                         </div>
                                     </div>
 
+                                    {/* Gross Profit Budget/Variance/Achievement (V1.53) */}
+                                    {data.grossProfitBudget !== null && (
+                                        <>
+                                            <div className="flex justify-between py-1 text-sm text-blue-600 pl-4">
+                                                <span>粗利予算:</span>
+                                                <span>{formatCurrency(data.grossProfitBudget)}</span>
+                                            </div>
+                                            <div className="flex justify-between py-1 text-sm pl-4">
+                                                <span>差異:</span>
+                                                <span className={data.grossProfitVariance! >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                                    {data.grossProfitVariance! >= 0 ? '+' : ''}{formatCurrency(data.grossProfitVariance!)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between py-1 text-sm text-purple-600 pl-4 border-b border-gray-100">
+                                                <span>達成率:</span>
+                                                <span className="font-semibold">{data.grossProfitAchievementRate?.toFixed(1)}%</span>
+                                            </div>
+                                        </>
+                                    )}
+
                                     {data.adExpense !== null && data.operatingProfit !== null && (
                                         <>
                                             {/* Ad Expense */}
@@ -330,6 +362,26 @@ export default function PlPage() {
                                                     <span className="text-sm ml-2">({formatPercent(data.adExpense, data.sales)})</span>
                                                 </div>
                                             </div>
+
+                                            {/* Ad Budget/Variance/Achievement (V1.53) */}
+                                            {data.adBudget !== null && (
+                                                <>
+                                                    <div className="flex justify-between py-1 text-sm text-blue-600 pl-4">
+                                                        <span>広告予算:</span>
+                                                        <span>{formatCurrency(data.adBudget)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between py-1 text-sm pl-4">
+                                                        <span>差異:</span>
+                                                        <span className={data.adVariance! <= 0 ? 'text-green-600' : 'text-red-600'}>
+                                                            {data.adVariance! >= 0 ? '+' : ''}{formatCurrency(data.adVariance!)}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between py-1 text-sm text-purple-600 pl-4 border-b border-gray-100">
+                                                        <span>達成率:</span>
+                                                        <span className="font-semibold">{data.adAchievementRate?.toFixed(1)}%</span>
+                                                    </div>
+                                                </>
+                                            )}
 
                                             <div className="border-t-2 border-gray-800 my-4"></div>
 
@@ -343,6 +395,26 @@ export default function PlPage() {
                                                     <span className="text-base ml-2 text-gray-600">({formatPercent(data.operatingProfit, data.sales)})</span>
                                                 </div>
                                             </div>
+
+                                            {/* Operating Profit Budget/Variance/Achievement (V1.53) */}
+                                            {data.operatingProfitBudget !== null && (
+                                                <>
+                                                    <div className="flex justify-between py-1 text-sm text-blue-600 pl-4">
+                                                        <span>営業利益予算:</span>
+                                                        <span>{formatCurrency(data.operatingProfitBudget)}</span>
+                                                    </div>
+                                                    <div className="flex justify-between py-1 text-sm pl-4">
+                                                        <span>差異:</span>
+                                                        <span className={data.operatingProfitVariance! >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                                            {data.operatingProfitVariance! >= 0 ? '+' : ''}{formatCurrency(data.operatingProfitVariance!)}
+                                                        </span>
+                                                    </div>
+                                                    <div className="flex justify-between py-1 text-sm text-purple-600 pl-4">
+                                                        <span>達成率:</span>
+                                                        <span className="font-semibold">{data.operatingProfitAchievementRate?.toFixed(1)}%</span>
+                                                    </div>
+                                                </>
+                                            )}
                                         </>
                                     )}
                                 </div>

@@ -69,14 +69,62 @@ export async function GET(request: Request) {
             }
         });
 
+        // 3. Ad Budgets (aggregated over the target period)
+        const adBudgetAgg = await prisma.adBudget.aggregate({
+            _sum: {
+                amount: true,
+            },
+            where: {
+                periodYm: {
+                    gte: startYm,
+                    lte: endYm,
+                }
+            }
+        });
+
+        // 4. Product Budgets (to calculate budget gross profit)
+        const productBudgetAgg = await prisma.monthlyBudget.aggregate({
+            _sum: {
+                budgetQuantity: true,
+                budgetSalesExclTax: true,
+                budgetCostExclTax: true,
+                budgetGrossProfit: true,
+            },
+            where: {
+                periodYm: {
+                    gte: startYm,
+                    lte: endYm,
+                },
+                product: {
+                    managementStatus: { in: ['managed', '管理中'] }
+                }
+            }
+        });
+
         const totalSales = salesAgg._sum.salesAmountExclTax || 0;
         const totalCost = salesAgg._sum.costAmountExclTax || 0;
         const totalGrossProfit = salesAgg._sum.grossProfit || 0;
 
-        // Ad expenses are not linked to sales channels, so return 0 if filtering by channel
-        const totalAd = (salesChannelId && salesChannelId !== 'all') ? 0 : (adAgg._sum.amount || 0);
+        // Ad expenses/budgets are not linked to sales channels, so return null/0 if filtering by channel
+        const isChannelFiltered = !!(salesChannelId && salesChannelId !== 'all');
+        const totalAd = isChannelFiltered ? 0 : (adAgg._sum.amount || 0);
+        const totalAdBudget = isChannelFiltered ? null : (adBudgetAgg._sum.amount || 0);
 
         const operatingProfit = totalGrossProfit - totalAd;
+
+        // Budget calculations
+        const grossProfitBudget = productBudgetAgg._sum.budgetGrossProfit || 0;
+        const operatingProfitBudget = isChannelFiltered ? null : (grossProfitBudget - (totalAdBudget || 0));
+
+        // Achievement rates and variances
+        const adVariance = isChannelFiltered ? null : (totalAd - (totalAdBudget || 0));
+        const adAchievementRate = isChannelFiltered ? null : (totalAdBudget && totalAdBudget > 0 ? (totalAd / totalAdBudget) * 100 : 0);
+
+        const opVariance = isChannelFiltered ? null : (operatingProfit - (operatingProfitBudget || 0));
+        const opAchievementRate = isChannelFiltered ? null : (operatingProfitBudget && operatingProfitBudget !== 0 ? (operatingProfit / operatingProfitBudget) * 100 : 0);
+
+        const gpVariance = totalGrossProfit - grossProfitBudget;
+        const gpAchievementRate = grossProfitBudget && grossProfitBudget > 0 ? (totalGrossProfit / grossProfitBudget) * 100 : 0;
 
         return NextResponse.json({
             sales: totalSales,
@@ -85,7 +133,22 @@ export async function GET(request: Request) {
             adExpense: totalAd,
             operatingProfit: operatingProfit,
 
-            // Rates
+            // Budgets (v1.53)
+            grossProfitBudget,
+            adBudget: totalAdBudget,
+            operatingProfitBudget,
+
+            // Variances (v1.53)
+            grossProfitVariance: gpVariance,
+            adVariance,
+            operatingProfitVariance: opVariance,
+
+            // Achievement Rates (v1.53)
+            grossProfitAchievementRate: gpAchievementRate ? Math.round(gpAchievementRate * 10) / 10 : 0,
+            adAchievementRate: adAchievementRate ? Math.round(adAchievementRate * 10) / 10 : 0,
+            operatingProfitAchievementRate: opAchievementRate ? Math.round(opAchievementRate * 10) / 10 : 0,
+
+            // Legacy Rates
             costRate: totalSales ? (totalCost / totalSales) * 100 : 0,
             grossProfitRate: totalSales ? (totalGrossProfit / totalSales) * 100 : 0,
             adRate: totalSales ? (totalAd / totalSales) * 100 : 0,

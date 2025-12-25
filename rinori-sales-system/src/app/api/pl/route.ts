@@ -73,13 +73,52 @@ export async function GET(request: Request) {
                 grossProfit,
                 adExpense: null,
                 operatingProfit: null,
+                grossProfitBudget: null,
+                adBudget: null,
+                operatingProfitBudget: null,
+                grossProfitVariance: null,
+                adVariance: null,
+                operatingProfitVariance: null,
+                grossProfitAchievementRate: null,
+                adAchievementRate: null,
+                operatingProfitAchievementRate: null,
             });
         }
 
         const adExpense = adAgg._sum.amount || 0;
 
-        // 3. Calculate Operating Profit
+        // 3. Ad Budgets
+        const adBudgetAgg = await prisma.adBudget.aggregate({
+            _sum: { amount: true },
+            where: {
+                periodYm: { gte: startYm, lte: endYm }
+            }
+        });
+        const adBudget = adBudgetAgg._sum.amount || 0;
+
+        // 4. Product Budgets (Gross Profit)
+        const productBudgetAgg = await prisma.monthlyBudget.aggregate({
+            _sum: { budgetGrossProfit: true },
+            where: {
+                periodYm: { gte: startYm, lte: endYm },
+                product: { managementStatus: { in: ['管理中', 'managed'] } }
+            }
+        });
+        const grossProfitBudget = productBudgetAgg._sum.budgetGrossProfit || 0;
+
+        // 5. Logical Calculations
         const operatingProfit = grossProfit - adExpense;
+        const operatingProfitBudget = grossProfitBudget - adBudget;
+
+        // Variances
+        const grossProfitVariance = grossProfit - grossProfitBudget;
+        const adVariance = adExpense - adBudget;
+        const operatingProfitVariance = operatingProfit - operatingProfitBudget;
+
+        // Achievement Rates
+        const grossProfitAchievementRate = grossProfitBudget > 0 ? (grossProfit / grossProfitBudget) * 100 : 0;
+        const adAchievementRate = adBudget > 0 ? (adExpense / adBudget) * 100 : 0;
+        const operatingProfitAchievementRate = operatingProfitBudget !== 0 ? (operatingProfit / operatingProfitBudget) * 100 : 0;
 
         return NextResponse.json({
             sales,
@@ -87,6 +126,21 @@ export async function GET(request: Request) {
             grossProfit,
             adExpense,
             operatingProfit,
+
+            // Budgets (v1.53)
+            grossProfitBudget,
+            adBudget,
+            operatingProfitBudget,
+
+            // Variances (v1.53)
+            grossProfitVariance,
+            adVariance,
+            operatingProfitVariance,
+
+            // Achievement Rates (v1.53)
+            grossProfitAchievementRate: Math.round(grossProfitAchievementRate * 10) / 10,
+            adAchievementRate: Math.round(adAchievementRate * 10) / 10,
+            operatingProfitAchievementRate: Math.round(operatingProfitAchievementRate * 10) / 10,
         });
     } catch (error) {
         console.error('Failed to fetch PL data:', error);

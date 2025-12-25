@@ -158,32 +158,95 @@ export default function MonthlyPLPage() {
                                 </div>
 
                                 {/* Gross Profit */}
-                                <div className="flex justify-between items-center p-6 bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl border-2 border-emerald-100 shadow-sm relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 p-4 text-4xl opacity-10 group-hover:scale-125 transition-transform">📈</div>
-                                    <span className="text-xl font-bold text-emerald-900">売上総利益 (粗利)</span>
-                                    <div className="text-right z-10">
-                                        <div className="text-3xl font-black text-emerald-700 tracking-tight">{formatCurrency(plData.grossProfit)}</div>
-                                        <div className="text-sm font-bold text-emerald-600 mt-1">利益率: {formatPercent(plData.grossProfitRate)}</div>
+                                <div className="bg-gradient-to-r from-emerald-50 to-green-50 rounded-2xl border-2 border-emerald-100 shadow-sm overflow-hidden">
+                                    <div className="flex justify-between items-center p-6 relative group">
+                                        <div className="absolute top-0 right-0 p-4 text-4xl opacity-10 group-hover:scale-125 transition-transform">📈</div>
+                                        <span className="text-xl font-bold text-emerald-900">売上総利益 (粗利)</span>
+                                        <div className="text-right z-10">
+                                            <div className="text-3xl font-black text-emerald-700 tracking-tight">{formatCurrency(plData.grossProfit)}</div>
+                                            <div className="text-sm font-bold text-emerald-600 mt-1">利益率: {formatPercent(plData.grossProfitRate)}</div>
+                                        </div>
                                     </div>
+                                    {/* Gross Profit Budget/Variance/Achievement (V1.53) */}
+                                    {plData.grossProfitBudget !== null && plData.grossProfitBudget !== undefined && (
+                                        <div className="px-6 pb-4 pt-2 border-t border-emerald-200 bg-white/50 space-y-2">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-blue-600 font-semibold">粗利予算:</span>
+                                                <span className="font-bold text-blue-700">{formatCurrency(plData.grossProfitBudget)}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="font-semibold">差異:</span>
+                                                <span className={`font-bold ${plData.grossProfitVariance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                    {plData.grossProfitVariance >= 0 ? '+' : ''}{formatCurrency(plData.grossProfitVariance)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-purple-600 font-semibold">達成率:</span>
+                                                <span className="font-bold text-purple-700">{formatPercent(plData.grossProfitAchievementRate)}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Ad Expense */}
-                                <div className="flex justify-between items-center py-2 text-neutral-600 pl-4 border-l-4 border-neutral-200">
-                                    <span className="font-semibold text-rose-700">広告宣伝費</span>
-                                    <div className="text-right">
-                                        <div className="text-xl font-bold text-rose-900">{formatCurrency(plData.adExpense)}</div>
-                                        <div className="text-xs font-bold text-rose-400 bg-rose-50 px-2 py-0.5 rounded-full inline-block mt-1">{formatPercent(plData.adRate)}</div>
+                                <div className="bg-gradient-to-r from-rose-50 to-red-50 rounded-2xl border-2 border-rose-100 shadow-sm overflow-hidden">
+                                    <div className="flex justify-between items-center p-4">
+                                        <span className="font-semibold text-rose-700">広告宣伝費</span>
+                                        <div className="text-right">
+                                            <div className="text-xl font-bold text-rose-900">{formatCurrency(plData.adExpense)}</div>
+                                            <div className="text-xs font-bold text-rose-400 bg-rose-50 px-2 py-0.5 rounded-full inline-block mt-1">{formatPercent(plData.adRate)}</div>
+                                        </div>
                                     </div>
+                                    {/* Ad Budget/Variance/Achievement (V1.53) */}
+                                    {plData.adBudget !== null && plData.adBudget !== undefined && (
+                                        <div className="px-4 pb-4 pt-2 border-t border-rose-200 bg-white/50 space-y-2">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-blue-600 font-semibold">広告予算:</span>
+                                                <span className="font-bold text-blue-700">{formatCurrency(plData.adBudget)}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="font-semibold">差異:</span>
+                                                <span className={`font-bold ${plData.adVariance <= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                    {plData.adVariance >= 0 ? '+' : ''}{formatCurrency(plData.adVariance)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-purple-600 font-semibold">達成率:</span>
+                                                <span className="font-bold text-purple-700">{formatPercent(plData.adAchievementRate)}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Operating Profit */}
-                                <div className="flex justify-between items-center p-6 bg-gradient-to-r from-[#00214d] to-[#002855] text-white rounded-2xl shadow-xl border-t-4 border-[#d4af37] relative overflow-hidden group">
-                                    <div className="absolute top-0 right-0 p-4 text-4xl opacity-20 group-hover:scale-125 transition-transform">⭐</div>
-                                    <span className="text-xl font-bold">営業利益</span>
-                                    <div className="text-right z-10">
-                                        <div className="text-4xl font-black text-white tracking-tight">{formatCurrency(plData.operatingProfit)}</div>
-                                        <div className="text-sm font-bold text-[#d4af37] mt-1">利益率: {formatPercent(plData.operatingProfitRate)}</div>
+                                <div className="bg-gradient-to-r from-[#00214d] to-[#002855] text-white rounded-2xl shadow-xl border-t-4 border-[#d4af37] overflow-hidden">
+                                    <div className="flex justify-between items-center p-6 relative group">
+                                        <div className="absolute top-0 right-0 p-4 text-4xl opacity-20 group-hover:scale-125 transition-transform">⭐</div>
+                                        <span className="text-xl font-bold">営業利益</span>
+                                        <div className="text-right z-10">
+                                            <div className="text-4xl font-black text-white tracking-tight">{formatCurrency(plData.operatingProfit)}</div>
+                                            <div className="text-sm font-bold text-[#d4af37] mt-1">利益率: {formatPercent(plData.operatingProfitRate)}</div>
+                                        </div>
                                     </div>
+                                    {/* Operating Profit Budget/Variance/Achievement (V1.53) */}
+                                    {plData.operatingProfitBudget !== null && plData.operatingProfitBudget !== undefined && (
+                                        <div className="px-6 pb-4 pt-2 border-t border-white/20 bg-white/10 space-y-2">
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-blue-200 font-semibold">営業利益予算:</span>
+                                                <span className="font-bold text-blue-100">{formatCurrency(plData.operatingProfitBudget)}</span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="font-semibold text-white">差異:</span>
+                                                <span className={`font-bold ${plData.operatingProfitVariance >= 0 ? 'text-green-300' : 'text-red-300'}`}>
+                                                    {plData.operatingProfitVariance >= 0 ? '+' : ''}{formatCurrency(plData.operatingProfitVariance)}
+                                                </span>
+                                            </div>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-[#d4af37] font-semibold">達成率:</span>
+                                                <span className="font-bold text-[#d4af37]">{formatPercent(plData.operatingProfitAchievementRate)}</span>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         )}

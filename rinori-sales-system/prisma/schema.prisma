@@ -17,6 +17,7 @@ model User {
 
   salesRecords  SalesRecord[]
   adExpenses    AdExpense[]
+  adBudgets     AdBudget[]
   importHistories ImportHistory[]
 
   @@map("users")
@@ -136,6 +137,7 @@ model AdCategory {
   createdAt    DateTime @default(now()) @map("created_at")
 
   adExpenses   AdExpense[]
+  adBudgets    AdBudget[]
 
   @@map("ad_categories")
 }
@@ -154,6 +156,24 @@ model AdExpense {
   createdBy       User       @relation(fields: [createdByUserId], references: [id])
 
   @@map("ad_expenses")
+}
+
+// 広告予算 (V1.53追加)
+model AdBudget {
+  id              Int        @id @default(autoincrement())
+  periodYm        String     @map("period_ym")       // 予算対象年月 (YYYY-MM)
+  adCategoryId    Int        @map("ad_category_id")  // 広告カテゴリID (FK)
+  amount          Float      @default(0)             // 予算額
+  createdByUserId Int        @map("created_by_user_id") // 登録・更新ユーザー (FK)
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  adCategory      AdCategory @relation(fields: [adCategoryId], references: [id])
+  createdBy       User       @relation(fields: [createdByUserId], references: [id])
+
+  @@unique([periodYm, adCategoryId]) // 1カテゴリ1ヶ月に対し1予算
+  @@map("ad_budgets")
 }
 
 // 税率マスタ
