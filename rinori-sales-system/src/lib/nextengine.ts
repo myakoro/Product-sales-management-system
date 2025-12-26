@@ -21,7 +21,8 @@ export class NextEngineClient {
      * ログインページURLの生成
      */
     getAuthUrl(state: string): string {
-        return `https://base.next-engine.org/main/oauth/authorize?client_id=${this.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri)}&state=${state}`;
+        // テスト環境用のドメインを使用
+        return `https://sandbox.next-engine.org/main/oauth/authorize?client_id=${this.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri)}&state=${state}`;
     }
 
     /**
