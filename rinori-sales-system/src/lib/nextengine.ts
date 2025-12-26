@@ -42,7 +42,7 @@ export class NextEngineClient {
             state,
         });
 
-        const response = await fetch('https://api.next-engine.org/main/oauth/token', {
+        const response = await fetch('https://api.next-engine.org/api_neauth/', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: params.toString(),
