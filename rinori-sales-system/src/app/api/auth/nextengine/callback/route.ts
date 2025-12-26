@@ -33,9 +33,11 @@ export async function GET(request: Request) {
 
         console.log('[NE OAuth] Successfully authenticated and tokens saved.');
 
-        return NextResponse.redirect(new URL('/settings/nextengine?auth=success', request.url));
+        const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+        return NextResponse.redirect(new URL('/settings/nextengine?auth=success', baseUrl));
     } catch (error: any) {
         console.error('[NE OAuth] Callback error:', error);
-        return NextResponse.redirect(new URL('/settings/nextengine?auth=error', request.url));
+        const baseUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+        return NextResponse.redirect(new URL('/settings/nextengine?auth=error', baseUrl));
     }
 }
