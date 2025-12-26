@@ -102,7 +102,7 @@ function resolveDbPath(databaseUrl) {
         console.log("\n🚀 Starting database initialization...");
         try {
             console.log("📝 Running prisma db push...");
-            execSync("npx prisma db push", { stdio: "inherit" });
+            execSync("npx prisma db push --accept-data-loss", { stdio: "inherit" });
 
             console.log("🌱 Running seed...");
             execSync("node prisma/seed.js", { stdio: "inherit" });
