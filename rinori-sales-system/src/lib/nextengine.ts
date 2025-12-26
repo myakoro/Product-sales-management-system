@@ -54,7 +54,11 @@ export class NextEngineClient {
         }
 
         const data = await response.json();
-        // data: { access_token, refresh_token, access_token_end_date, refresh_token_end_date, ... }
+        console.log('[NE OAuth] Token response:', JSON.stringify(data, null, 2));
+
+        // Next Engineは日付をUNIXタイムスタンプ(秒)で返すため、ミリ秒に変換
+        const accessTokenExpiry = new Date(parseInt(data.access_token_end_date) * 1000);
+        const refreshTokenExpiry = new Date(parseInt(data.refresh_token_end_date) * 1000);
 
         // DBに保存 (ID=1に固定)
         return await prisma.nEAuth.upsert({
@@ -62,15 +66,15 @@ export class NextEngineClient {
             update: {
                 accessToken: data.access_token,
                 refreshToken: data.refresh_token,
-                expiresAt: new Date(data.access_token_end_date),
-                refreshesAt: new Date(data.refresh_token_end_date),
+                expiresAt: accessTokenExpiry,
+                refreshesAt: refreshTokenExpiry,
             },
             create: {
                 id: 1,
                 accessToken: data.access_token,
                 refreshToken: data.refresh_token,
-                expiresAt: new Date(data.access_token_end_date),
-                refreshesAt: new Date(data.refresh_token_end_date),
+                expiresAt: accessTokenExpiry,
+                refreshesAt: refreshTokenExpiry,
             },
         });
     }
