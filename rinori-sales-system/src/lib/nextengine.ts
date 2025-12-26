@@ -19,9 +19,16 @@ export class NextEngineClient {
 
     /**
      * ログインページURLの生成
+     * OAuth 2.0 Authorization Code Grant フロー
      */
     getAuthUrl(state: string): string {
-        return `https://base.next-engine.org/main/oauth/authorize?client_id=${this.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri)}&state=${state}`;
+        const params = new URLSearchParams({
+            response_type: 'code',
+            client_id: this.clientId,
+            redirect_uri: this.redirectUri,
+            state: state
+        });
+        return `https://base.next-engine.org/users/sign_in?${params.toString()}`;
     }
 
     /**
