@@ -66,6 +66,7 @@ model SalesRecord {
   costAmountExclTax   Float    @map("cost_amount_excl_tax")
   grossProfit         Float    @map("gross_profit")
   salesChannelId      Int?     @map("sales_channel_id")
+  externalOrderId     String?  @unique @map("external_order_id") // V1.54追加: NEの受注番号等
   importHistoryId     Int      @map("import_history_id")
   createdByUserId     Int      @map("created_by_user_id")
   createdAt           DateTime @default(now()) @map("created_at")
@@ -195,6 +196,7 @@ model SalesChannel {
 
   salesRecords   SalesRecord[]
   importHistories ImportHistory[]
+  neShopMappings NEShopMapping[]
 
   @@map("sales_channels")
 }
@@ -239,5 +241,29 @@ model ExclusionKeyword {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("exclusion_keywords")
+}
+
+// V1.54 ネクストエンジン認証
+model NEAuth {
+  id            Int      @id @default(1)
+  accessToken   String   @map("access_token")
+  refreshToken  String   @map("refresh_token")
+  expiresAt     DateTime @map("expires_at")      // アクセストークン有効期限
+  refreshesAt   DateTime @map("refreshes_at")    // リフレッシュトークン有効期限
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("ne_auth")
+}
+
+// V1.54 ネクストエンジン店舗マッピング
+model NEShopMapping {
+  neShopId    Int      @id @map("ne_shop_id")
+  channelId   Int      @map("channel_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  channel     SalesChannel @relation(fields: [channelId], references: [id])
+
+  @@map("ne_shop_mappings")
 }
 

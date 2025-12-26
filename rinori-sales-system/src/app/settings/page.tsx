@@ -53,6 +53,13 @@ export default function SettingsPage() {
             href: '/budget',
             icon: '🎯',
             color: 'from-purple-400 to-violet-600'
+        },
+        {
+            title: 'ネクストエンジン連携',
+            description: 'NE API連携の認証・店舗紐付け設定',
+            href: '/settings/nextengine',
+            icon: '🔄',
+            color: 'from-blue-500 to-indigo-700'
         }
     ];
 
