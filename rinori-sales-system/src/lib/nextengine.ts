@@ -21,7 +21,7 @@ export class NextEngineClient {
      * ログインページURLの生成
      */
     getAuthUrl(state: string): string {
-        return `https://api.next-engine.org/main/oauth/authorize?client_id=${this.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri)}&state=${state}`;
+        return `https://base.next-engine.org/main/oauth/authorize?client_id=${this.clientId}&redirect_uri=${encodeURIComponent(this.redirectUri)}&state=${state}`;
     }
 
     /**
