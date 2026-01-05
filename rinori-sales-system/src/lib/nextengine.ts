@@ -149,8 +149,8 @@ export class NextEngineClient {
 
         return await this.apiPost('/api_v1_receiveorder_row/search', {
             fields: 'receive_order_row_id,receive_order_row_goods_id,receive_order_row_quantity,receive_order_row_unit_price',
-            'receive_order_receive_order_date-from': formatDate(startDate),
-            'receive_order_receive_order_date-to': formatDate(endDate),
+            'receive_order_date-from': formatDate(startDate),
+            'receive_order_date-to': formatDate(endDate),
             receive_order_order_status_id: '50', // 出荷確定済（完了）
             receive_order_shop_id: shopIds.join(','),
             wait_flag: '1'
