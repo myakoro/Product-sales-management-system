@@ -150,13 +150,12 @@ export default function NextEngineSettingsPage() {
     const handleSaveMappings = async () => {
         setIsSaving(true);
         try {
-            // 未設定（value=""）の行を除外
-            const mappingsToSave = shops
-                .filter(shop => selectedChannels[shop.shopId] && selectedChannels[shop.shopId] !== "")
-                .map(shop => ({
-                    neShopId: shop.shopId,
-                    channelId: Number(selectedChannels[shop.shopId])
-                }));
+            // 全ショップの現在の設定値を保存対象とする（未設定＝解除も含む）
+            const mappingsToSave = shops.map(shop => ({
+                neShopId: shop.shopId,
+                // 空文字列の場合は null または 0 として送信、サーバー側で削除処理を行う
+                channelId: selectedChannels[shop.shopId] ? Number(selectedChannels[shop.shopId]) : 0
+            }));
 
             // 順次POST
             for (const mapping of mappingsToSave) {
@@ -396,11 +395,10 @@ export default function NextEngineSettingsPage() {
                                 <button
                                     onClick={handleSaveMappings}
                                     disabled={isSaving}
-                                    className={`px-6 py-2.5 rounded-lg font-bold transition-all ${
-                                        isSaving
+                                    className={`px-6 py-2.5 rounded-lg font-bold transition-all ${isSaving
                                             ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
                                             : 'bg-[#00214d] text-white hover:bg-[#00337a] shadow-md hover:shadow-lg'
-                                    }`}
+                                        }`}
                                 >
                                     {isSaving ? '保存中...' : '保存する'}
                                 </button>
@@ -469,11 +467,10 @@ export default function NextEngineSettingsPage() {
                                     <button
                                         onClick={handleSync}
                                         disabled={!targetYm || !syncChannelId}
-                                        className={`px-6 py-2.5 rounded-lg font-bold transition-all ${
-                                            !targetYm || !syncChannelId
+                                        className={`px-6 py-2.5 rounded-lg font-bold transition-all ${!targetYm || !syncChannelId
                                                 ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
                                                 : 'bg-[#00214d] text-white hover:bg-[#00337a] shadow-md hover:shadow-lg'
-                                        }`}
+                                            }`}
                                     >
                                         同期実行
                                     </button>
@@ -482,34 +479,31 @@ export default function NextEngineSettingsPage() {
                                 {/* 結果メッセージ */}
                                 {syncResult && (
                                     <div
-                                        className={`relative p-4 rounded-lg ${
-                                            syncResult.type === 'success'
+                                        className={`relative p-4 rounded-lg ${syncResult.type === 'success'
                                                 ? 'bg-green-50 border border-green-200'
                                                 : syncResult.type === 'warning'
-                                                ? 'bg-yellow-50 border border-yellow-200'
-                                                : 'bg-red-50 border border-red-200'
-                                        }`}
+                                                    ? 'bg-yellow-50 border border-yellow-200'
+                                                    : 'bg-red-50 border border-red-200'
+                                            }`}
                                     >
                                         <button
                                             onClick={() => setSyncResult(null)}
-                                            className={`absolute top-2 right-2 text-lg font-bold transition-colors ${
-                                                syncResult.type === 'success'
+                                            className={`absolute top-2 right-2 text-lg font-bold transition-colors ${syncResult.type === 'success'
                                                     ? 'text-green-600 hover:text-green-800'
                                                     : syncResult.type === 'warning'
-                                                    ? 'text-yellow-600 hover:text-yellow-800'
-                                                    : 'text-red-600 hover:text-red-800'
-                                            }`}
+                                                        ? 'text-yellow-600 hover:text-yellow-800'
+                                                        : 'text-red-600 hover:text-red-800'
+                                                }`}
                                         >
                                             ✕
                                         </button>
                                         <p
-                                            className={`pr-6 ${
-                                                syncResult.type === 'success'
+                                            className={`pr-6 ${syncResult.type === 'success'
                                                     ? 'text-green-800'
                                                     : syncResult.type === 'warning'
-                                                    ? 'text-yellow-800'
-                                                    : 'text-red-800'
-                                            }`}
+                                                        ? 'text-yellow-800'
+                                                        : 'text-red-800'
+                                                }`}
                                         >
                                             {syncResult.message}
                                         </p>
