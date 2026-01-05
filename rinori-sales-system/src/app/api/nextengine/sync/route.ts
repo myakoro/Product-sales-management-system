@@ -94,11 +94,18 @@ export async function POST(request: Request) {
             productCode: string;
         }>();
 
-        const [year, month] = targetYm.split('-').map(Number);
-        const saleDate = new Date(year, month - 1, 1); // 月初日
+        // exclusionKeywordsを取得
+        const exclusionKeywords = await prisma.exclusionKeyword.findMany();
 
         for (const row of orderData.data) {
             const sku = row.receive_order_row_goods_id;
+
+            // 除外キーワードのチェック (一致したらスキップ)
+            const isExcluded = exclusionKeywords.some(k =>
+                k.matchType === 'startsWith' ? sku.startsWith(k.keyword) : sku.includes(k.keyword)
+            );
+            if (isExcluded) continue;
+
             const parentCode = convertSkuToParentCode(sku);
             const quantity = parseInt(row.receive_order_row_quantity);
             // receive_order_row_sub_total_price（行小計：割引などを反映した後の金額）を使用
