@@ -124,6 +124,7 @@ export class NextEngineClient {
      */
     async getShops() {
         return await this.apiPost('/api_v1_master_shop/search', {
+            fields: 'shop_id,shop_name',
             wait_flag: '1'
         });
     }
