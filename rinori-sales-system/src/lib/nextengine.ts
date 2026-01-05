@@ -152,7 +152,7 @@ export class NextEngineClient {
             'receive_order_send_date-gte': formatDate(startDate),
             'receive_order_send_date-lte': formatDate(endDate),
             'receive_order_order_status_id-eq': '50', // 出荷確定済（完了）
-            receive_order_shop_id: shopIds.join(','),
+            'receive_order_shop_id-in': shopIds.join(','),
             wait_flag: '1'
         });
     }
