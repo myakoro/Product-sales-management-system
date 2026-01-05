@@ -148,12 +148,9 @@ export class NextEngineClient {
         };
 
         return await this.apiPost('/api_v1_receiveorder_row/search', {
-            fields: 'receive_order_row_no,receive_order_row_goods_id,receive_order_row_quantity,receive_order_row_unit_price,receive_order_row_sub_total_price',
+            fields: 'receive_order_row_no,receive_order_row_goods_id,receive_order_row_quantity,receive_order_row_unit_price,receive_order_row_sub_total_price,receive_order_cancel_flag,receive_order_deleted_flag,receive_order_test_order_flag',
             'receive_order_send_date-gte': formatDate(startDate),
             'receive_order_send_date-lte': formatDate(endDate),
-            'receive_order_cancel_flag-eq': '0',        // キャンセルされていない
-            'receive_order_deleted_flag-eq': '0',       // 削除されていない
-            'receive_order_test_order_flag-eq': '0',    // テスト注文ではない
             'receive_order_shop_id-in': shopIds.join(','),
             wait_flag: '1'
         });
