@@ -29,15 +29,16 @@ export async function GET() {
         const grossProfit = salesData._sum.grossProfit || 0;
 
         // 今月の広告費を集計
-        const startDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-01`;
-        const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-        const endDateStr = `${endDate.getFullYear()}-${String(endDate.getMonth() + 1).padStart(2, '0')}-${String(endDate.getDate()).padStart(2, '0')}`;
+        const year = now.getFullYear();
+        const month = now.getMonth() + 1;
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0);
 
         const adExpenseData = await prisma.adExpense.aggregate({
             where: {
                 expenseDate: {
                     gte: startDate,
-                    lte: endDateStr
+                    lte: endDate
                 }
             },
             _sum: {
