@@ -103,14 +103,7 @@ export async function POST(request: Request) {
         for (const row of orderData.data) {
             const sku = row.receive_order_row_goods_id;
 
-            // 1. キャンセル・削除・テスト注文のフィルタ (API検索不可のためアプリ側で対応)
-            if (row.receive_order_cancel_flag != '0' ||
-                row.receive_order_deleted_flag != '0' ||
-                row.receive_order_test_order_flag != '0') {
-                continue;
-            }
-
-            // 2. 除外キーワードのチェック (一致したらスキップ)
+            // 除外キーワードのチェック (一致したらスキップ)
             const isExcluded = exclusionKeywords.some(k =>
                 k.matchType === 'startsWith' ? sku.startsWith(k.keyword) : sku.includes(k.keyword)
             );
