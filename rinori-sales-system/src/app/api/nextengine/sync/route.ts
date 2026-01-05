@@ -155,9 +155,15 @@ export async function POST(request: Request) {
         }
 
         // 6. 一括保存
-        if (salesRecords.length > 0) {
+        // 6. 一括保存
+        // salesRecordsの中からexternalOrderIdが重複していないものだけにフィルタリング
+        const uniqueSalesRecords = Array.from(
+            new Map(salesRecords.map(item => [item.externalOrderId, item])).values()
+        );
+
+        if (uniqueSalesRecords.length > 0) {
             await prisma.salesRecord.createMany({
-                data: salesRecords
+                data: uniqueSalesRecords
             });
         }
 
