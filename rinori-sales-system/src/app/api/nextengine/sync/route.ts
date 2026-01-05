@@ -94,6 +94,9 @@ export async function POST(request: Request) {
             productCode: string;
         }>();
 
+        const [year, month] = targetYm.split('-').map(Number);
+        const saleDate = new Date(year, month - 1, 1); // 月初日
+
         // exclusionKeywordsを取得
         const exclusionKeywords = await prisma.exclusionKeyword.findMany();
 
