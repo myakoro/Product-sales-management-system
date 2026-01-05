@@ -59,14 +59,32 @@ export async function POST(request: Request) {
             });
         }
 
-        // 3. 既存データ削除 (同一月・同一販路)
-        const deletedRecords = await prisma.salesRecord.deleteMany({
+        // 3. 既存データ削除 (重複回避)
+        // 今回取り込むデータのexternalOrderIdリストを作成
+        const newExternalOrderIds = orderData.data.map((row: any) => String(row.receive_order_row_no));
+
+        // 既存のレコードで、今回取り込むデータとexternalOrderIdが重複するものを削除
+        // (対象月や販路に関わらず、ユニーク制約違反を防ぐため)
+        if (newExternalOrderIds.length > 0) {
+            const deletedDuplicates = await prisma.salesRecord.deleteMany({
+                where: {
+                    externalOrderId: {
+                        in: newExternalOrderIds
+                    }
+                }
+            });
+            console.log('[NE Sync] Deleted duplicate references:', deletedDuplicates.count);
+        }
+
+        // また、同一月・同一販路のデータも念のため削除（クリーンアップ）
+        const deletedPeriodRecords = await prisma.salesRecord.deleteMany({
             where: {
                 periodYm: targetYm,
-                salesChannelId: parseInt(channelId)
+                salesChannelId: parseInt(channelId),
+                // すでに削除済みのものは除外されるので問題なし
             }
         });
-        console.log('[NE Sync] Deleted existing records:', deletedRecords.count);
+        console.log('[NE Sync] Cleaned up period records:', deletedPeriodRecords.count);
 
         // 4. 取込履歴を作成
         const importHistory = await prisma.importHistory.create({
