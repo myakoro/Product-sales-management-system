@@ -59,32 +59,18 @@ export async function POST(request: Request) {
             });
         }
 
-        // 3. 既存データ削除 (重複回避)
-        // 今回取り込むデータのexternalOrderIdリストを作成
-        const newExternalOrderIds = orderData.data.map((row: any) => String(row.receive_order_row_no));
-
-        // 既存のレコードで、今回取り込むデータとexternalOrderIdが重複するものを削除
-        // (対象月や販路に関わらず、ユニーク制約違反を防ぐため)
-        if (newExternalOrderIds.length > 0) {
-            const deletedDuplicates = await prisma.salesRecord.deleteMany({
-                where: {
-                    externalOrderId: {
-                        in: newExternalOrderIds
-                    }
-                }
-            });
-            console.log('[NE Sync] Deleted duplicate references:', deletedDuplicates.count);
-        }
-
-        // また、同一月・同一販路のデータも念のため削除（クリーンアップ）
+        // 3. 既存データ集計レコードを削除 (重複回避)
+        // NE自動同期によって作成されたこの「月・販路」のレコードを一旦削除する
         const deletedPeriodRecords = await prisma.salesRecord.deleteMany({
             where: {
                 periodYm: targetYm,
                 salesChannelId: parseInt(channelId),
-                // すでに削除済みのものは除外されるので問題なし
+                externalOrderId: {
+                    startsWith: `NE-${channelId}-${targetYm}-`
+                }
             }
         });
-        console.log('[NE Sync] Cleaned up period records:', deletedPeriodRecords.count);
+        console.log('[NE Sync] Cleaned up existing sync records:', deletedPeriodRecords.count);
 
         // 4. 取込履歴を作成
         const importHistory = await prisma.importHistory.create({
@@ -100,70 +86,84 @@ export async function POST(request: Request) {
             }
         });
 
-        // 5. データ変換と保存
-        const salesRecords = [];
+        // 5. データ集計と変換
+        // 商品コード単位で数量と金額を集計するためのMap
+        const aggregatedData = new Map<string, {
+            quantity: number;
+            totalAmount税込: number;
+            productCode: string;
+        }>();
+
         const [year, month] = targetYm.split('-').map(Number);
         const saleDate = new Date(year, month - 1, 1); // 月初日
-
-        // 税率の取得（ループ外で1回だけ）
-        const taxRateRecord = await prisma.taxRate.findFirst({
-            where: {
-                startYm: {
-                    lte: targetYm
-                }
-            },
-            orderBy: {
-                startYm: 'desc'
-            }
-        });
-        const taxRate = taxRateRecord ? (1 + taxRateRecord.rate) : 1.1; // デフォルト10%
 
         for (const row of orderData.data) {
             const sku = row.receive_order_row_goods_id;
             const parentCode = convertSkuToParentCode(sku);
             const quantity = parseInt(row.receive_order_row_quantity);
-            const unitPrice = parseFloat(row.receive_order_row_unit_price);
-            const totalAmount = unitPrice * quantity;
+            // receive_order_row_sub_total_price（行小計：割引などを反映した後の金額）を使用
+            const subTotal = parseFloat(row.receive_order_row_sub_total_price || '0');
 
+            if (aggregatedData.has(parentCode)) {
+                const existing = aggregatedData.get(parentCode)!;
+                existing.quantity += quantity;
+                existing.totalAmount税込 += subTotal;
+            } else {
+                aggregatedData.set(parentCode, {
+                    quantity,
+                    totalAmount税込: subTotal,
+                    productCode: parentCode
+                });
+            }
+        }
+
+        // 税率の取得
+        const taxRateRecord = await prisma.taxRate.findFirst({
+            where: { startYm: { lte: targetYm } },
+            orderBy: { startYm: 'desc' }
+        });
+        const taxRate = taxRateRecord ? (1 + taxRateRecord.rate) : 1.1;
+
+        const salesRecords = [];
+        for (const [parentCode, data] of aggregatedData.entries()) {
             // 商品マスタの存在確認
             const product = await prisma.product.findUnique({
                 where: { productCode: parentCode }
             });
 
             if (!product) {
-                console.warn(`[NE Sync] Product not found: ${parentCode} (SKU: ${sku})`);
-                continue; // 商品マスタに存在しない場合はスキップ
+                console.warn(`[NE Sync] Product not found: ${parentCode}`);
+                continue; // マスタ未登録はスキップ（同期終了後に通知される可能性を考慮）
             }
 
-            const salesAmountExclTax = totalAmount / taxRate;
-            const costAmountExclTax = product.costExclTax * quantity;
+            // 管理ステータスチェック
+            if (product.managementStatus === '管理外' || product.managementStatus === 'unmanaged') {
+                continue;
+            }
+
+            const salesAmountExclTax = Math.round(data.totalAmount税込 / taxRate);
+            const costAmountExclTax = product.costExclTax * data.quantity;
             const grossProfit = salesAmountExclTax - costAmountExclTax;
 
             salesRecords.push({
                 productCode: parentCode,
                 periodYm: targetYm,
                 salesDate: saleDate,
-                quantity,
+                quantity: data.quantity,
                 salesAmountExclTax,
                 costAmountExclTax,
                 grossProfit,
                 salesChannelId: parseInt(channelId),
-                externalOrderId: String(row.receive_order_row_no),
+                // 決定論的な外部ID: NE-[販路ID]-[年月]-[商品コード]
+                externalOrderId: `NE-${channelId}-${targetYm}-${parentCode}`,
                 importHistoryId: importHistory.id,
                 createdByUserId: parseInt((session.user as any).id)
             });
         }
 
-        // 6. 一括保存
-        // 6. 一括保存
-        // salesRecordsの中からexternalOrderIdが重複していないものだけにフィルタリング
-        const uniqueSalesRecords = Array.from(
-            new Map(salesRecords.map(item => [item.externalOrderId, item])).values()
-        );
-
-        if (uniqueSalesRecords.length > 0) {
+        if (salesRecords.length > 0) {
             await prisma.salesRecord.createMany({
-                data: uniqueSalesRecords
+                data: salesRecords
             });
         }
 
