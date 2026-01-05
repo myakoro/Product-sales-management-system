@@ -69,7 +69,7 @@ export async function POST(request: Request) {
                 comment: `ネクストエンジン自動同期 (店舗ID: ${shopIds.join(', ')})`,
                 salesChannelId: parseInt(channelId),
                 recordCount: 0, // 後で更新
-                importedByUserId: (session.user as any).id
+                importedByUserId: parseInt((session.user as any).id)
             }
         });
 
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
                 salesChannelId: parseInt(channelId),
                 externalOrderId: row.receive_order_row_no,
                 importHistoryId: importHistory.id,
-                createdByUserId: (session.user as any).id
+                createdByUserId: parseInt((session.user as any).id)
             });
         }
 
