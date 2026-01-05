@@ -130,24 +130,31 @@ export class NextEngineClient {
     }
 
     /**
-     * 受注明細情報の検索 (receiveorder_row/search)
+     * 受注明細の検索 (receiveorder_row/search)
+     * @param targetYm 対象月 (YYYY-MM)
+     * @param shopIds 店舗IDの配列
      */
-    async searchOrderRows(params: {
-        receive_order_date_from: string;
-        receive_order_date_to: string;
-        shop_ids?: number[];
-    }) {
-        const body: any = {
-            wait_flag: '1',
-            receive_order_date_from: params.receive_order_date_from,
-            receive_order_date_to: params.receive_order_date_to,
+    async searchOrderRows(targetYm: string, shopIds: number[]) {
+        // 月初と月末を計算
+        const [year, month] = targetYm.split('-').map(Number);
+        const startDate = new Date(year, month - 1, 1);
+        const endDate = new Date(year, month, 0); // 月末日
+
+        const formatDate = (date: Date) => {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0');
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
         };
 
-        if (params.shop_ids && params.shop_ids.length > 0) {
-            body['receive_order_shop_id-in'] = params.shop_ids.join(',');
-        }
-
-        return await this.apiPost('/api_v1_receiveorder_row/search', body);
+        return await this.apiPost('/api_v1_receiveorder_row/search', {
+            fields: 'receive_order_row_id,receive_order_row_goods_id,receive_order_row_quantity,receive_order_row_unit_price',
+            receive_order_date_from: formatDate(startDate),
+            receive_order_date_to: formatDate(endDate),
+            receive_order_order_status_id: '20', // 出荷確定済
+            receive_order_shop_id: shopIds.join(','),
+            wait_flag: '1'
+        });
     }
 
     /**
