@@ -39,6 +39,15 @@ export async function POST(request: Request) {
         const shopIds = mappings.map(m => m.neShopId);
         console.log('[NE Sync] Shop IDs:', shopIds);
 
+        // 店舗名を取得
+        const shopsData = await nextEngineClient.getShops();
+        const shopNames = shopIds
+            .map(id => {
+                const shop = shopsData.data?.find((s: any) => s.shop_id === String(id));
+                return shop ? `${shop.shop_name}(ID:${id})` : `店舗ID:${id}`;
+            })
+            .join(', ');
+
         // 2. NE APIから受注データを取得
         const orderData = await nextEngineClient.searchOrderRows(targetYm, shopIds);
         console.log('[NE Sync] Order data received:', { count: orderData.count, dataLength: orderData.data?.length });
@@ -66,7 +75,7 @@ export async function POST(request: Request) {
                 targetYm,
                 importMode: 'overwrite',
                 dataSource: 'API',
-                comment: `ネクストエンジン自動同期 (店舗ID: ${shopIds.join(', ')})`,
+                comment: `ネクストエンジン自動同期 (${shopNames})`,
                 salesChannelId: parseInt(channelId),
                 recordCount: 0, // 後で更新
                 importedByUserId: parseInt((session.user as any).id)
