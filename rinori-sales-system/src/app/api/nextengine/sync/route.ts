@@ -121,7 +121,7 @@ export async function POST(request: Request) {
                 costAmountExclTax,
                 grossProfit,
                 salesChannelId: parseInt(channelId),
-                externalOrderId: row.receive_order_row_id,
+                externalOrderId: row.receive_order_row_no,
                 importHistoryId: importHistory.id,
                 createdByUserId: (session.user as any).id
             });
