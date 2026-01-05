@@ -78,6 +78,19 @@ export async function POST(request: Request) {
         const [year, month] = targetYm.split('-').map(Number);
         const saleDate = new Date(year, month - 1, 1); // 月初日
 
+        // 税率の取得（ループ外で1回だけ）
+        const taxRateRecord = await prisma.taxRate.findFirst({
+            where: {
+                startYm: {
+                    lte: targetYm
+                }
+            },
+            orderBy: {
+                startYm: 'desc'
+            }
+        });
+        const taxRate = taxRateRecord ? (1 + taxRateRecord.rate) : 1.1; // デフォルト10%
+
         for (const row of orderData.data) {
             const sku = row.receive_order_row_goods_id;
             const parentCode = convertSkuToParentCode(sku);
@@ -95,19 +108,6 @@ export async function POST(request: Request) {
                 continue; // 商品マスタに存在しない場合はスキップ
             }
 
-            // 税率の取得
-            const taxRateRecord = await prisma.taxRate.findFirst({
-                where: {
-                    startYm: {
-                        lte: targetYm
-                    }
-                },
-                orderBy: {
-                    startYm: 'desc'
-                }
-            });
-            const taxRate = taxRateRecord ? (1 + taxRateRecord.rate) : 1.1; // デフォルト10%
-
             const salesAmountExclTax = totalAmount / taxRate;
             const costAmountExclTax = product.costExclTax * quantity;
             const grossProfit = salesAmountExclTax - costAmountExclTax;
@@ -121,7 +121,7 @@ export async function POST(request: Request) {
                 costAmountExclTax,
                 grossProfit,
                 salesChannelId: parseInt(channelId),
-                externalOrderId: row.receive_order_row_no,
+                externalOrderId: String(row.receive_order_row_no),
                 importHistoryId: importHistory.id,
                 createdByUserId: parseInt((session.user as any).id)
             });
