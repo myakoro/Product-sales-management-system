@@ -149,9 +149,9 @@ export class NextEngineClient {
 
         return await this.apiPost('/api_v1_receiveorder_row/search', {
             fields: 'receive_order_row_no,receive_order_row_goods_id,receive_order_row_quantity,receive_order_row_unit_price,receive_order_row_sub_total_price',
-            'receive_order_date-gte': formatDate(startDate),
-            'receive_order_date-lte': formatDate(endDate),
-            'receive_order_order_status_id-eq': '20', // 出荷確定済 (受注日基準)
+            'receive_order_confirm_date-gte': formatDate(startDate),
+            'receive_order_confirm_date-lte': formatDate(endDate),
+            'receive_order_order_status_id-gte': '20', // 出荷確定済 以上
             'receive_order_shop_id-in': shopIds.join(','),
             wait_flag: '1'
         });
