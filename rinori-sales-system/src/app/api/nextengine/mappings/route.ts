@@ -42,6 +42,14 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
         }
 
+        // channelIdが0の場合はマッピングを削除（設定解除）
+        if (channelId == 0) {
+            await prisma.nEShopMapping.deleteMany({
+                where: { neShopId: parseInt(neShopId) }
+            });
+            return NextResponse.json({ success: true, message: 'Mapping cleared' });
+        }
+
         const mapping = await prisma.nEShopMapping.upsert({
             where: { neShopId: parseInt(neShopId) },
             update: { channelId: parseInt(channelId) },
