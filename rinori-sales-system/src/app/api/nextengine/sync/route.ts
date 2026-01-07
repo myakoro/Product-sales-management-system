@@ -92,6 +92,7 @@ export async function POST(request: Request) {
             quantity: number;
             totalAmount税込: number;
             productCode: string;
+            productName: string | null;
         }>();
 
         const [year, month] = targetYm.split('-').map(Number);
@@ -102,6 +103,7 @@ export async function POST(request: Request) {
 
         for (const row of orderData.data) {
             const sku = row.receive_order_row_goods_id;
+            const productName = row.receive_order_row_goods_name || null;
 
             // 除外キーワードのチェック (一致したらスキップ)
             const isExcluded = exclusionKeywords.some(k =>
@@ -118,11 +120,13 @@ export async function POST(request: Request) {
                 const existing = aggregatedData.get(parentCode)!;
                 existing.quantity += quantity;
                 existing.totalAmount税込 += subTotal;
+                // 商品名は最初に見つかったものを保持
             } else {
                 aggregatedData.set(parentCode, {
                     quantity,
                     totalAmount税込: subTotal,
-                    productCode: parentCode
+                    productCode: parentCode,
+                    productName
                 });
             }
         }
@@ -135,7 +139,7 @@ export async function POST(request: Request) {
         const taxRate = taxRateRecord ? (1 + taxRateRecord.rate) : 1.1;
 
         // 新商品候補を収集するMap
-        const newProductCandidates = new Map<string, { sku: string }>();
+        const newProductCandidates = new Map<string, { sku: string; name: string | null }>();
 
         const salesRecords = [];
         for (const [parentCode, data] of aggregatedData.entries()) {
@@ -149,7 +153,8 @@ export async function POST(request: Request) {
                 // 新商品候補として記録
                 if (!newProductCandidates.has(parentCode)) {
                     newProductCandidates.set(parentCode, {
-                        sku: parentCode // NEの場合、商品コードをSKUとして使用
+                        sku: parentCode,
+                        name: data.productName
                     });
                 }
                 continue;
@@ -197,7 +202,7 @@ export async function POST(request: Request) {
                         data: {
                             productCode: parentCode,
                             sampleSku: data.sku,
-                            productName: null, // NEからは商品名を取得していないためnull
+                            productName: data.name,
                             status: 'pending'
                         }
                     });
