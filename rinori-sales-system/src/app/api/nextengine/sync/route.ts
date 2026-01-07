@@ -134,6 +134,9 @@ export async function POST(request: Request) {
         });
         const taxRate = taxRateRecord ? (1 + taxRateRecord.rate) : 1.1;
 
+        // 新商品候補を収集するMap
+        const newProductCandidates = new Map<string, { sku: string }>();
+
         const salesRecords = [];
         for (const [parentCode, data] of aggregatedData.entries()) {
             // 商品マスタの存在確認
@@ -143,7 +146,13 @@ export async function POST(request: Request) {
 
             if (!product) {
                 console.warn(`[NE Sync] Product not found: ${parentCode}`);
-                continue; // マスタ未登録はスキップ（同期終了後に通知される可能性を考慮）
+                // 新商品候補として記録
+                if (!newProductCandidates.has(parentCode)) {
+                    newProductCandidates.set(parentCode, {
+                        sku: parentCode // NEの場合、商品コードをSKUとして使用
+                    });
+                }
+                continue;
             }
 
             // 管理ステータスチェック
@@ -169,6 +178,31 @@ export async function POST(request: Request) {
                 importHistoryId: importHistory.id,
                 createdByUserId: parseInt((session.user as any).id)
             });
+        }
+
+        // 新商品候補を登録（手動CSV取込と同じロジック）
+        if (newProductCandidates.size > 0) {
+            console.log('[NE Sync] 新商品候補チェック中:', newProductCandidates.size, '件');
+            const candidateCodes = Array.from(newProductCandidates.keys());
+            const existingCandidates = await prisma.newProductCandidate.findMany({
+                where: { productCode: { in: candidateCodes } },
+                select: { productCode: true }
+            });
+            const existingSet = new Set(existingCandidates.map(c => c.productCode));
+
+            for (const [parentCode, data] of newProductCandidates.entries()) {
+                if (!existingSet.has(parentCode)) {
+                    console.log('[NE Sync] 新商品候補登録:', parentCode);
+                    await prisma.newProductCandidate.create({
+                        data: {
+                            productCode: parentCode,
+                            sampleSku: data.sku,
+                            productName: null, // NEからは商品名を取得していないためnull
+                            status: 'pending'
+                        }
+                    });
+                }
+            }
         }
 
         if (salesRecords.length > 0) {
