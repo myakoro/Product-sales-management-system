@@ -66,22 +66,32 @@ function resolveDbPath(databaseUrl) {
 
             // 3) V1.51マイグレーションチェック: products テーブルに asin カラムがあるか
             const hasAsinColumn = await new Promise((resolve) => {
-                db.all(
-                    `PRAGMA table_info(products)`,
-                    [],
-                    (err, rows) => {
-                        if (err) {
-                            console.error("⚠️  Query error:", err.message);
-                            resolve(false);
-                        } else {
-                            const asinCol = rows.find(r => r.name === 'asin');
-                            resolve(!!asinCol);
-                        }
+                db.all(`PRAGMA table_info(products)`, [], (err, rows) => {
+                    if (err) {
+                        console.error("⚠️  Query error:", err.message);
+                        resolve(false);
+                    } else {
+                        const asinCol = rows.find(r => r.name === 'asin');
+                        resolve(!!asinCol);
                     }
-                );
+                });
             });
 
-            if (missing.length === 0 && hasAsinColumn) {
+            // 4) V1.55マイグレーションチェック: product_categories テーブルに name カラムがあるか
+            const hasCategoryNameColumnV155 = await new Promise((resolve) => {
+                db.all(`PRAGMA table_info(product_categories)`, [], (err, rows) => {
+                    if (err) {
+                        console.error("⚠️  Query error:", err.message);
+                        resolve(false);
+                    } else {
+                        // 旧カラム categoryName が新カラム name に変更されたかチェック
+                        const nameCol = rows.find(r => r.name === 'name');
+                        resolve(!!nameCol);
+                    }
+                });
+            });
+
+            if (missing.length === 0 && hasAsinColumn && hasCategoryNameColumnV155) {
                 console.log("✅ Required tables exist and schema is up-to-date. Skipping initialization.");
             } else {
                 if (missing.length > 0) {
@@ -89,6 +99,9 @@ function resolveDbPath(databaseUrl) {
                 }
                 if (!hasAsinColumn) {
                     console.log(`❌ Schema outdated: 'products' table missing 'asin' column`);
+                }
+                if (!hasCategoryNameColumnV155) {
+                    console.log(`❌ Schema outdated: 'product_categories' table missing 'name' column`);
                 }
                 needsInit = true;
             }
