@@ -26,7 +26,13 @@ export async function GET(request: Request) {
     }
 
     if (status !== 'all') {
-        whereClause.managementStatus = status;
+        if (status === '管理中') {
+            whereClause.managementStatus = { in: ['管理中', 'managed'] };
+        } else if (status === '管理外') {
+            whereClause.managementStatus = { in: ['管理外', 'unmanaged'] };
+        } else {
+            whereClause.managementStatus = status;
+        }
     }
 
     // V1.55追加: カテゴリーフィルタ

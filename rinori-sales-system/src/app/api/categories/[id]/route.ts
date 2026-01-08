@@ -10,7 +10,7 @@ export async function PUT(
 ) {
     try {
         // 権限チェック（マスター権限のみ）
-        const session = await getServerSession();
+        const session = await getServerSession(authOptions);
         if (!session || (session.user as any)?.role !== 'master') {
             return NextResponse.json(
                 { error: '権限がありません' },

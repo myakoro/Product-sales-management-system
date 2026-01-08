@@ -16,7 +16,9 @@ export async function GET(request: NextRequest) {
                 _count: {
                     select: {
                         products: {
-                            where: { managementStatus: '管理中' }
+                            where: {
+                                managementStatus: { in: ['管理中', 'managed'] }
+                            }
                         }
                     }
                 }
