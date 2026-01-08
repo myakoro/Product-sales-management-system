@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 const prisma = new PrismaClient();
 
@@ -11,7 +12,7 @@ export async function POST(
 ) {
     try {
         // 権限チェック（マスター権限のみ）
-        const session = await getServerSession();
+        const session = await getServerSession(authOptions);
         if (!session || (session.user as any)?.role !== 'master') {
             return NextResponse.json(
                 { error: '権限がありません' },
@@ -80,7 +81,7 @@ export async function DELETE(
 ) {
     try {
         // 権限チェック（マスター権限のみ）
-        const session = await getServerSession();
+        const session = await getServerSession(authOptions);
         if (!session || (session.user as any)?.role !== 'master') {
             return NextResponse.json(
                 { error: '権限がありません' },
