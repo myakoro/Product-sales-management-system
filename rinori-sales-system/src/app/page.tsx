@@ -234,18 +234,16 @@ export default function HomePage() {
                                             <td className="px-4 py-4 text-right">
                                                 <div className="flex items-center justify-end gap-2">
                                                     <div className="flex-1 max-w-[100px] h-2 bg-neutral-200 rounded-full overflow-hidden">
-                                                        <div 
-                                                            className={`h-full transition-all duration-500 ${
-                                                                product.achievementRate >= 100 ? 'bg-green-500' :
-                                                                product.achievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
-                                                            }`}
+                                                        <div
+                                                            className={`h-full transition-all duration-500 ${product.achievementRate >= 100 ? 'bg-green-500' :
+                                                                    product.achievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
+                                                                }`}
                                                             style={{ width: `${Math.min(product.achievementRate, 100)}%` }}
                                                         />
                                                     </div>
-                                                    <span className={`font-bold text-sm ${
-                                                        product.achievementRate >= 100 ? 'text-green-600' :
-                                                        product.achievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
-                                                    }`}>
+                                                    <span className={`font-bold text-sm ${product.achievementRate >= 100 ? 'text-green-600' :
+                                                            product.achievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
+                                                        }`}>
                                                         {product.achievementRate.toFixed(1)}%
                                                     </span>
                                                 </div>
@@ -381,11 +379,18 @@ export default function HomePage() {
                                     </Link>
                                 </li>
                                 {user?.role === 'master' && (
-                                    <li>
-                                        <Link href="/settings/users" className="block px-4 py-3 text-[#00214d] hover:bg-cyan-50 rounded-lg transition-all duration-200 font-medium border border-transparent hover:border-cyan-200">
-                                            ユーザー管理
-                                        </Link>
-                                    </li>
+                                    <>
+                                        <li>
+                                            <Link href="/settings/categories" className="block px-4 py-3 text-[#00214d] hover:bg-cyan-50 rounded-lg transition-all duration-200 font-medium border border-transparent hover:border-cyan-200">
+                                                カテゴリー管理
+                                            </Link>
+                                        </li>
+                                        <li>
+                                            <Link href="/settings/users" className="block px-4 py-3 text-[#00214d] hover:bg-cyan-50 rounded-lg transition-all duration-200 font-medium border border-transparent hover:border-cyan-200">
+                                                ユーザー管理
+                                            </Link>
+                                        </li>
+                                    </>
                                 )}
                             </ul>
                         </div>
