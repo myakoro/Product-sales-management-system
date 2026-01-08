@@ -14,7 +14,11 @@ export async function GET(request: NextRequest) {
             orderBy: { displayOrder: 'asc' },
             include: {
                 _count: {
-                    select: { products: true }
+                    select: {
+                        products: {
+                            where: { managementStatus: '管理中' }
+                        }
+                    }
                 }
             }
         });

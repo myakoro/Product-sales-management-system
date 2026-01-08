@@ -55,7 +55,7 @@ export default function CategoriesPage() {
     // 所属商品を取得
     const fetchCategoryProducts = async (categoryId: number) => {
         try {
-            const res = await fetch(`/api/products?categoryId=${categoryId}`);
+            const res = await fetch(`/api/products?categoryId=${categoryId}&status=管理中`);
             if (res.ok) {
                 const data = await res.json();
                 setCategoryProducts(data);
@@ -68,7 +68,7 @@ export default function CategoriesPage() {
     // 未所属商品を取得
     const fetchUnassignedProducts = async () => {
         try {
-            const res = await fetch('/api/products?categoryId=null');
+            const res = await fetch('/api/products?categoryId=null&status=管理中');
             if (res.ok) {
                 const data = await res.json();
                 setUnassignedProducts(data);
@@ -330,11 +330,10 @@ export default function CategoriesPage() {
                                     categories.map(category => (
                                         <div
                                             key={category.id}
-                                            className={`p-3 rounded-lg border transition-all cursor-pointer ${
-                                                selectedCategoryId === category.id
+                                            className={`p-3 rounded-lg border transition-all cursor-pointer ${selectedCategoryId === category.id
                                                     ? 'bg-[#00214d] text-white border-[#00214d]'
                                                     : 'bg-white border-neutral-200 hover:border-[#d4af37]'
-                                            }`}
+                                                }`}
                                             onClick={() => setSelectedCategoryId(category.id)}
                                         >
                                             <div className="flex items-center justify-between">
@@ -348,21 +347,19 @@ export default function CategoriesPage() {
                                                 <div className="flex gap-1" onClick={(e) => e.stopPropagation()}>
                                                     <button
                                                         onClick={() => openEditModal(category)}
-                                                        className={`px-2 py-1 rounded text-xs ${
-                                                            selectedCategoryId === category.id
+                                                        className={`px-2 py-1 rounded text-xs ${selectedCategoryId === category.id
                                                                 ? 'bg-white text-[#00214d] hover:bg-neutral-100'
                                                                 : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         編集
                                                     </button>
                                                     <button
                                                         onClick={() => handleDeleteCategory(category)}
-                                                        className={`px-2 py-1 rounded text-xs ${
-                                                            selectedCategoryId === category.id
+                                                        className={`px-2 py-1 rounded text-xs ${selectedCategoryId === category.id
                                                                 ? 'bg-red-500 text-white hover:bg-red-600'
                                                                 : 'bg-red-50 text-red-600 hover:bg-red-100'
-                                                        }`}
+                                                            }`}
                                                     >
                                                         削除
                                                     </button>
