@@ -28,10 +28,10 @@ export async function GET(request: NextRequest) {
         }));
 
         return NextResponse.json(result);
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error fetching categories:', error);
         return NextResponse.json(
-            { error: 'カテゴリー一覧の取得に失敗しました' },
+            { error: `カテゴリー一覧の取得に失敗しました: ${error.message}` },
             { status: 500 }
         );
     }
@@ -88,10 +88,10 @@ export async function POST(request: NextRequest) {
         });
 
         return NextResponse.json(category, { status: 201 });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error creating category:', error);
         return NextResponse.json(
-            { error: 'カテゴリーの作成に失敗しました' },
+            { error: `カテゴリーの作成に失敗しました: ${error.message}` },
             { status: 500 }
         );
     }

@@ -63,10 +63,10 @@ export async function POST(
             categoryId,
             addedProductIds: productIds
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error adding products to category:', error);
         return NextResponse.json(
-            { error: '商品の追加に失敗しました' },
+            { error: `商品の追加に失敗しました: ${error.message}` },
             { status: 500 }
         );
     }
@@ -120,10 +120,10 @@ export async function DELETE(
             message: `${result.count}件の商品をカテゴリーから削除しました`,
             removedProductIds: productIds
         });
-    } catch (error) {
+    } catch (error: any) {
         console.error('Error removing products from category:', error);
         return NextResponse.json(
-            { error: '商品の削除に失敗しました' },
+            { error: `商品の削除に失敗しました: ${error.message}` },
             { status: 500 }
         );
     }
