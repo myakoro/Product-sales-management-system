@@ -15,7 +15,7 @@ export default function Header() {
     const navItems = [
         { label: 'ダッシュボード', href: '/', icon: '📊' },
         { label: '商品予算vs実績', href: '/budget/vs-actual', icon: '📈', priority: true },
-        { label: 'PL分析', href: '/pl/monthly', icon: '💰', priority: true },
+        { label: 'PL分析', href: '/pl', icon: '💰', priority: true },
         { label: '商品マスタ', href: '/products', icon: '📦' },
         { label: '売上取込', href: '/import/sales', icon: '📥' },
         { label: '広告費管理', href: '/ad-expenses', icon: '💳' },

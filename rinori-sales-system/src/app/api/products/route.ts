@@ -8,6 +8,7 @@ export async function GET(request: Request) {
     const search = searchParams.get('search') || '';
     const type = searchParams.get('type') || 'all'; // '自社' | '仕入' | 'all'
     const status = searchParams.get('status') || 'all'; // '管理中' | '管理外' | 'all'
+    const categoryId = searchParams.get('categoryId'); // V1.55追加: カテゴリーID
 
     // クエリ条件の構築
     const whereClause: any = {};
@@ -28,6 +29,17 @@ export async function GET(request: Request) {
         whereClause.managementStatus = status;
     }
 
+    // V1.55追加: カテゴリーフィルタ
+    if (categoryId !== null) {
+        if (categoryId === 'null') {
+            // 未所属商品のみ
+            whereClause.categoryId = null;
+        } else if (categoryId) {
+            // 特定カテゴリーの商品のみ
+            whereClause.categoryId = parseInt(categoryId);
+        }
+    }
+
     try {
         const products = await prisma.product.findMany({
             where: whereClause,
@@ -38,7 +50,24 @@ export async function GET(request: Request) {
                 category: true, // カテゴリ情報も含める
             },
         });
-        return NextResponse.json(products);
+
+        // V1.55: レスポンス形式を調整（categoryNameを追加）
+        const result = products.map(p => ({
+            id: p.productCode,
+            productCode: p.productCode,
+            productName: p.productName,
+            salesPriceExclTax: p.salesPriceExclTax,
+            costExclTax: p.costExclTax,
+            productType: p.productType,
+            managementStatus: p.managementStatus,
+            categoryId: p.categoryId,
+            categoryName: p.category?.name || null,
+            asin: p.asin,
+            createdAt: p.createdAt,
+            updatedAt: p.updatedAt
+        }));
+
+        return NextResponse.json(result);
     } catch (error) {
         console.error('Failed to fetch products:', error);
         return NextResponse.json({ error: 'Failed to fetch products' }, { status: 500 });

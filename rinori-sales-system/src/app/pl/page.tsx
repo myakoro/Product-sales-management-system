@@ -24,6 +24,15 @@ type PlData = {
     operatingProfitAchievementRate: number | null;
 };
 
+type CategoryPL = {
+    categoryId: number | null;
+    categoryName: string;
+    sales: number;
+    cogs: number;
+    grossProfit: number;
+    grossProfitRate: number;
+};
+
 type SalesChannel = {
     id: number;
     name: string;
@@ -78,6 +87,9 @@ const getRange = (type: 'single' | '3mo' | '6mo' | 'fiscal', baseYm: string): { 
 };
 
 export default function PlPage() {
+    // Tab state
+    const [activeTab, setActiveTab] = useState<'overall' | 'product' | 'category'>('overall');
+
     // State
     const [periodMode, setPeriodMode] = useState<'preset' | 'custom'>('preset');
     const [presetType, setPresetType] = useState<'single' | '3mo' | '6mo' | 'fiscal'>('single');
@@ -94,6 +106,11 @@ export default function PlPage() {
     const [data, setData] = useState<PlData | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    // Category PL state
+    const [categoryData, setCategoryData] = useState<CategoryPL[]>([]);
+    const [categorySortBy, setCategorySortBy] = useState<'sales' | 'grossProfit' | 'grossProfitRate'>('sales');
+    const [categorySortOrder, setCategorySortOrder] = useState<'asc' | 'desc'>('desc');
 
     // Fetch sales channels
     useEffect(() => {
@@ -146,28 +163,93 @@ export default function PlPage() {
         }
     };
 
+    const fetchCategoryData = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            let targetYm;
+            if (periodMode === 'preset' && presetType === 'single') {
+                targetYm = baseYm;
+            } else if (periodMode === 'custom') {
+                targetYm = customEnd;
+            } else {
+                const range = getRange(presetType, baseYm);
+                targetYm = range.end;
+            }
+
+            const url = `/api/pl/category?targetYm=${targetYm}&sortBy=${categorySortBy}&sortOrder=${categorySortOrder}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error("Failed to fetch category data");
+            const result = await res.json();
+            setCategoryData(result);
+        } catch (err) {
+            console.error(err);
+            setError("カテゴリー別データの取得に失敗しました。");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleFetchData = () => {
+        if (activeTab === 'category') {
+            fetchCategoryData();
+        } else {
+            fetchData();
+        }
+    };
+
+    const handleSortCategory = (sortBy: 'sales' | 'grossProfit' | 'grossProfitRate') => {
+        if (categorySortBy === sortBy) {
+            setCategorySortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+        } else {
+            setCategorySortBy(sortBy);
+            setCategorySortOrder('desc');
+        }
+    };
+
+    useEffect(() => {
+        if (activeTab === 'category' && categoryData.length > 0) {
+            fetchCategoryData();
+        }
+    }, [categorySortBy, categorySortOrder]);
+
     return (
         <div className="min-h-screen bg-gray-50">
-            {/* Header */}
-            <header className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center">
-                <h1 className="text-lg font-semibold">Rinori 売上管理システム</h1>
-                <div className="flex items-center gap-4">
-                    <Link href="/" className="text-sm text-gray-600 hover:text-primary">
-                        ダッシュボード
-                    </Link>
-                    <Link href="/" className="text-sm text-gray-600 hover:text-primary">
-                        ダッシュボード
-                    </Link>
-                    <span className="text-sm text-gray-600">権限: {userRole === 'master' ? '管理者' : 'スタッフ'}</span>
-                </div>
-            </header>
+            <main className="max-w-7xl mx-auto px-6 py-8">
+                <h2 className="text-3xl font-bold text-[#00214d] mb-6 flex items-center gap-2">
+                    <span className="w-1 h-8 bg-[#d4af37] rounded-full"></span>
+                    損益計算書 (PL)
+                </h2>
 
-            <main className="max-w-4xl mx-auto px-6 py-8">
-                <div className="flex justify-between items-end mb-6">
-                    <h2 className="text-2xl font-semibold">損益計算書 (PL)</h2>
-                    <Link href="/pl/products" className="text-primary hover:underline text-sm font-medium">
-                        商品別PL分析はこちら &rarr;
-                    </Link>
+                {/* Tabs */}
+                <div className="flex gap-2 mb-6 border-b border-gray-200">
+                    <button
+                        onClick={() => setActiveTab('overall')}
+                        className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'overall'
+                                ? 'border-[#00214d] text-[#00214d]'
+                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                            }`}
+                    >
+                        全体PL
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('product')}
+                        className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'product'
+                                ? 'border-[#00214d] text-[#00214d]'
+                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                            }`}
+                    >
+                        商品別PL
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('category')}
+                        className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'category'
+                                ? 'border-[#00214d] text-[#00214d]'
+                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                            }`}
+                    >
+                        カテゴリー別PL
+                    </button>
                 </div>
 
                 {/* Period Selection */}
@@ -272,7 +354,7 @@ export default function PlPage() {
 
                         <div className="mt-4">
                             <button
-                                onClick={fetchData}
+                                onClick={handleFetchData}
                                 disabled={loading}
                                 className="px-6 py-2 bg-primary text-white rounded hover:opacity-90 disabled:opacity-50"
                             >
@@ -290,133 +372,223 @@ export default function PlPage() {
                         </div>
                     )}
 
-                    {!data && !loading && !error && (
-                        <div className="text-center text-gray-500 py-12">
-                            「表示」ボタンを押してデータを読み込んでください。
+                    {/* Product Tab - Redirect */}
+                    {activeTab === 'product' && (
+                        <div className="text-center py-12">
+                            <p className="text-gray-600 mb-4">商品別PL分析は専用ページで表示されます。</p>
+                            <Link
+                                href="/pl/products"
+                                className="inline-block px-6 py-3 bg-[#00214d] text-white rounded-lg hover:bg-[#00337a] transition-colors font-medium"
+                            >
+                                商品別PL分析ページへ →
+                            </Link>
                         </div>
                     )}
 
-                    {data && (
+                    {/* Overall Tab */}
+                    {activeTab === 'overall' && (
                         <>
-                            {userRole === 'staff' ? (
-                                <div className="text-center py-12">
-                                    <div className="text-4xl mb-4">🔴</div>
-                                    <p className="text-lg text-gray-600">総合計は非表示</p>
-                                    <p className="text-sm text-gray-500 mt-2">※ 商品別PLは閲覧可能です</p>
+                            {!data && !loading && !error && (
+                                <div className="text-center text-gray-500 py-12">
+                                    「表示」ボタンを押してデータを読み込んでください。
                                 </div>
-                            ) : (
-                                <div className="max-w-xl mx-auto font-mono text-lg">
-                                    {/* Sales */}
-                                    <div className="flex justify-between py-2 border-b border-gray-100">
-                                        <span>売上（税別）:</span>
-                                        <span className="font-bold">{formatCurrency(data.sales)}</span>
-                                    </div>
+                            )}
 
-                                    {/* Cost */}
-                                    <div className="flex justify-between py-2 border-b border-gray-100 text-gray-600">
-                                        <span>原価（税別）:</span>
-                                        <div className="text-right">
-                                            <span>-{formatCurrency(data.cost)}</span>
-                                            <span className="text-sm ml-2">({formatPercent(data.cost, data.sales)})</span>
+                            {data && (
+                                <>
+                                    {userRole === 'staff' ? (
+                                        <div className="text-center py-12">
+                                            <div className="text-4xl mb-4">🔴</div>
+                                            <p className="text-lg text-gray-600">総合計は非表示</p>
+                                            <p className="text-sm text-gray-500 mt-2">※ 商品別PLは閲覧可能です</p>
                                         </div>
-                                    </div>
-
-                                    <div className="border-t-2 border-gray-300 my-4"></div>
-
-                                    {/* Gross Profit */}
-                                    <div className="flex justify-between py-2 border-b border-gray-100">
-                                        <span>粗利:</span>
-                                        <div className="text-right">
-                                            <span className="font-bold">{formatCurrency(data.grossProfit)}</span>
-                                            <span className="text-sm ml-2 text-gray-600">({formatPercent(data.grossProfit, data.sales)})</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Gross Profit Budget/Variance/Achievement (V1.53) */}
-                                    {data.grossProfitBudget !== null && (
-                                        <>
-                                            <div className="flex justify-between py-1 text-sm text-blue-600 pl-4">
-                                                <span>粗利予算:</span>
-                                                <span>{formatCurrency(data.grossProfitBudget)}</span>
+                                    ) : (
+                                        <div className="max-w-xl mx-auto font-mono text-lg">
+                                            {/* Sales */}
+                                            <div className="flex justify-between py-2 border-b border-gray-100">
+                                                <span>売上（税別）:</span>
+                                                <span className="font-bold">{formatCurrency(data.sales)}</span>
                                             </div>
-                                            <div className="flex justify-between py-1 text-sm pl-4">
-                                                <span>差異:</span>
-                                                <span className={data.grossProfitVariance! >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                                    {data.grossProfitVariance! >= 0 ? '+' : ''}{formatCurrency(data.grossProfitVariance!)}
-                                                </span>
-                                            </div>
-                                            <div className="flex justify-between py-1 text-sm text-purple-600 pl-4 border-b border-gray-100">
-                                                <span>達成率:</span>
-                                                <span className="font-semibold">{data.grossProfitAchievementRate?.toFixed(1)}%</span>
-                                            </div>
-                                        </>
-                                    )}
 
-                                    {data.adExpense !== null && data.operatingProfit !== null && (
-                                        <>
-                                            {/* Ad Expense */}
+                                            {/* Cost */}
                                             <div className="flex justify-between py-2 border-b border-gray-100 text-gray-600">
-                                                <span>広告費:</span>
+                                                <span>原価（税別）:</span>
                                                 <div className="text-right">
-                                                    <span>-{formatCurrency(data.adExpense)}</span>
-                                                    <span className="text-sm ml-2">({formatPercent(data.adExpense, data.sales)})</span>
+                                                    <span>-{formatCurrency(data.cost)}</span>
+                                                    <span className="text-sm ml-2">({formatPercent(data.cost, data.sales)})</span>
                                                 </div>
                                             </div>
 
-                                            {/* Ad Budget/Variance/Achievement (V1.53) */}
-                                            {data.adBudget !== null && (
+                                            <div className="border-t-2 border-gray-300 my-4"></div>
+
+                                            {/* Gross Profit */}
+                                            <div className="flex justify-between py-2 border-b border-gray-100">
+                                                <span>粗利:</span>
+                                                <div className="text-right">
+                                                    <span className="font-bold">{formatCurrency(data.grossProfit)}</span>
+                                                    <span className="text-sm ml-2 text-gray-600">({formatPercent(data.grossProfit, data.sales)})</span>
+                                                </div>
+                                            </div>
+
+                                            {/* Gross Profit Budget/Variance/Achievement (V1.53) */}
+                                            {data.grossProfitBudget !== null && (
                                                 <>
                                                     <div className="flex justify-between py-1 text-sm text-blue-600 pl-4">
-                                                        <span>広告予算:</span>
-                                                        <span>{formatCurrency(data.adBudget)}</span>
+                                                        <span>粗利予算:</span>
+                                                        <span>{formatCurrency(data.grossProfitBudget)}</span>
                                                     </div>
                                                     <div className="flex justify-between py-1 text-sm pl-4">
                                                         <span>差異:</span>
-                                                        <span className={data.adVariance! <= 0 ? 'text-green-600' : 'text-red-600'}>
-                                                            {data.adVariance! >= 0 ? '+' : ''}{formatCurrency(data.adVariance!)}
+                                                        <span className={data.grossProfitVariance! >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                                            {data.grossProfitVariance! >= 0 ? '+' : ''}{formatCurrency(data.grossProfitVariance!)}
                                                         </span>
                                                     </div>
                                                     <div className="flex justify-between py-1 text-sm text-purple-600 pl-4 border-b border-gray-100">
                                                         <span>達成率:</span>
-                                                        <span className="font-semibold">{data.adAchievementRate?.toFixed(1)}%</span>
+                                                        <span className="font-semibold">{data.grossProfitAchievementRate?.toFixed(1)}%</span>
                                                     </div>
                                                 </>
                                             )}
 
-                                            <div className="border-t-2 border-gray-800 my-4"></div>
-
-                                            {/* Operating Profit */}
-                                            <div className="flex justify-between py-4 text-xl">
-                                                <span className="font-bold">営業利益:</span>
-                                                <div className="text-right">
-                                                    <span className={`font-bold ${data.operatingProfit >= 0 ? 'text-black' : 'text-red-600'}`}>
-                                                        {formatCurrency(data.operatingProfit)}
-                                                    </span>
-                                                    <span className="text-base ml-2 text-gray-600">({formatPercent(data.operatingProfit, data.sales)})</span>
-                                                </div>
-                                            </div>
-
-                                            {/* Operating Profit Budget/Variance/Achievement (V1.53) */}
-                                            {data.operatingProfitBudget !== null && (
+                                            {data.adExpense !== null && data.operatingProfit !== null && (
                                                 <>
-                                                    <div className="flex justify-between py-1 text-sm text-blue-600 pl-4">
-                                                        <span>営業利益予算:</span>
-                                                        <span>{formatCurrency(data.operatingProfitBudget)}</span>
+                                                    {/* Ad Expense */}
+                                                    <div className="flex justify-between py-2 border-b border-gray-100 text-gray-600">
+                                                        <span>広告費:</span>
+                                                        <div className="text-right">
+                                                            <span>-{formatCurrency(data.adExpense)}</span>
+                                                            <span className="text-sm ml-2">({formatPercent(data.adExpense, data.sales)})</span>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex justify-between py-1 text-sm pl-4">
-                                                        <span>差異:</span>
-                                                        <span className={data.operatingProfitVariance! >= 0 ? 'text-green-600' : 'text-red-600'}>
-                                                            {data.operatingProfitVariance! >= 0 ? '+' : ''}{formatCurrency(data.operatingProfitVariance!)}
-                                                        </span>
+
+                                                    {/* Ad Budget/Variance/Achievement (V1.53) */}
+                                                    {data.adBudget !== null && (
+                                                        <>
+                                                            <div className="flex justify-between py-1 text-sm text-blue-600 pl-4">
+                                                                <span>広告予算:</span>
+                                                                <span>{formatCurrency(data.adBudget)}</span>
+                                                            </div>
+                                                            <div className="flex justify-between py-1 text-sm pl-4">
+                                                                <span>差異:</span>
+                                                                <span className={data.adVariance! <= 0 ? 'text-green-600' : 'text-red-600'}>
+                                                                    {data.adVariance! >= 0 ? '+' : ''}{formatCurrency(data.adVariance!)}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex justify-between py-1 text-sm text-purple-600 pl-4 border-b border-gray-100">
+                                                                <span>達成率:</span>
+                                                                <span className="font-semibold">{data.adAchievementRate?.toFixed(1)}%</span>
+                                                            </div>
+                                                        </>
+                                                    )}
+
+                                                    <div className="border-t-2 border-gray-800 my-4"></div>
+
+                                                    {/* Operating Profit */}
+                                                    <div className="flex justify-between py-4 text-xl">
+                                                        <span className="font-bold">営業利益:</span>
+                                                        <div className="text-right">
+                                                            <span className={`font-bold ${data.operatingProfit >= 0 ? 'text-black' : 'text-red-600'}`}>
+                                                                {formatCurrency(data.operatingProfit)}
+                                                            </span>
+                                                            <span className="text-base ml-2 text-gray-600">({formatPercent(data.operatingProfit, data.sales)})</span>
+                                                        </div>
                                                     </div>
-                                                    <div className="flex justify-between py-1 text-sm text-purple-600 pl-4">
-                                                        <span>達成率:</span>
-                                                        <span className="font-semibold">{data.operatingProfitAchievementRate?.toFixed(1)}%</span>
-                                                    </div>
+
+                                                    {/* Operating Profit Budget/Variance/Achievement (V1.53) */}
+                                                    {data.operatingProfitBudget !== null && (
+                                                        <>
+                                                            <div className="flex justify-between py-1 text-sm text-blue-600 pl-4">
+                                                                <span>営業利益予算:</span>
+                                                                <span>{formatCurrency(data.operatingProfitBudget)}</span>
+                                                            </div>
+                                                            <div className="flex justify-between py-1 text-sm pl-4">
+                                                                <span>差異:</span>
+                                                                <span className={data.operatingProfitVariance! >= 0 ? 'text-green-600' : 'text-red-600'}>
+                                                                    {data.operatingProfitVariance! >= 0 ? '+' : ''}{formatCurrency(data.operatingProfitVariance!)}
+                                                                </span>
+                                                            </div>
+                                                            <div className="flex justify-between py-1 text-sm text-purple-600 pl-4">
+                                                                <span>達成率:</span>
+                                                                <span className="font-semibold">{data.operatingProfitAchievementRate?.toFixed(1)}%</span>
+                                                            </div>
+                                                        </>
+                                                    )}
                                                 </>
                                             )}
-                                        </>
+                                        </div>
                                     )}
+                                </>
+                            )}
+                        </>
+                    )}
+
+                    {/* Category Tab */}
+                    {activeTab === 'category' && (
+                        <>
+                            {!categoryData.length && !loading && !error && (
+                                <div className="text-center text-gray-500 py-12">
+                                    「表示」ボタンを押してデータを読み込んでください。
+                                </div>
+                            )}
+
+                            {categoryData.length > 0 && (
+                                <div className="overflow-x-auto">
+                                    <table className="w-full">
+                                        <thead>
+                                            <tr className="border-b-2 border-gray-300">
+                                                <th className="text-left py-3 px-4 font-semibold text-gray-700">カテゴリー名</th>
+                                                <th
+                                                    className="text-right py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
+                                                    onClick={() => handleSortCategory('sales')}
+                                                >
+                                                    売上高
+                                                    {categorySortBy === 'sales' && (
+                                                        <span className="ml-1">{categorySortOrder === 'asc' ? '↑' : '↓'}</span>
+                                                    )}
+                                                </th>
+                                                <th className="text-right py-3 px-4 font-semibold text-gray-700">売上原価</th>
+                                                <th
+                                                    className="text-right py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
+                                                    onClick={() => handleSortCategory('grossProfit')}
+                                                >
+                                                    粗利
+                                                    {categorySortBy === 'grossProfit' && (
+                                                        <span className="ml-1">{categorySortOrder === 'asc' ? '↑' : '↓'}</span>
+                                                    )}
+                                                </th>
+                                                <th
+                                                    className="text-right py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
+                                                    onClick={() => handleSortCategory('grossProfitRate')}
+                                                >
+                                                    粗利率
+                                                    {categorySortBy === 'grossProfitRate' && (
+                                                        <span className="ml-1">{categorySortOrder === 'asc' ? '↑' : '↓'}</span>
+                                                    )}
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {categoryData.map((cat, idx) => (
+                                                <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
+                                                    <td className="py-3 px-4 font-medium">
+                                                        {cat.categoryName || '未分類'}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-right font-mono">
+                                                        {formatCurrency(cat.sales)}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-right font-mono text-gray-600">
+                                                        {formatCurrency(cat.cogs)}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-right font-mono font-semibold">
+                                                        {formatCurrency(cat.grossProfit)}
+                                                    </td>
+                                                    <td className="py-3 px-4 text-right font-mono">
+                                                        {cat.grossProfitRate.toFixed(1)}%
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
                             )}
                         </>

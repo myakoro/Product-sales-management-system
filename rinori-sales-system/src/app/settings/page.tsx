@@ -55,6 +55,13 @@ export default function SettingsPage() {
             color: 'from-purple-400 to-violet-600'
         },
         {
+            title: 'カテゴリー管理',
+            description: '商品カテゴリーの作成・編集・紐付け管理',
+            href: '/settings/categories',
+            icon: '📁',
+            color: 'from-amber-400 to-orange-600'
+        },
+        {
             title: 'ネクストエンジン連携',
             description: 'NE API連携の認証・店舗紐付け設定',
             href: '/settings/nextengine',

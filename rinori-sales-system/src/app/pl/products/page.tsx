@@ -94,17 +94,14 @@ export default function ProductPLPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-50">
-            <header className="bg-gradient-to-r from-[#00214d] to-[#002855] border-b-2 border-[#d4af37] px-6 py-4 shadow-lg">
-                <div className="max-w-7xl mx-auto flex items-center justify-between">
-                    <h1 className="text-2xl font-bold text-white">商品別PL分析</h1>
-                    <Link href="/" className="px-4 py-2 text-white hover:text-[#d4af37] transition-colors duration-200 font-medium">
-                        ダッシュボードへ戻る
-                    </Link>
-                </div>
-            </header>
-
+        <div className="min-h-screen bg-neutral-50">
             <main className="max-w-7xl mx-auto px-6 py-8">
+                <div className="flex items-center justify-between mb-8">
+                    <h2 className="text-3xl font-bold text-[#00214d] flex items-center gap-2">
+                        <span className="w-1 h-8 bg-[#d4af37] rounded-full"></span>
+                        商品別PL分析
+                    </h2>
+                </div>
                 <div className="bg-white p-6 rounded-xl shadow-lg border-2 border-neutral-200 mb-8 flex flex-wrap gap-6 items-end">
                     <div>
                         <label className="block text-sm font-medium mb-2 text-gray-700">表示期間</label>
@@ -150,7 +147,7 @@ export default function ProductPLPage() {
                     </button>
 
                     <div className="ml-auto mb-0.5">
-                        <Link href="/pl/monthly" className="text-sm text-[#00214d] hover:text-[#d4af37] font-medium transition-colors">
+                        <Link href="/pl" className="text-sm text-[#00214d] hover:text-[#d4af37] font-medium transition-colors">
                             → 月次・期間PLへ
                         </Link>
                     </div>
