@@ -101,6 +101,11 @@ export async function POST(request: Request) {
         // exclusionKeywordsを取得
         const exclusionKeywords = await prisma.exclusionKeyword.findMany();
 
+        // デバッグ用: Fr013関連のログ
+        let fr013RowCount = 0;
+        let fr013TotalQty = 0;
+        const fr013Details: any[] = [];
+
         for (const row of orderData.data) {
             const sku = row.receive_order_row_goods_id;
             const productName = row.receive_order_row_goods_name || null;
@@ -116,6 +121,20 @@ export async function POST(request: Request) {
             // receive_order_row_sub_total_price（行小計：割引などを反映した後の金額）を使用
             const subTotal = parseFloat(row.receive_order_row_sub_total_price || '0');
 
+            // デバッグ: Fr013関連のログ
+            if (parentCode.toUpperCase().includes('FR013')) {
+                fr013RowCount++;
+                fr013TotalQty += quantity;
+                fr013Details.push({
+                    rowNo: row.receive_order_row_no,
+                    sku,
+                    parentCode,
+                    quantity,
+                    subTotal,
+                    productName
+                });
+            }
+
             if (aggregatedData.has(parentCode)) {
                 const existing = aggregatedData.get(parentCode)!;
                 existing.quantity += quantity;
@@ -128,6 +147,17 @@ export async function POST(request: Request) {
                     productCode: parentCode,
                     productName
                 });
+            }
+        }
+
+        console.log(`[NE Sync] Fr013 summary: ${fr013RowCount} rows, total quantity: ${fr013TotalQty}`);
+        if (fr013Details.length > 0) {
+            console.log('[NE Sync] Fr013 details (first 20):');
+            fr013Details.slice(0, 20).forEach((d, i) => {
+                console.log(`  ${i + 1}. 受注番号:${d.rowNo}, SKU:${d.sku}, 数量:${d.quantity}, 金額:${d.subTotal}`);
+            });
+            if (fr013Details.length > 20) {
+                console.log(`  ... 他 ${fr013Details.length - 20}件`);
             }
         }
 

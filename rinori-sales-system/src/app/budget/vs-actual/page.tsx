@@ -19,6 +19,8 @@ type ProductResult = {
     actualCost: number;
     budgetGrossProfit: number;
     actualGrossProfit: number;
+    budgetGrossProfitRate: number;
+    actualGrossProfitRate: number;
     grossProfitAchievementRate: number;
 };
 
@@ -33,6 +35,8 @@ type Summary = {
     totalActualCost: number;
     totalBudgetGrossProfit: number;
     totalActualGrossProfit: number;
+    totalBudgetGrossProfitRate: number;
+    totalActualGrossProfitRate: number;
     totalGrossProfitAchievementRate: number;
 };
 
@@ -394,9 +398,15 @@ export default function BudgetVsActualPage() {
                                 </h3>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '0.5rem 1rem', fontSize: '1.25rem' }}>
                                     <div style={{ fontWeight: '500' }}>予算:</div>
-                                    <div>¥{Math.round(summary.totalBudgetGrossProfit).toLocaleString()}</div>
+                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'baseline' }}>
+                                        <span>¥{Math.round(summary.totalBudgetGrossProfit).toLocaleString()}</span>
+                                        <span style={{ fontSize: '0.9rem', color: '#666' }}>({summary.totalBudgetGrossProfitRate.toFixed(1)}%)</span>
+                                    </div>
                                     <div style={{ fontWeight: '500' }}>実績:</div>
-                                    <div>¥{Math.round(summary.totalActualGrossProfit).toLocaleString()}</div>
+                                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'baseline' }}>
+                                        <span>¥{Math.round(summary.totalActualGrossProfit).toLocaleString()}</span>
+                                        <span style={{ fontSize: '0.9rem', color: '#666' }}>({summary.totalActualGrossProfitRate.toFixed(1)}%)</span>
+                                    </div>
                                     <div style={{ fontWeight: '600' }}>達成率:</div>
                                     <div style={{
                                         fontWeight: '600',
@@ -530,10 +540,22 @@ export default function BudgetVsActualPage() {
                                                     <span className="text-[#d4af37]">{getSortIcon('budgetGrossProfit')}</span>
                                                 </div>
                                             </th>
+                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('budgetGrossProfitRate')}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <span>予算粗利率</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('budgetGrossProfitRate')}</span>
+                                                </div>
+                                            </th>
                                             <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('actualGrossProfit')}>
                                                 <div className="flex items-center justify-end gap-2">
                                                     <span>実績粗利</span>
                                                     <span className="text-[#d4af37]">{getSortIcon('actualGrossProfit')}</span>
+                                                </div>
+                                            </th>
+                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('actualGrossProfitRate')}>
+                                                <div className="flex items-center justify-end gap-2">
+                                                    <span>実績粗利率</span>
+                                                    <span className="text-[#d4af37]">{getSortIcon('actualGrossProfitRate')}</span>
                                                 </div>
                                             </th>
                                             <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('grossProfitAchievementRate')}>
@@ -599,8 +621,18 @@ export default function BudgetVsActualPage() {
                                                             </span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-4 py-4 text-right text-neutral-600">¥{Math.round(p.budgetGrossProfit).toLocaleString()}</td>
-                                                    <td className="px-4 py-4 text-right font-semibold text-neutral-800">¥{Math.round(p.actualGrossProfit).toLocaleString()}</td>
+                                                    <td className="px-4 py-4 text-right text-neutral-600">
+                                                        <div className="flex flex-col items-end">
+                                                            <span>¥{Math.round(p.budgetGrossProfit).toLocaleString()}</span>
+                                                            <span className="text-[10px] text-gray-400 font-sans italic">({p.budgetGrossProfitRate.toFixed(1)}%)</span>
+                                                        </div>
+                                                    </td>
+                                                    <td className="px-4 py-4 text-right font-semibold text-neutral-800">
+                                                        <div className="flex flex-col items-end">
+                                                            <span>¥{Math.round(p.actualGrossProfit).toLocaleString()}</span>
+                                                            <span className="text-[10px] text-gray-500 font-sans italic">({p.actualGrossProfitRate.toFixed(1)}%)</span>
+                                                        </div>
+                                                    </td>
                                                     <td className="px-4 py-4 text-right">
                                                         <div className="flex items-center justify-end gap-2">
                                                             <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">

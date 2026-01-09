@@ -138,6 +138,9 @@ export async function GET(request: Request) {
                 ? (actual.grossProfit / budget.grossProfit) * 100
                 : 0;
 
+            const budgetGrossProfitRate = budget.sales > 0 ? (budget.grossProfit / budget.sales) * 100 : 0;
+            const actualGrossProfitRate = actual.sales > 0 ? (actual.grossProfit / actual.sales) * 100 : 0;
+
             productResults.push({
                 productCode: product.productCode,
                 productName: product.productName,
@@ -151,6 +154,8 @@ export async function GET(request: Request) {
                 actualCost: actual.cost,
                 budgetGrossProfit: budget.grossProfit,
                 actualGrossProfit: actual.grossProfit,
+                budgetGrossProfitRate: Math.round(budgetGrossProfitRate * 10) / 10,
+                actualGrossProfitRate: Math.round(actualGrossProfitRate * 10) / 10,
                 grossProfitAchievementRate: Math.round(grossProfitAchievementRate * 10) / 10
             });
 
@@ -177,6 +182,14 @@ export async function GET(request: Request) {
             ? (totalActualGrossProfit / totalBudgetGrossProfit) * 100
             : 0;
 
+        const totalBudgetGrossProfitRate = totalBudgetSales > 0
+            ? (totalBudgetGrossProfit / totalBudgetSales) * 100
+            : 0;
+
+        const totalActualGrossProfitRate = totalActualSales > 0
+            ? (totalActualGrossProfit / totalActualSales) * 100
+            : 0;
+
         const summary = {
             totalBudgetQuantity,
             totalActualQuantity,
@@ -188,6 +201,8 @@ export async function GET(request: Request) {
             totalActualCost,
             totalBudgetGrossProfit,
             totalActualGrossProfit,
+            totalBudgetGrossProfitRate: Math.round(totalBudgetGrossProfitRate * 10) / 10,
+            totalActualGrossProfitRate: Math.round(totalActualGrossProfitRate * 10) / 10,
             totalGrossProfitAchievementRate: Math.round(totalGrossProfitAchievementRate * 10) / 10
         };
 

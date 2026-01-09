@@ -189,11 +189,12 @@ export default function NextEngineSettingsPage() {
         }));
     };
 
-    // 過去12ヶ月分の対象月を生成
+    // 過去25ヶ月分（2024年1月〜）の対象月を生成
     const generateMonthOptions = () => {
         const options: string[] = [];
         const today = new Date();
-        for (let i = 0; i < 12; i++) {
+        // 2026年1月時点で2024年1月まで含めるため25回ループ
+        for (let i = 0; i < 25; i++) {
             const date = new Date(today.getFullYear(), today.getMonth() - i, 1);
             const ym = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
             options.push(ym);
@@ -396,8 +397,8 @@ export default function NextEngineSettingsPage() {
                                     onClick={handleSaveMappings}
                                     disabled={isSaving}
                                     className={`px-6 py-2.5 rounded-lg font-bold transition-all ${isSaving
-                                            ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
-                                            : 'bg-[#00214d] text-white hover:bg-[#00337a] shadow-md hover:shadow-lg'
+                                        ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+                                        : 'bg-[#00214d] text-white hover:bg-[#00337a] shadow-md hover:shadow-lg'
                                         }`}
                                 >
                                     {isSaving ? '保存中...' : '保存する'}
@@ -468,8 +469,8 @@ export default function NextEngineSettingsPage() {
                                         onClick={handleSync}
                                         disabled={!targetYm || !syncChannelId}
                                         className={`px-6 py-2.5 rounded-lg font-bold transition-all ${!targetYm || !syncChannelId
-                                                ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
-                                                : 'bg-[#00214d] text-white hover:bg-[#00337a] shadow-md hover:shadow-lg'
+                                            ? 'bg-neutral-200 text-neutral-400 cursor-not-allowed'
+                                            : 'bg-[#00214d] text-white hover:bg-[#00337a] shadow-md hover:shadow-lg'
                                             }`}
                                     >
                                         同期実行
@@ -480,29 +481,29 @@ export default function NextEngineSettingsPage() {
                                 {syncResult && (
                                     <div
                                         className={`relative p-4 rounded-lg ${syncResult.type === 'success'
-                                                ? 'bg-green-50 border border-green-200'
-                                                : syncResult.type === 'warning'
-                                                    ? 'bg-yellow-50 border border-yellow-200'
-                                                    : 'bg-red-50 border border-red-200'
+                                            ? 'bg-green-50 border border-green-200'
+                                            : syncResult.type === 'warning'
+                                                ? 'bg-yellow-50 border border-yellow-200'
+                                                : 'bg-red-50 border border-red-200'
                                             }`}
                                     >
                                         <button
                                             onClick={() => setSyncResult(null)}
                                             className={`absolute top-2 right-2 text-lg font-bold transition-colors ${syncResult.type === 'success'
-                                                    ? 'text-green-600 hover:text-green-800'
-                                                    : syncResult.type === 'warning'
-                                                        ? 'text-yellow-600 hover:text-yellow-800'
-                                                        : 'text-red-600 hover:text-red-800'
+                                                ? 'text-green-600 hover:text-green-800'
+                                                : syncResult.type === 'warning'
+                                                    ? 'text-yellow-600 hover:text-yellow-800'
+                                                    : 'text-red-600 hover:text-red-800'
                                                 }`}
                                         >
                                             ✕
                                         </button>
                                         <p
                                             className={`pr-6 ${syncResult.type === 'success'
-                                                    ? 'text-green-800'
-                                                    : syncResult.type === 'warning'
-                                                        ? 'text-yellow-800'
-                                                        : 'text-red-800'
+                                                ? 'text-green-800'
+                                                : syncResult.type === 'warning'
+                                                    ? 'text-yellow-800'
+                                                    : 'text-red-800'
                                                 }`}
                                         >
                                             {syncResult.message}

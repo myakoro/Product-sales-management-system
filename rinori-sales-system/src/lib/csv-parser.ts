@@ -12,44 +12,15 @@ export function convertSkuToParentCode(sku: string): string {
     const cleanSku = sku.trim();
 
     // Rule 1: RINO- 形式 (e.g., RINO-FR010-X-BLK -> RINO-FR010)
-    // Start with RINO-, followed by Alphanumeric.
-    // The spec example shows RINO-FR010-X-BLK. The part we want is RINO-FR010.
-    // Regex: ^(RINO-[A-Z0-9]+)
-    // Wait, if it is RINO-FR010-X-BLK, match[1] will be RINO-FR010 IF the next char is not A-Z0-9?
-    // No, + is greedy. It will match RINO-FR010-X-BLK entirely if it's all alphanumeric + hyphen?
-    // Spec says: "Rule 1: ^(RINO-[A-Z0-9]+)"
-    // And example: RINO-FR010-X-BLK -> RINO-FR010
-    // This implies conversion must stop before the variant part.
-    // Usually variant is separated by hyphen.
-    // If Rule is ^(RINO-[^-]+), that isolates RINO-FR010.
-    // But spec explicitly says `^(RINO-[A-Z0-9]+)`.
-    // Valid chars in ParentCode?
-    // Let's assume the spec regex meant "RINO-" + "MainPart".
-    // 01_DB.md says:
-    // Pattern: `^(RINO-[A-Z0-9]+)`
-    // Example: `RINO-FR010-X-BLK` -> `RINO-FR010`
-    // If I use `^(RINO-[A-Z0-9]+)` on `RINO-FR010-X-BLK`:
-    // It matches `RINO-FR010` IF `-` is not in `[A-Z0-9]`.
-    // Yes, `-` is not in `[A-Z0-9]`.
-    // So it stops at the first hyphen after RINO-.
-    // Wait, `RINO-` includes a hyphen.
-    // Sequence: R, I, N, O, -
-    // Then [A-Z0-9]+ (one or more alphanum).
-    // F, R, 0, 1, 0 (match)
-    // - (stop, because - is not A-Z0-9)
-    // So `RINO-FR010` is matched. Correct.
-
-    const match1 = cleanSku.match(/^(RINO-[A-Z0-9]+)/);
-    if (match1) return match1[1];
+    // 大文字小文字を区別しない（iフラグ）
+    // ネクストエンジンから RINO-Fr013-M-BLK のような混在形式が来る可能性があるため
+    const match1 = cleanSku.match(/^(RINO-[A-Z0-9]+)/i);
+    if (match1) return match1[1].toUpperCase(); // 常に大文字で返す
 
     // Rule 2: RINO 形式 (No hyphen)
-    // Pattern: `^(RINO[A-Z]+[0-9]{3,4})`
-    // Example: `RINODO002BLK` -> `RINODO002`
-    // RINO + DO (Alpha) + 002 (Digits 3-4)
-    // BLK (Next chars)
-    // So `RINO` then `[A-Z]+` then `[0-9]{3,4}`.
-    const match2 = cleanSku.match(/^(RINO[A-Z]+[0-9]{3,4})/);
-    if (match2) return match2[1];
+    // 大文字小文字を区別しない（iフラグ）
+    const match2 = cleanSku.match(/^(RINO[A-Z]+[0-9]{3,4})/i);
+    if (match2) return match2[1].toUpperCase(); // 常に大文字で返す
 
     // Rule 3: As is
     return cleanSku;

@@ -22,6 +22,7 @@ export async function GET(request: Request) {
                 productCode: 'asc',
             },
             include: {
+                category: true,
                 monthlyBudgets: {
                     where: {
                         periodYm: {
@@ -45,6 +46,7 @@ export async function GET(request: Request) {
             return {
                 productCode: p.productCode,
                 productName: p.productName,
+                categoryName: p.category?.name || '未分類',
                 salesPrice: p.salesPriceExclTax,
                 cost: p.costExclTax,
                 periodTotal: periodTotal,

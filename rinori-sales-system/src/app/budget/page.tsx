@@ -29,7 +29,7 @@ function getProductCodePriority(code: string): number {
     return 4;
 }
 
-type SortKey = 'productCode' | 'productName' | 'periodTotal' | 'periodSales' | 'periodProfit';
+type SortKey = 'productCode' | 'productName' | 'categoryName' | 'periodTotal' | 'periodSales' | 'periodProfit';
 
 export default function BudgetPage() {
     const [startYm, setStartYm] = useState("2025-01");
@@ -209,7 +209,8 @@ export default function BudgetPage() {
     // フィルタリング
     const filteredData = budgetData.filter(p =>
         p.productCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.productName.toLowerCase().includes(searchTerm.toLowerCase())
+        p.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (p.categoryName || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const sortedData = [...filteredData].sort((a, b) => {
@@ -326,10 +327,16 @@ export default function BudgetPage() {
                                         商品コード
                                     </th>
                                     <th
-                                        className="px-4 py-3 text-left text-sm font-semibold border-r sticky left-[120px] bg-gray-50 z-10 cursor-pointer min-w-[400px]"
+                                        className="px-4 py-3 text-left text-sm font-semibold border-r sticky left-[120px] bg-gray-50 z-10 cursor-pointer min-w-[300px]"
                                         onClick={() => handleSort('productName')}
                                     >
                                         商品名
+                                    </th>
+                                    <th
+                                        className="px-4 py-3 text-left text-sm font-semibold border-r sticky left-[420px] bg-gray-50 z-10 cursor-pointer min-w-[150px]"
+                                        onClick={() => handleSort('categoryName')}
+                                    >
+                                        カテゴリー
                                     </th>
                                     <th
                                         className="px-4 py-3 text-right text-sm font-semibold border-r cursor-pointer"
@@ -360,7 +367,8 @@ export default function BudgetPage() {
                                 {sortedData.map((product) => (
                                     <tr key={product.productCode} className="hover:bg-gray-50">
                                         <td className="px-4 py-3 text-sm border-r sticky left-0 bg-white z-10">{product.productCode}</td>
-                                        <td className="px-4 py-3 text-sm border-r sticky left-[120px] bg-white z-10 min-w-[400px]">{product.productName}</td>
+                                        <td className="px-4 py-3 text-sm border-r sticky left-[120px] bg-white z-10 min-w-[300px]">{product.productName}</td>
+                                        <td className="px-4 py-3 text-sm border-r sticky left-[420px] bg-white z-10 min-w-[150px]">{product.categoryName}</td>
                                         <td className="px-4 py-3 text-right border-r">
                                             <input
                                                 type="number"

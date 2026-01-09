@@ -38,7 +38,7 @@ export default function ProductsPage() {
     const [categoryFilter, setCategoryFilter] = useState("all");
 
     // Categories
-    const [categories, setCategories] = useState<{id: number; categoryName: string}[]>([]);
+    const [categories, setCategories] = useState<{ id: number; name: string }[]>([]);
 
     const [sortKey, setSortKey] = useState<SortKey>('productCode');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -252,7 +252,7 @@ export default function ProductsPage() {
                             <option value="all">カテゴリー: すべて</option>
                             <option value="unclassified">未分類</option>
                             {categories.map(cat => (
-                                <option key={cat.id} value={cat.id}>{cat.categoryName}</option>
+                                <option key={cat.id} value={cat.id}>{cat.name}</option>
                             ))}
                         </select>
                     </div>

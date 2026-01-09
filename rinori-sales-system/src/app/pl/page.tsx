@@ -417,7 +417,11 @@ function PlPageContent() {
 
             // APIレスポンスをRechartsフォーマットに変換
             const formattedData = result.map((item: any) => {
-                const dataPoint: any = { periodYm: item.periodYm };
+                const dataPoint: any = {
+                    periodYm: item.periodYm,
+                    monthlyTotalSales: item.monthlyTotalSales,
+                    monthlyTotalSalesPrevYear: item.monthlyTotalSalesPrevYear
+                };
                 item.data.forEach((category: any) => {
                     const catId = category.id === 'unclassified' ? 'unclassified' : category.id;
                     dataPoint[`sales_${catId}`] = category.sales;
@@ -425,6 +429,12 @@ function PlPageContent() {
                     dataPoint[`grossProfit_${catId}`] = category.grossProfit;
                     dataPoint[`grossProfitPrevYear_${catId}`] = category.grossProfitPrevYear;
                     dataPoint[`grossProfitRate_${catId}`] = category.grossProfitRate;
+                    // その月の構成比を計算して保持
+                    if (item.monthlyTotalSales > 0) {
+                        dataPoint[`ratio_${catId}`] = (category.sales / item.monthlyTotalSales) * 100;
+                    } else {
+                        dataPoint[`ratio_${catId}`] = 0;
+                    }
                 });
                 return dataPoint;
             });
@@ -881,7 +891,7 @@ function PlPageContent() {
                                                             {cat.categoryName || '未分類'}
                                                         </td>
                                                         <td className="py-3 px-4 text-right font-mono">
-                                                            {formatCurrency(cat.sales)}
+                                                            <div className="flex flex-col items-end"><span>{formatCurrency(cat.sales)}</span><span className="text-[10px] text-gray-400 font-sans">({categoryData.reduce((acc, c) => acc + c.sales, 0) > 0 ? Math.floor((cat.sales / categoryData.reduce((acc, c) => acc + c.sales, 0)) * 100) : 0}%)</span></div>
                                                         </td>
                                                         <td className="py-3 px-4 text-right font-mono text-gray-600">
                                                             {formatCurrency(cat.cogs)}
@@ -1055,11 +1065,19 @@ function PlPageContent() {
                                                         borderRadius: '8px',
                                                         padding: '12px'
                                                     }}
-                                                    formatter={(value: any, name: any) => {
+                                                    formatter={(value: any, name: any, props: any) => {
                                                         if (name.includes('率')) {
-                                                            return `${Number(value).toFixed(1)}%`;
+                                                            return [`${Number(value).toFixed(1)}%`, name];
                                                         }
-                                                        return `¥${Number(value).toLocaleString()}`;
+                                                        const dataKey = props.dataKey;
+                                                        if (dataKey && typeof dataKey === 'string' && dataKey.startsWith('sales_')) {
+                                                            const catId = dataKey.replace('sales_', '');
+                                                            const ratio = props.payload[`ratio_${catId}`];
+                                                            if (ratio !== undefined) {
+                                                                return [`¥${Number(value).toLocaleString()} (${Math.floor(ratio)}%)`, name];
+                                                            }
+                                                        }
+                                                        return [`¥${Number(value).toLocaleString()}`, name];
                                                     }}
                                                 />
                                                 <Legend iconType="plainline" />
@@ -1168,11 +1186,19 @@ function PlPageContent() {
                                                         borderRadius: '8px',
                                                         padding: '12px'
                                                     }}
-                                                    formatter={(value: any, name: any) => {
+                                                    formatter={(value: any, name: any, props: any) => {
                                                         if (name.includes('率')) {
-                                                            return `${Number(value).toFixed(1)}%`;
+                                                            return [`${Number(value).toFixed(1)}%`, name];
                                                         }
-                                                        return `¥${Number(value).toLocaleString()}`;
+                                                        const dataKey = props.dataKey;
+                                                        if (dataKey && typeof dataKey === 'string' && dataKey.startsWith('sales_')) {
+                                                            const catId = dataKey.replace('sales_', '');
+                                                            const ratio = props.payload[`ratio_${catId}`];
+                                                            if (ratio !== undefined) {
+                                                                return [`¥${Number(value).toLocaleString()} (${Math.floor(ratio)}%)`, name];
+                                                            }
+                                                        }
+                                                        return [`¥${Number(value).toLocaleString()}`, name];
                                                     }}
                                                 />
                                                 <Legend />

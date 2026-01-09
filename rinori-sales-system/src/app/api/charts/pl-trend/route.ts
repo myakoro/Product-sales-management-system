@@ -36,31 +36,13 @@ export async function GET(request: Request) {
         const prevYearMonths = months.map(m => format(subYears(parse(m, 'yyyy-MM', new Date()), 1), 'yyyy-MM'));
 
         // 実績データ取得 (今年分 + 昨年分)
-        const salesRecords = (type === 'overall' || ids.length > 0) ? await prisma.salesRecord.findMany({
+        // カテゴリー分析の場合、構成比計算のために全カテゴリーのデータが必要なため、フィルタをかけずに全件取得する
+        const salesRecords = (type === 'overall' || type === 'category' || (type === 'product' && ids.length > 0)) ? await prisma.salesRecord.findMany({
             where: {
                 periodYm: { in: [...months, ...prevYearMonths] },
                 ...(channelId ? { salesChannelId: channelId } : {}),
                 ...(type === 'product' && ids.length > 0 ? { productCode: { in: ids } } : {}),
-                ...(type === 'category' && ids.length > 0 ? {
-                    product: {
-                        OR: [
-                            {
-                                categoryId: {
-                                    in: ids
-                                        .filter(id => id !== 'null' && id !== 'unclassified')
-                                        .map(id => parseInt(id))
-                                        .filter(num => !isNaN(num))
-                                }
-                            },
-                            (ids.includes('null') || ids.includes('unclassified')) ? { categoryId: null } : {}
-                        ].filter(cond => {
-                            const keys = Object.keys(cond);
-                            if (keys.length === 0) return false;
-                            if (keys[0] === 'categoryId' && (cond as any).categoryId?.in?.length === 0) return false;
-                            return true;
-                        }) as any
-                    }
-                } : {})
+                // カテゴリー指定がある場合も、一旦全件取得してメモリ上でフィルタリングする（合計値算出のため）
             },
             include: {
                 product: {
@@ -174,8 +156,14 @@ export async function GET(request: Request) {
                 });
             }
 
+            // 月全体の合計売上高（構成比計算用）
+            const monthlyTotalSales = allCurrentSales.reduce((sum, r) => sum + r.salesAmountExclTax, 0);
+            const monthlyTotalSalesPrevYear = allPrevSales.reduce((sum, r) => sum + r.salesAmountExclTax, 0);
+
             return {
                 periodYm: month,
+                monthlyTotalSales: hasActDataOverall ? monthlyTotalSales : null,
+                monthlyTotalSalesPrevYear: hasPrevDataOverall ? monthlyTotalSalesPrevYear : null,
                 data
             };
         });
