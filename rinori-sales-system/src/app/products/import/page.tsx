@@ -2,23 +2,44 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { AlertTriangle } from 'lucide-react';
 
 type NewProduct = {
     productCode: string;
     productName: string | null;
+    asin: string | null;
     salesPriceExclTax: number | null;
     costExclTax: number | null;
+    productType: string | null;
+    managementStatus: string | null;
+    categoryName: string | null;
     sampleSku: string;
+    // バリデーション情報
+    categoryExists?: boolean;
+    asinDuplicate?: boolean;
+    duplicateAsinCode?: string;
 };
 
 type UpdateProduct = {
     productCode: string;
     oldProductName: string | null;
     newProductName: string | null;
+    oldAsin: string | null;
+    newAsin: string | null;
     oldSalesPriceExclTax: number | null;
     newSalesPriceExclTax: number | null;
     oldCostExclTax: number | null;
     newCostExclTax: number | null;
+    oldProductType: string | null;
+    newProductType: string | null;
+    oldManagementStatus: string | null;
+    newManagementStatus: string | null;
+    oldCategoryName: string | null;
+    newCategoryName: string | null;
+    // バリデーション情報
+    categoryExists?: boolean;
+    asinDuplicate?: boolean;
+    duplicateAsinCode?: string;
 };
 
 export default function ProductImportPage() {
@@ -85,7 +106,9 @@ export default function ProductImportPage() {
     };
 
     const handleSelectAllNew = () => {
-        setSelectedNew(new Set(newProducts.map(p => p.productCode)));
+        // カテゴリー未登録の商品は除外
+        const validProducts = newProducts.filter(p => p.categoryExists !== false);
+        setSelectedNew(new Set(validProducts.map(p => p.productCode)));
     };
 
     const handleDeselectAllNew = () => {
@@ -93,14 +116,20 @@ export default function ProductImportPage() {
     };
 
     const handleSelectAllUpdate = () => {
-        setSelectedUpdate(new Set(updateProducts.map(p => p.productCode)));
+        // カテゴリー未登録の商品は除外
+        const validProducts = updateProducts.filter(p => p.categoryExists !== false);
+        setSelectedUpdate(new Set(validProducts.map(p => p.productCode)));
     };
 
     const handleDeselectAllUpdate = () => {
         setSelectedUpdate(new Set());
     };
 
-    const handleToggleNew = (productCode: string) => {
+    const handleToggleNew = (productCode: string, product: NewProduct) => {
+        // カテゴリー未登録の場合は選択不可
+        if (product.categoryExists === false) {
+            return;
+        }
         const newSet = new Set(selectedNew);
         if (newSet.has(productCode)) {
             newSet.delete(productCode);
@@ -110,7 +139,11 @@ export default function ProductImportPage() {
         setSelectedNew(newSet);
     };
 
-    const handleToggleUpdate = (productCode: string) => {
+    const handleToggleUpdate = (productCode: string, product: UpdateProduct) => {
+        // カテゴリー未登録の場合は選択不可
+        if (product.categoryExists === false) {
+            return;
+        }
         const newSet = new Set(selectedUpdate);
         if (newSet.has(productCode)) {
             newSet.delete(productCode);
@@ -317,33 +350,66 @@ export default function ProductImportPage() {
                                         <th style={{ padding: '0.75rem', textAlign: 'center', width: '50px' }}>選択</th>
                                         <th style={{ padding: '0.75rem', textAlign: 'left' }}>商品コード</th>
                                         <th style={{ padding: '0.75rem', textAlign: 'left' }}>商品名</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>ASIN</th>
                                         <th style={{ padding: '0.75rem', textAlign: 'right' }}>販売価格</th>
                                         <th style={{ padding: '0.75rem', textAlign: 'right' }}>原価</th>
-                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>サンプルSKU</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>商品区分</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>ステータス</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>カテゴリー</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {newProducts.map((product) => (
-                                        <tr key={product.productCode} style={{ borderBottom: '1px solid #eee' }}>
-                                            <td style={{ padding: '0.75rem', textAlign: 'center' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedNew.has(product.productCode)}
-                                                    onChange={() => handleToggleNew(product.productCode)}
-                                                    style={{ cursor: 'pointer' }}
-                                                />
-                                            </td>
-                                            <td style={{ padding: '0.75rem', fontWeight: '500' }}>{product.productCode}</td>
-                                            <td style={{ padding: '0.75rem' }}>{product.productName || '-'}</td>
-                                            <td style={{ padding: '0.75rem', textAlign: 'right' }}>
-                                                {product.salesPriceExclTax !== null ? `¥${product.salesPriceExclTax.toLocaleString()}` : '-'}
-                                            </td>
-                                            <td style={{ padding: '0.75rem', textAlign: 'right' }}>
-                                                {product.costExclTax !== null ? `¥${product.costExclTax.toLocaleString()}` : '-'}
-                                            </td>
-                                            <td style={{ padding: '0.75rem', fontSize: '0.875rem', color: '#666' }}>{product.sampleSku}</td>
-                                        </tr>
-                                    ))}
+                                    {newProducts.map((product) => {
+                                        const hasInvalidCategory = product.categoryExists === false;
+                                        const hasDuplicateAsin = product.asinDuplicate === true;
+                                        return (
+                                            <tr 
+                                                key={product.productCode} 
+                                                style={{ 
+                                                    borderBottom: '1px solid #eee',
+                                                    backgroundColor: hasInvalidCategory ? '#fef2f2' : 'transparent'
+                                                }}
+                                            >
+                                                <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedNew.has(product.productCode)}
+                                                        onChange={() => handleToggleNew(product.productCode, product)}
+                                                        disabled={hasInvalidCategory}
+                                                        style={{ cursor: hasInvalidCategory ? 'not-allowed' : 'pointer' }}
+                                                    />
+                                                </td>
+                                                <td style={{ padding: '0.75rem', fontWeight: '500' }}>{product.productCode}</td>
+                                                <td style={{ padding: '0.75rem' }}>{product.productName || '-'}</td>
+                                                <td style={{ padding: '0.75rem' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                                        <span>{product.asin || '-'}</span>
+                                                        {hasDuplicateAsin && (
+                                                            <span style={{ display: 'inline-flex', alignItems: 'center' }} title={`ASIN重複: ${product.duplicateAsinCode}`}>
+                                                                <AlertTriangle size={16} color="#f59e0b" />
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                                                    {product.salesPriceExclTax !== null ? `¥${product.salesPriceExclTax.toLocaleString()}` : '-'}
+                                                </td>
+                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                                                    {product.costExclTax !== null ? `¥${product.costExclTax.toLocaleString()}` : '-'}
+                                                </td>
+                                                <td style={{ padding: '0.75rem' }}>
+                                                    {product.productType === 'own' ? '自社' : product.productType === 'purchase' ? '仕入' : product.productType || '-'}
+                                                </td>
+                                                <td style={{ padding: '0.75rem' }}>
+                                                    {product.managementStatus === 'managed' ? '管理中' : product.managementStatus === 'unmanaged' ? '管理外' : product.managementStatus || '-'}
+                                                </td>
+                                                <td style={{ padding: '0.75rem', color: hasInvalidCategory ? '#dc2626' : 'inherit', fontWeight: hasInvalidCategory ? '600' : 'normal' }}>
+                                                    {product.categoryName || '-'}
+                                                    {hasInvalidCategory && ' (未登録)'}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
@@ -393,65 +459,145 @@ export default function ProductImportPage() {
                                         <th style={{ padding: '0.75rem', textAlign: 'center', width: '50px' }}>選択</th>
                                         <th style={{ padding: '0.75rem', textAlign: 'left' }}>商品コード</th>
                                         <th style={{ padding: '0.75rem', textAlign: 'left' }}>商品名</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>ASIN</th>
                                         <th style={{ padding: '0.75rem', textAlign: 'right' }}>販売価格</th>
                                         <th style={{ padding: '0.75rem', textAlign: 'right' }}>原価</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>商品区分</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>ステータス</th>
+                                        <th style={{ padding: '0.75rem', textAlign: 'left' }}>カテゴリー</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {updateProducts.map((product) => (
-                                        <tr key={product.productCode} style={{ borderBottom: '1px solid #eee' }}>
-                                            <td style={{ padding: '0.75rem', textAlign: 'center' }}>
-                                                <input
-                                                    type="checkbox"
-                                                    checked={selectedUpdate.has(product.productCode)}
-                                                    onChange={() => handleToggleUpdate(product.productCode)}
-                                                    style={{ cursor: 'pointer' }}
-                                                />
-                                            </td>
-                                            <td style={{ padding: '0.75rem', fontWeight: '500' }}>{product.productCode}</td>
-                                            <td style={{ padding: '0.75rem' }}>
-                                                {product.oldProductName !== product.newProductName ? (
-                                                    <>
-                                                        <span style={{ color: '#999', textDecoration: 'line-through' }}>{product.oldProductName || '-'}</span>
-                                                        {' → '}
-                                                        <span style={{ color: '#28a745', fontWeight: '500' }}>{product.newProductName || '-'}</span>
-                                                    </>
-                                                ) : (
-                                                    product.oldProductName || '-'
-                                                )}
-                                            </td>
-                                            <td style={{ padding: '0.75rem', textAlign: 'right' }}>
-                                                {product.oldSalesPriceExclTax !== product.newSalesPriceExclTax ? (
-                                                    <>
-                                                        <span style={{ color: '#999', textDecoration: 'line-through' }}>
-                                                            ¥{product.oldSalesPriceExclTax?.toLocaleString() || '0'}
-                                                        </span>
-                                                        {' → '}
-                                                        <span style={{ color: '#28a745', fontWeight: '500' }}>
-                                                            ¥{product.newSalesPriceExclTax?.toLocaleString() || '0'}
-                                                        </span>
-                                                    </>
-                                                ) : (
-                                                    `¥${product.oldSalesPriceExclTax?.toLocaleString() || '0'}`
-                                                )}
-                                            </td>
-                                            <td style={{ padding: '0.75rem', textAlign: 'right' }}>
-                                                {product.oldCostExclTax !== product.newCostExclTax ? (
-                                                    <>
-                                                        <span style={{ color: '#999', textDecoration: 'line-through' }}>
-                                                            ¥{product.oldCostExclTax?.toLocaleString() || '0'}
-                                                        </span>
-                                                        {' → '}
-                                                        <span style={{ color: '#28a745', fontWeight: '500' }}>
-                                                            ¥{product.newCostExclTax?.toLocaleString() || '0'}
-                                                        </span>
-                                                    </>
-                                                ) : (
-                                                    `¥${product.oldCostExclTax?.toLocaleString() || '0'}`
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
+                                    {updateProducts.map((product) => {
+                                        const hasInvalidCategory = product.categoryExists === false;
+                                        const hasDuplicateAsin = product.asinDuplicate === true;
+                                        return (
+                                            <tr 
+                                                key={product.productCode} 
+                                                style={{ 
+                                                    borderBottom: '1px solid #eee',
+                                                    backgroundColor: hasInvalidCategory ? '#fef2f2' : 'transparent'
+                                                }}
+                                            >
+                                                <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedUpdate.has(product.productCode)}
+                                                        onChange={() => handleToggleUpdate(product.productCode, product)}
+                                                        disabled={hasInvalidCategory}
+                                                        style={{ cursor: hasInvalidCategory ? 'not-allowed' : 'pointer' }}
+                                                    />
+                                                </td>
+                                                <td style={{ padding: '0.75rem', fontWeight: '500' }}>{product.productCode}</td>
+                                                <td style={{ padding: '0.75rem' }}>
+                                                    {product.oldProductName !== product.newProductName ? (
+                                                        <>
+                                                            <span style={{ color: '#999', textDecoration: 'line-through' }}>{product.oldProductName || '-'}</span>
+                                                            {' → '}
+                                                            <span style={{ color: '#28a745', fontWeight: '500' }}>{product.newProductName || '-'}</span>
+                                                        </>
+                                                    ) : (
+                                                        product.newProductName || '-'
+                                                    )}
+                                                </td>
+                                                <td style={{ padding: '0.75rem' }}>
+                                                    {product.oldAsin !== product.newAsin ? (
+                                                        <>
+                                                            <span style={{ color: '#999', textDecoration: 'line-through' }}>{product.oldAsin || '-'}</span>
+                                                            {' → '}
+                                                            <span style={{ color: '#28a745', fontWeight: '500' }}>{product.newAsin || '-'}</span>
+                                                        </>
+                                                    ) : (
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                                                            <span>{product.newAsin || '-'}</span>
+                                                            {hasDuplicateAsin && (
+                                                                <span style={{ display: 'inline-flex', alignItems: 'center' }} title={`ASIN重複: ${product.duplicateAsinCode}`}>
+                                                                    <AlertTriangle size={16} color="#f59e0b" />
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </td>
+                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                                                    {product.oldSalesPriceExclTax !== product.newSalesPriceExclTax ? (
+                                                        <>
+                                                            <span style={{ color: '#999', textDecoration: 'line-through' }}>
+                                                                ¥{product.oldSalesPriceExclTax?.toLocaleString() || '0'}
+                                                            </span>
+                                                            {' → '}
+                                                            <span style={{ color: '#28a745', fontWeight: '500' }}>
+                                                                ¥{product.newSalesPriceExclTax?.toLocaleString() || '0'}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        `¥${product.newSalesPriceExclTax?.toLocaleString() || '0'}`
+                                                    )}
+                                                </td>
+                                                <td style={{ padding: '0.75rem', textAlign: 'right' }}>
+                                                    {product.oldCostExclTax !== product.newCostExclTax ? (
+                                                        <>
+                                                            <span style={{ color: '#999', textDecoration: 'line-through' }}>
+                                                                ¥{product.oldCostExclTax?.toLocaleString() || '0'}
+                                                            </span>
+                                                            {' → '}
+                                                            <span style={{ color: '#28a745', fontWeight: '500' }}>
+                                                                ¥{product.newCostExclTax?.toLocaleString() || '0'}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        `¥${product.newCostExclTax?.toLocaleString() || '0'}`
+                                                    )}
+                                                </td>
+                                                <td style={{ padding: '0.75rem' }}>
+                                                    {product.oldProductType !== product.newProductType ? (
+                                                        <>
+                                                            <span style={{ color: '#999', textDecoration: 'line-through' }}>
+                                                                {product.oldProductType === 'own' ? '自社' : product.oldProductType === 'purchase' ? '仕入' : product.oldProductType || '-'}
+                                                            </span>
+                                                            {' → '}
+                                                            <span style={{ color: '#28a745', fontWeight: '500' }}>
+                                                                {product.newProductType === 'own' ? '自社' : product.newProductType === 'purchase' ? '仕入' : product.newProductType || '-'}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        product.newProductType === 'own' ? '自社' : product.newProductType === 'purchase' ? '仕入' : product.newProductType || '-'
+                                                    )}
+                                                </td>
+                                                <td style={{ padding: '0.75rem' }}>
+                                                    {product.oldManagementStatus !== product.newManagementStatus ? (
+                                                        <>
+                                                            <span style={{ color: '#999', textDecoration: 'line-through' }}>
+                                                                {product.oldManagementStatus === 'managed' ? '管理中' : product.oldManagementStatus === 'unmanaged' ? '管理外' : product.oldManagementStatus || '-'}
+                                                            </span>
+                                                            {' → '}
+                                                            <span style={{ color: '#28a745', fontWeight: '500' }}>
+                                                                {product.newManagementStatus === 'managed' ? '管理中' : product.newManagementStatus === 'unmanaged' ? '管理外' : product.newManagementStatus || '-'}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        product.newManagementStatus === 'managed' ? '管理中' : product.newManagementStatus === 'unmanaged' ? '管理外' : product.newManagementStatus || '-'
+                                                    )}
+                                                </td>
+                                                <td style={{ padding: '0.75rem', color: hasInvalidCategory ? '#dc2626' : 'inherit', fontWeight: hasInvalidCategory ? '600' : 'normal' }}>
+                                                    {product.oldCategoryName !== product.newCategoryName ? (
+                                                        <>
+                                                            <span style={{ color: '#999', textDecoration: 'line-through' }}>{product.oldCategoryName || '-'}</span>
+                                                            {' → '}
+                                                            <span style={{ color: hasInvalidCategory ? '#dc2626' : '#28a745', fontWeight: '500' }}>
+                                                                {product.newCategoryName || '-'}
+                                                                {hasInvalidCategory && ' (未登録)'}
+                                                            </span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            {product.newCategoryName || '-'}
+                                                            {hasInvalidCategory && ' (未登録)'}
+                                                        </>
+                                                    )}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>

@@ -19,12 +19,14 @@
         "bcryptjs": "^3.0.3",
         "date-fns": "^4.1.0",
         "encoding-japanese": "^2.2.0",
+        "lucide-react": "^0.562.0",
         "next": "14.2.18",
         "next-auth": "^4.24.13",
         "papaparse": "^5.5.3",
         "prisma": "^5.22.0",
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
+        "recharts": "^3.6.0",
         "sqlite3": "^5.1.7"
     },
     "devDependencies": {

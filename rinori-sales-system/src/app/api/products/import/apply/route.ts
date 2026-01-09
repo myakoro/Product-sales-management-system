@@ -29,10 +29,12 @@ export async function POST(request: Request) {
                         data: {
                             productCode: product.productCode,
                             productName: product.productName,
+                            asin: product.asin,
                             salesPriceExclTax: product.salesPriceExclTax,
                             costExclTax: product.costExclTax,
-                            productType: 'own', // デフォルト: 自社
-                            managementStatus: 'managed' // デフォルト: 管理中
+                            productType: product.productType || 'own',
+                            managementStatus: product.managementStatus || 'managed',
+                            categoryId: product.categoryId || null
                         }
                     });
                 }
@@ -46,8 +48,12 @@ export async function POST(request: Request) {
                         where: { productCode: product.productCode },
                         data: {
                             productName: product.newProductName,
+                            asin: product.newAsin,
                             salesPriceExclTax: product.newSalesPriceExclTax,
-                            costExclTax: product.newCostExclTax
+                            costExclTax: product.newCostExclTax,
+                            productType: product.newProductType,
+                            managementStatus: product.newManagementStatus,
+                            categoryId: product.categoryId || null
                         }
                     });
                 }

@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { ChevronDown, ChevronUp } from 'lucide-react';
 
 type PlData = {
     sales: number;
@@ -31,6 +33,33 @@ type CategoryPL = {
     cogs: number;
     grossProfit: number;
     grossProfitRate: number;
+};
+
+type PLTrendData = {
+    periodYm: string;
+    sales: number;
+    salesPrevYear: number;
+    grossProfit: number;
+    grossProfitPrevYear: number;
+    grossProfitRate: number;
+    grossProfitRatePrevYear: number;
+    operatingProfit?: number;
+    operatingProfitPrevYear?: number;
+    sga?: number;
+};
+
+type BudgetVsActualData = {
+    periodYm: string;
+    actualSales: number;
+    budgetSales: number;
+    prevYearSales: number;
+    actualGrossProfit: number;
+    budgetGrossProfit: number;
+    prevYearGrossProfit: number;
+    actualQuantity: number;
+    budgetQuantity: number;
+    prevYearQuantity: number;
+    achievementRate: number;
 };
 
 type SalesChannel = {
@@ -111,6 +140,67 @@ export default function PlPage() {
     const [categoryData, setCategoryData] = useState<CategoryPL[]>([]);
     const [categorySortBy, setCategorySortBy] = useState<'sales' | 'grossProfit' | 'grossProfitRate'>('sales');
     const [categorySortOrder, setCategorySortOrder] = useState<'asc' | 'desc'>('desc');
+
+    // V1.565: カテゴリー選択状態（最大5件）
+    const [selectedCategories, setSelectedCategories] = useState<(number | null)[]>([]);
+    const [categoryGraphData, setCategoryGraphData] = useState<any[]>([]);
+    const [categoryGraphLoading, setCategoryGraphLoading] = useState(false);
+    const [showCategoryPrevYear, setShowCategoryPrevYear] = useState(true);
+    const [categoryGraphType, setCategoryGraphType] = useState<'line' | 'bar'>('line');
+    
+    // V1.565: カテゴリーグラフ表示項目選択（初期表示：売上高、粗利、粗利率）
+    const [categoryVisibleItems, setCategoryVisibleItems] = useState({
+        sales: true,
+        salesPrevYear: false,
+        grossProfit: true,
+        grossProfitPrevYear: false,
+        grossProfitRate: true
+    });
+
+    const toggleCategoryVisibleItem = (item: keyof typeof categoryVisibleItems) => {
+        setCategoryVisibleItems(prev => ({ ...prev, [item]: !prev[item] }));
+    };
+
+    const handleCategorySelect = (categoryId: number | null) => {
+        setSelectedCategories(prev => {
+            if (prev.includes(categoryId)) {
+                return prev.filter(id => id !== categoryId);
+            } else {
+                if (prev.length >= 5) {
+                    return prev; // 最大5件まで
+                }
+                return [...prev, categoryId];
+            }
+        });
+    };
+
+    const handleCategorySelectAll = () => {
+        setSelectedCategories([]);
+    };
+
+    // PL Trend Graph state
+    const [plTrendData, setPlTrendData] = useState<PLTrendData[]>([]);
+    const [isGraphOpen, setIsGraphOpen] = useState(true);
+    const [visibleLines, setVisibleLines] = useState({
+        sales: true,
+        grossProfit: true,
+        grossProfitRate: false,
+        operatingProfit: false,
+        sga: false
+    });
+
+    // Budget vs Actual Graph state
+    const [budgetVsActualData, setBudgetVsActualData] = useState<BudgetVsActualData[]>([]);
+    const [isBudgetGraphOpen, setIsBudgetGraphOpen] = useState(true);
+    const [visibleBudgetLines, setVisibleBudgetLines] = useState({
+        actualSales: true,
+        budgetSales: true,
+        achievementRate: true,
+        actualGrossProfit: false,
+        budgetGrossProfit: false,
+        actualQuantity: false,
+        budgetQuantity: false
+    });
 
     // Fetch sales channels
     useEffect(() => {
@@ -196,6 +286,9 @@ export default function PlPage() {
         } else {
             fetchData();
         }
+        // グラフデータも取得
+        fetchPlTrendData();
+        fetchBudgetVsActualData();
     };
 
     const handleSortCategory = (sortBy: 'sales' | 'grossProfit' | 'grossProfitRate') => {
@@ -212,6 +305,154 @@ export default function PlPage() {
             fetchCategoryData();
         }
     }, [categorySortBy, categorySortOrder]);
+
+    // Fetch PL Trend data
+    const fetchPlTrendData = async () => {
+        try {
+            let sDate, eDate;
+            if (periodMode === 'preset') {
+                const range = getRange(presetType, baseYm);
+                sDate = range.start;
+                eDate = range.end;
+            } else {
+                sDate = customStart;
+                eDate = customEnd;
+            }
+
+            const type = activeTab === 'overall' ? 'overall' : activeTab === 'product' ? 'product' : 'category';
+            const url = `/api/charts/pl-trend?startYm=${sDate}&endYm=${eDate}&type=${type}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Failed to fetch PL trend data');
+            const result = await res.json();
+            
+            // APIからのレスポンスを変換
+            const trendData: PLTrendData[] = result.map((item: any) => ({
+                periodYm: item.periodYm,
+                sales: item.data[0]?.sales || 0,
+                salesPrevYear: item.data[0]?.salesPrevYear || 0,
+                grossProfit: item.data[0]?.grossProfit || 0,
+                grossProfitPrevYear: item.data[0]?.grossProfitPrevYear || 0,
+                grossProfitRate: item.data[0]?.grossProfitRate || 0,
+                grossProfitRatePrevYear: item.data[0]?.grossProfitRatePrevYear || 0,
+                operatingProfit: item.data[0]?.operatingProfit,
+                operatingProfitPrevYear: item.data[0]?.operatingProfitPrevYear,
+                sga: item.data[0]?.sga
+            }));
+            
+            setPlTrendData(trendData);
+        } catch (err) {
+            console.error('PL推移データの取得に失敗しました:', err);
+        }
+    };
+
+    // タブ切り替え時にグラフを開く
+    useEffect(() => {
+        setIsGraphOpen(true);
+        setIsBudgetGraphOpen(true);
+    }, [activeTab]);
+
+    // カテゴリーグラフデータ取得
+    const fetchCategoryGraphData = async () => {
+        if (selectedCategories.length === 0) {
+            setCategoryGraphData([]);
+            return;
+        }
+
+        setCategoryGraphLoading(true);
+        try {
+            let sDate, eDate;
+            if (periodMode === 'preset') {
+                const range = getRange(presetType, baseYm);
+                sDate = range.start;
+                eDate = range.end;
+            } else {
+                sDate = customStart;
+                eDate = customEnd;
+            }
+
+            const ids = selectedCategories.map(id => id === null ? 'unclassified' : id).join(',');
+            const url = `/api/charts/pl-trend?startYm=${sDate}&endYm=${eDate}&type=category&ids=${ids}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Failed to fetch category graph data');
+            const result = await res.json();
+
+            // APIレスポンスをRechartsフォーマットに変換
+            const formattedData = result.map((item: any) => {
+                const dataPoint: any = { periodYm: item.periodYm };
+                item.data.forEach((category: any) => {
+                    const catId = category.id === 'unclassified' ? 'unclassified' : category.id;
+                    dataPoint[`sales_${catId}`] = category.sales;
+                    dataPoint[`salesPrevYear_${catId}`] = category.salesPrevYear;
+                    dataPoint[`grossProfit_${catId}`] = category.grossProfit;
+                    dataPoint[`grossProfitPrevYear_${catId}`] = category.grossProfitPrevYear;
+                    dataPoint[`grossProfitRate_${catId}`] = category.grossProfitRate;
+                });
+                return dataPoint;
+            });
+
+            setCategoryGraphData(formattedData);
+        } catch (err) {
+            console.error('カテゴリーグラフデータの取得に失敗しました:', err);
+        } finally {
+            setCategoryGraphLoading(false);
+        }
+    };
+
+    // 選択カテゴリー変更時にグラフデータを再取得
+    useEffect(() => {
+        if (activeTab === 'category' && selectedCategories.length > 0) {
+            fetchCategoryGraphData();
+        } else {
+            setCategoryGraphData([]);
+        }
+    }, [selectedCategories, periodMode, presetType, baseYm, customStart, customEnd, activeTab]);
+
+    const toggleLine = (line: keyof typeof visibleLines) => {
+        setVisibleLines(prev => ({ ...prev, [line]: !prev[line] }));
+    };
+
+    const toggleBudgetLine = (line: keyof typeof visibleBudgetLines) => {
+        setVisibleBudgetLines(prev => ({ ...prev, [line]: !prev[line] }));
+    };
+
+    // Fetch Budget vs Actual data
+    const fetchBudgetVsActualData = async () => {
+        try {
+            let sDate, eDate;
+            if (periodMode === 'preset') {
+                const range = getRange(presetType, baseYm);
+                sDate = range.start;
+                eDate = range.end;
+            } else {
+                sDate = customStart;
+                eDate = customEnd;
+            }
+
+            const url = `/api/charts/budget-vs-actual?startYm=${sDate}&endYm=${eDate}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Failed to fetch budget vs actual data');
+            const result = await res.json();
+            
+            // APIからのレスポンスを変換
+            const budgetData: BudgetVsActualData[] = result.map((item: any) => ({
+                periodYm: item.periodYm,
+                actualSales: item.data[0]?.actualSales || 0,
+                budgetSales: item.data[0]?.budgetSales || 0,
+                prevYearSales: item.data[0]?.prevYearSales || 0,
+                actualGrossProfit: item.data[0]?.actualGrossProfit || 0,
+                budgetGrossProfit: item.data[0]?.budgetGrossProfit || 0,
+                prevYearGrossProfit: item.data[0]?.prevYearGrossProfit || 0,
+                actualQuantity: item.data[0]?.actualQuantity || 0,
+                budgetQuantity: item.data[0]?.budgetQuantity || 0,
+                prevYearQuantity: item.data[0]?.prevYearQuantity || 0,
+                achievementRate: item.data[0]?.achievementRate || 0
+            }));
+            
+            setBudgetVsActualData(budgetData);
+        } catch (err) {
+            console.error('予算実績データの取得に失敗しました:', err);
+        }
+    };
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -536,6 +777,15 @@ export default function PlPage() {
                                     <table className="w-full">
                                         <thead>
                                             <tr className="border-b-2 border-gray-300">
+                                                <th className="text-center py-3 px-4 font-semibold text-gray-700">
+                                                    <button
+                                                        onClick={handleCategorySelectAll}
+                                                        className="text-xs px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                                                        title="全解除"
+                                                    >
+                                                        解除
+                                                    </button>
+                                                </th>
                                                 <th className="text-left py-3 px-4 font-semibold text-gray-700">カテゴリー名</th>
                                                 <th
                                                     className="text-right py-3 px-4 font-semibold text-gray-700 cursor-pointer hover:bg-gray-50"
@@ -568,9 +818,21 @@ export default function PlPage() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {categoryData.map((cat, idx) => (
-                                                <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
-                                                    <td className="py-3 px-4 font-medium">
+                                            {categoryData.map((cat, idx) => {
+                                                const isSelected = selectedCategories.includes(cat.categoryId);
+                                                const isDisabled = !isSelected && selectedCategories.length >= 5;
+                                                return (
+                                                    <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
+                                                        <td className="py-3 px-4 text-center">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={isSelected}
+                                                                onChange={() => handleCategorySelect(cat.categoryId)}
+                                                                disabled={isDisabled}
+                                                                className="w-4 h-4 cursor-pointer disabled:opacity-30 disabled:cursor-not-allowed"
+                                                            />
+                                                        </td>
+                                                        <td className="py-3 px-4 font-medium">
                                                         {cat.categoryName || '未分類'}
                                                     </td>
                                                     <td className="py-3 px-4 text-right font-mono">
@@ -584,9 +846,10 @@ export default function PlPage() {
                                                     </td>
                                                     <td className="py-3 px-4 text-right font-mono">
                                                         {cat.grossProfitRate.toFixed(1)}%
-                                                    </td>
-                                                </tr>
-                                            ))}
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
                                         </tbody>
                                     </table>
                                 </div>
@@ -594,6 +857,777 @@ export default function PlPage() {
                         </>
                     )}
                 </div>
+
+                {/* カテゴリー別PL選択状態表示 */}
+                {activeTab === 'category' && categoryData.length > 0 && (
+                    <div className="mt-4 px-4 py-3 bg-white rounded-lg border border-gray-200 flex items-center justify-between">
+                        <div className="flex items-center gap-4">
+                            <span className="text-sm font-medium text-gray-700">
+                                比較対象: <span className="text-[#00214d] font-bold">{selectedCategories.length}</span> / 5 件選択中
+                            </span>
+                            {selectedCategories.length > 0 && (
+                                <button
+                                    onClick={handleCategorySelectAll}
+                                    className="text-xs px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded transition-colors text-gray-700"
+                                >
+                                    全解除
+                                </button>
+                            )}
+                        </div>
+                        {selectedCategories.length === 5 && (
+                            <span className="text-xs text-amber-600 font-medium">
+                                ⚠ 最大5件まで選択可能です
+                            </span>
+                        )}
+                    </div>
+                )}
+
+                {/* カテゴリー別PLグラフ */}
+                {activeTab === 'category' && (
+                    <div className="mt-8 bg-white border border-gray-200 rounded p-6 shadow-sm">
+                        <div className="mb-4">
+                            <div 
+                                className="flex items-center justify-between cursor-pointer"
+                                onClick={() => setIsGraphOpen(!isGraphOpen)}
+                            >
+                                <h3 className="text-xl font-bold text-[#00214d] flex items-center gap-2">
+                                    {isGraphOpen ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                    カテゴリー別PL推移グラフ
+                                </h3>
+                            </div>
+                            {isGraphOpen && selectedCategories.length > 0 && (
+                                <div className="mt-4 space-y-3" onClick={(e) => e.stopPropagation()}>
+                                    <div className="flex items-center gap-6">
+                                        <label className="flex items-center gap-2 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={showCategoryPrevYear}
+                                                onChange={(e) => setShowCategoryPrevYear(e.target.checked)}
+                                                className="w-4 h-4 cursor-pointer"
+                                            />
+                                            <span className="text-sm font-medium text-gray-700">昨年対比を表示</span>
+                                        </label>
+                                        <div className="flex gap-2">
+                                            <button
+                                                onClick={() => setCategoryGraphType('line')}
+                                                className={`px-4 py-1.5 text-sm font-medium rounded transition-colors ${
+                                                    categoryGraphType === 'line'
+                                                        ? 'bg-[#00214d] text-white'
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                折れ線
+                                            </button>
+                                            <button
+                                                onClick={() => setCategoryGraphType('bar')}
+                                                className={`px-4 py-1.5 text-sm font-medium rounded transition-colors ${
+                                                    categoryGraphType === 'bar'
+                                                        ? 'bg-[#00214d] text-white'
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                棒
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4 flex-wrap">
+                                        <span className="text-xs font-semibold text-gray-600">表示項目:</span>
+                                        <label className="flex items-center gap-1.5 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={categoryVisibleItems.sales}
+                                                onChange={() => toggleCategoryVisibleItem('sales')}
+                                                className="w-3.5 h-3.5 cursor-pointer"
+                                            />
+                                            <span className="text-xs text-gray-700">売上高</span>
+                                        </label>
+                                        <label className="flex items-center gap-1.5 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={categoryVisibleItems.grossProfit}
+                                                onChange={() => toggleCategoryVisibleItem('grossProfit')}
+                                                className="w-3.5 h-3.5 cursor-pointer"
+                                            />
+                                            <span className="text-xs text-gray-700">粗利</span>
+                                        </label>
+                                        <label className="flex items-center gap-1.5 cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={categoryVisibleItems.grossProfitRate}
+                                                onChange={() => toggleCategoryVisibleItem('grossProfitRate')}
+                                                className="w-3.5 h-3.5 cursor-pointer"
+                                            />
+                                            <span className="text-xs text-gray-700">粗利率(%)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        {isGraphOpen && (
+                            <div className="mt-4">
+                                {selectedCategories.length === 0 ? (
+                                    <div className="text-center py-16">
+                                        <svg className="w-20 h-20 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                        </svg>
+                                        <p className="text-lg text-gray-600 font-medium mb-2">比較したいカテゴリーを選択してください</p>
+                                        <p className="text-sm text-gray-500">上の表から最大5件まで選択できます</p>
+                                    </div>
+                                ) : categoryGraphLoading ? (
+                                    <div className="text-center py-16">
+                                        <svg className="animate-spin h-10 w-10 text-[#00214d] mx-auto mb-3" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        <p className="text-gray-500">グラフを読み込み中...</p>
+                                    </div>
+                                ) : (
+                                    <ResponsiveContainer width="100%" height={400}>
+                                        {categoryGraphType === 'line' ? (
+                                            <LineChart data={categoryGraphData}>
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                            <XAxis 
+                                                dataKey="periodYm" 
+                                                stroke="#6b7280"
+                                                style={{ fontSize: '12px' }}
+                                            />
+                                            <YAxis 
+                                                yAxisId="left"
+                                                stroke="#6b7280"
+                                                style={{ fontSize: '12px' }}
+                                                tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
+                                            />
+                                            <YAxis 
+                                                yAxisId="right"
+                                                orientation="right"
+                                                stroke="#6b7280"
+                                                style={{ fontSize: '12px' }}
+                                                tickFormatter={(value) => `${value.toFixed(1)}%`}
+                                            />
+                                            <Tooltip 
+                                                contentStyle={{ 
+                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                    border: '1px solid #d1d5db',
+                                                    borderRadius: '8px',
+                                                    padding: '12px'
+                                                }}
+                                                formatter={(value: any, name: string) => {
+                                                    if (name.includes('率')) {
+                                                        return `${Number(value).toFixed(1)}%`;
+                                                    }
+                                                    return `¥${Number(value).toLocaleString()}`;
+                                                }}
+                                            />
+                                            <Legend />
+                                            
+                                            {selectedCategories.map((categoryId, index) => {
+                                                const category = categoryData.find(c => c.categoryId === categoryId);
+                                                const color = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'][index % 5];
+                                                const lightColor = color + '80';
+                                                const catId = categoryId === null ? 'unclassified' : categoryId;
+                                                
+                                                return (
+                                                    <React.Fragment key={catId}>
+                                                        {categoryVisibleItems.sales && (
+                                                            <Line 
+                                                                yAxisId="left"
+                                                                type="monotone" 
+                                                                dataKey={`sales_${catId}`}
+                                                                stroke={color}
+                                                                strokeWidth={2}
+                                                                name={`${category?.categoryName || '未分類'} - 売上高`}
+                                                                dot={{ fill: color, r: 4 }}
+                                                            />
+                                                        )}
+                                                        {categoryVisibleItems.salesPrevYear && showCategoryPrevYear && (
+                                                            <Line 
+                                                                yAxisId="left"
+                                                                type="monotone" 
+                                                                dataKey={`salesPrevYear_${catId}`}
+                                                                stroke={lightColor}
+                                                                strokeWidth={2}
+                                                                strokeDasharray="5 5"
+                                                                name={`${category?.categoryName || '未分類'} - 売上高(昨年)`}
+                                                                dot={{ fill: lightColor, r: 3 }}
+                                                            />
+                                                        )}
+                                                        {categoryVisibleItems.grossProfit && (
+                                                            <Line 
+                                                                yAxisId="left"
+                                                                type="monotone" 
+                                                                dataKey={`grossProfit_${catId}`}
+                                                                stroke={color}
+                                                                strokeWidth={2}
+                                                                strokeDasharray="3 3"
+                                                                name={`${category?.categoryName || '未分類'} - 粗利`}
+                                                                dot={{ fill: color, r: 3 }}
+                                                            />
+                                                        )}
+                                                        {categoryVisibleItems.grossProfitPrevYear && showCategoryPrevYear && (
+                                                            <Line 
+                                                                yAxisId="left"
+                                                                type="monotone" 
+                                                                dataKey={`grossProfitPrevYear_${catId}`}
+                                                                stroke={lightColor}
+                                                                strokeWidth={2}
+                                                                strokeDasharray="3 3"
+                                                                name={`${category?.categoryName || '未分類'} - 粗利(昨年)`}
+                                                                dot={{ fill: lightColor, r: 2 }}
+                                                            />
+                                                        )}
+                                                        {categoryVisibleItems.grossProfitRate && (
+                                                            <Line 
+                                                                yAxisId="right"
+                                                                type="monotone" 
+                                                                dataKey={`grossProfitRate_${catId}`}
+                                                                stroke={color}
+                                                                strokeWidth={2}
+                                                                name={`${category?.categoryName || '未分類'} - 粗利率`}
+                                                                dot={{ fill: color, r: 4 }}
+                                                            />
+                                                        )}
+                                                    </React.Fragment>
+                                                );
+                                            })}
+                                        </LineChart>
+                                        ) : (
+                                            <BarChart data={categoryGraphData} barCategoryGap="20%" barGap={2}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                                <XAxis 
+                                                    dataKey="periodYm" 
+                                                    stroke="#6b7280"
+                                                    style={{ fontSize: '12px' }}
+                                                />
+                                                <YAxis 
+                                                    yAxisId="left"
+                                                    stroke="#6b7280"
+                                                    style={{ fontSize: '12px' }}
+                                                    tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
+                                                />
+                                                <YAxis 
+                                                    yAxisId="right"
+                                                    orientation="right"
+                                                    stroke="#6b7280"
+                                                    style={{ fontSize: '12px' }}
+                                                    tickFormatter={(value) => `${value.toFixed(1)}%`}
+                                                />
+                                                <Tooltip 
+                                                    contentStyle={{ 
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                        border: '1px solid #d1d5db',
+                                                        borderRadius: '8px',
+                                                        padding: '12px'
+                                                    }}
+                                                    formatter={(value: any, name: string) => {
+                                                        if (name.includes('率')) {
+                                                            return `${Number(value).toFixed(1)}%`;
+                                                        }
+                                                        return `¥${Number(value).toLocaleString()}`;
+                                                    }}
+                                                />
+                                                <Legend />
+                                                
+                                                {selectedCategories.map((categoryId, index) => {
+                                                    const category = categoryData.find(c => c.categoryId === categoryId);
+                                                    const color = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'][index % 5];
+                                                    const lightColor = color + '80';
+                                                    const catId = categoryId === null ? 'unclassified' : categoryId;
+                                                    
+                                                    return (
+                                                        <React.Fragment key={catId}>
+                                                            {categoryVisibleItems.sales && (
+                                                                <Bar 
+                                                                    yAxisId="left"
+                                                                    dataKey={`sales_${catId}`}
+                                                                    fill={color}
+                                                                    name={`${category?.categoryName || '未分類'} - 売上高`}
+                                                                />
+                                                            )}
+                                                            {categoryVisibleItems.salesPrevYear && showCategoryPrevYear && (
+                                                                <Bar 
+                                                                    yAxisId="left"
+                                                                    dataKey={`salesPrevYear_${catId}`}
+                                                                    fill={lightColor}
+                                                                    name={`${category?.categoryName || '未分類'} - 売上高(昨年)`}
+                                                                />
+                                                            )}
+                                                            {categoryVisibleItems.grossProfit && (
+                                                                <Bar 
+                                                                    yAxisId="left"
+                                                                    dataKey={`grossProfit_${catId}`}
+                                                                    fill={color}
+                                                                    name={`${category?.categoryName || '未分類'} - 粗利`}
+                                                                />
+                                                            )}
+                                                            {categoryVisibleItems.grossProfitPrevYear && showCategoryPrevYear && (
+                                                                <Bar 
+                                                                    yAxisId="left"
+                                                                    dataKey={`grossProfitPrevYear_${catId}`}
+                                                                    fill={lightColor}
+                                                                    name={`${category?.categoryName || '未分類'} - 粗利(昨年)`}
+                                                                />
+                                                            )}
+                                                            {categoryVisibleItems.grossProfitRate && (
+                                                                <Bar 
+                                                                    yAxisId="right"
+                                                                    dataKey={`grossProfitRate_${catId}`}
+                                                                    fill={color}
+                                                                    name={`${category?.categoryName || '未分類'} - 粗利率`}
+                                                                />
+                                                            )}
+                                                        </React.Fragment>
+                                                    );
+                                                })}
+                                            </BarChart>
+                                        )}
+                                    </ResponsiveContainer>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* PL推移グラフ */}
+                {(plTrendData.length > 0 || budgetVsActualData.length > 0) && plTrendData.length > 0 && (
+                    <div className="bg-white border border-gray-200 rounded p-6 shadow-sm mt-8">
+                        <div 
+                            className="flex items-center justify-between cursor-pointer mb-4"
+                            onClick={() => setIsGraphOpen(!isGraphOpen)}
+                        >
+                            <h3 className="text-xl font-bold text-[#00214d] flex items-center gap-2">
+                                {isGraphOpen ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                PL推移グラフ
+                            </h3>
+                            <div className="flex gap-4 items-center" onClick={(e) => e.stopPropagation()}>
+                                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={visibleLines.sales}
+                                        onChange={() => toggleLine('sales')}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-4 h-0.5 bg-[#3b82f6]"></span>
+                                        売上高
+                                    </span>
+                                </label>
+                                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={visibleLines.grossProfit}
+                                        onChange={() => toggleLine('grossProfit')}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-4 h-0.5 bg-[#10b981]"></span>
+                                        粗利
+                                    </span>
+                                </label>
+                                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={visibleLines.grossProfitRate}
+                                        onChange={() => toggleLine('grossProfitRate')}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-4 h-0.5 bg-[#f59e0b]"></span>
+                                        粗利率
+                                    </span>
+                                </label>
+                                {activeTab === 'overall' && (
+                                    <>
+                                        <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={visibleLines.operatingProfit}
+                                                onChange={() => toggleLine('operatingProfit')}
+                                                className="w-4 h-4"
+                                            />
+                                            <span className="flex items-center gap-1">
+                                                <span className="w-4 h-0.5 bg-[#8b5cf6]"></span>
+                                                営業利益
+                                            </span>
+                                        </label>
+                                        <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                            <input
+                                                type="checkbox"
+                                                checked={visibleLines.sga}
+                                                onChange={() => toggleLine('sga')}
+                                                className="w-4 h-4"
+                                            />
+                                            <span className="flex items-center gap-1">
+                                                <span className="w-4 h-0.5 bg-[#ef4444]"></span>
+                                                SGA
+                                            </span>
+                                        </label>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+
+                        {isGraphOpen && (
+                            <div className="mt-4">
+                                <ResponsiveContainer width="100%" height={400}>
+                                    <LineChart data={plTrendData}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                        <XAxis 
+                                            dataKey="periodYm" 
+                                            stroke="#6b7280"
+                                            style={{ fontSize: '12px' }}
+                                        />
+                                        <YAxis 
+                                            stroke="#6b7280"
+                                            style={{ fontSize: '12px' }}
+                                            tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
+                                        />
+                                        <Tooltip 
+                                            contentStyle={{ 
+                                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                border: '1px solid #d1d5db',
+                                                borderRadius: '8px',
+                                                padding: '12px'
+                                            }}
+                                            formatter={(value: any) => `¥${value.toLocaleString()}`}
+                                        />
+                                        <Legend />
+                                        
+                                        {visibleLines.sales && (
+                                            <>
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="sales" 
+                                                    stroke="#3b82f6" 
+                                                    strokeWidth={2}
+                                                    name="売上高"
+                                                    dot={{ fill: '#3b82f6', r: 4 }}
+                                                />
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="salesPrevYear" 
+                                                    stroke="#93c5fd" 
+                                                    strokeWidth={2}
+                                                    strokeDasharray="5 5"
+                                                    name="売上高(昨年)"
+                                                    dot={{ fill: '#93c5fd', r: 3 }}
+                                                />
+                                            </>
+                                        )}
+                                        
+                                        {visibleLines.grossProfit && (
+                                            <>
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="grossProfit" 
+                                                    stroke="#10b981" 
+                                                    strokeWidth={2}
+                                                    name="粗利"
+                                                    dot={{ fill: '#10b981', r: 4 }}
+                                                />
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="grossProfitPrevYear" 
+                                                    stroke="#6ee7b7" 
+                                                    strokeWidth={2}
+                                                    strokeDasharray="5 5"
+                                                    name="粗利(昨年)"
+                                                    dot={{ fill: '#6ee7b7', r: 3 }}
+                                                />
+                                            </>
+                                        )}
+                                        
+                                        {visibleLines.grossProfitRate && (
+                                            <>
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="grossProfitRate" 
+                                                    stroke="#f59e0b" 
+                                                    strokeWidth={2}
+                                                    name="粗利率(%)"
+                                                    dot={{ fill: '#f59e0b', r: 4 }}
+                                                />
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="grossProfitRatePrevYear" 
+                                                    stroke="#fcd34d" 
+                                                    strokeWidth={2}
+                                                    strokeDasharray="5 5"
+                                                    name="粗利率(昨年)"
+                                                    dot={{ fill: '#fcd34d', r: 3 }}
+                                                />
+                                            </>
+                                        )}
+                                        
+                                        {activeTab === 'overall' && visibleLines.operatingProfit && (
+                                            <>
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="operatingProfit" 
+                                                    stroke="#8b5cf6" 
+                                                    strokeWidth={2}
+                                                    name="営業利益"
+                                                    dot={{ fill: '#8b5cf6', r: 4 }}
+                                                />
+                                                <Line 
+                                                    type="monotone" 
+                                                    dataKey="operatingProfitPrevYear" 
+                                                    stroke="#c4b5fd" 
+                                                    strokeWidth={2}
+                                                    strokeDasharray="5 5"
+                                                    name="営業利益(昨年)"
+                                                    dot={{ fill: '#c4b5fd', r: 3 }}
+                                                />
+                                            </>
+                                        )}
+                                        
+                                        {activeTab === 'overall' && visibleLines.sga && (
+                                            <Line 
+                                                type="monotone" 
+                                                dataKey="sga" 
+                                                stroke="#ef4444" 
+                                                strokeWidth={2}
+                                                name="SGA"
+                                                dot={{ fill: '#ef4444', r: 4 }}
+                                            />
+                                        )}
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+                        )}
+                    </div>
+                )}
+
+                {/* 予算実績推移グラフ */}
+                {budgetVsActualData.length > 0 && (
+                    <div className="bg-white border border-gray-200 rounded p-6 shadow-sm mt-8">
+                        <div 
+                            className="flex items-center justify-between cursor-pointer mb-4"
+                            onClick={() => setIsBudgetGraphOpen(!isBudgetGraphOpen)}
+                        >
+                            <h3 className="text-xl font-bold text-[#00214d] flex items-center gap-2">
+                                {isBudgetGraphOpen ? <ChevronUp size={24} /> : <ChevronDown size={24} />}
+                                予算実績推移グラフ
+                            </h3>
+                            <div className="flex gap-4 items-center" onClick={(e) => e.stopPropagation()}>
+                                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={visibleBudgetLines.actualSales}
+                                        onChange={() => toggleBudgetLine('actualSales')}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-4 h-0.5 bg-[#3b82f6]"></span>
+                                        実績売上
+                                    </span>
+                                </label>
+                                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={visibleBudgetLines.budgetSales}
+                                        onChange={() => toggleBudgetLine('budgetSales')}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-4 h-0.5 bg-[#93c5fd] border-t-2 border-dashed border-[#93c5fd]"></span>
+                                        予算売上
+                                    </span>
+                                </label>
+                                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={visibleBudgetLines.actualGrossProfit}
+                                        onChange={() => toggleBudgetLine('actualGrossProfit')}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-4 h-0.5 bg-[#10b981]"></span>
+                                        実績粗利
+                                    </span>
+                                </label>
+                                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={visibleBudgetLines.budgetGrossProfit}
+                                        onChange={() => toggleBudgetLine('budgetGrossProfit')}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-4 h-0.5 bg-[#6ee7b7] border-t-2 border-dashed border-[#6ee7b7]"></span>
+                                        予算粗利
+                                    </span>
+                                </label>
+                                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={visibleBudgetLines.actualQuantity}
+                                        onChange={() => toggleBudgetLine('actualQuantity')}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-4 h-0.5 bg-[#8b5cf6]"></span>
+                                        実績数量
+                                    </span>
+                                </label>
+                                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={visibleBudgetLines.budgetQuantity}
+                                        onChange={() => toggleBudgetLine('budgetQuantity')}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-4 h-0.5 bg-[#c4b5fd] border-t-2 border-dashed border-[#c4b5fd]"></span>
+                                        予算数量
+                                    </span>
+                                </label>
+                                <label className="flex items-center gap-2 text-sm cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        checked={visibleBudgetLines.achievementRate}
+                                        onChange={() => toggleBudgetLine('achievementRate')}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="flex items-center gap-1">
+                                        <span className="w-4 h-0.5 bg-[#f59e0b]"></span>
+                                        達成率(%)
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+
+                        {isBudgetGraphOpen && (
+                            <div className="mt-4">
+                                <ResponsiveContainer width="100%" height={400}>
+                                    <LineChart data={budgetVsActualData}>
+                                        <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                        <XAxis 
+                                            dataKey="periodYm" 
+                                            stroke="#6b7280"
+                                            style={{ fontSize: '12px' }}
+                                        />
+                                        <YAxis 
+                                            yAxisId="left"
+                                            stroke="#6b7280"
+                                            style={{ fontSize: '12px' }}
+                                            tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
+                                        />
+                                        <YAxis 
+                                            yAxisId="right"
+                                            orientation="right"
+                                            stroke="#f59e0b"
+                                            style={{ fontSize: '12px' }}
+                                            tickFormatter={(value) => `${value.toFixed(0)}%`}
+                                        />
+                                        <Tooltip 
+                                            contentStyle={{ 
+                                                backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                border: '1px solid #d1d5db',
+                                                borderRadius: '8px',
+                                                padding: '12px'
+                                            }}
+                                            formatter={(value: any, name: string) => {
+                                                if (name.includes('達成率')) {
+                                                    return `${value.toFixed(1)}%`;
+                                                }
+                                                return `¥${value.toLocaleString()}`;
+                                            }}
+                                        />
+                                        <Legend />
+                                        
+                                        {visibleBudgetLines.actualSales && (
+                                            <Line 
+                                                yAxisId="left"
+                                                type="monotone" 
+                                                dataKey="actualSales" 
+                                                stroke="#3b82f6" 
+                                                strokeWidth={2}
+                                                name="実績売上"
+                                                dot={{ fill: '#3b82f6', r: 4 }}
+                                            />
+                                        )}
+                                        
+                                        {visibleBudgetLines.budgetSales && (
+                                            <Line 
+                                                yAxisId="left"
+                                                type="monotone" 
+                                                dataKey="budgetSales" 
+                                                stroke="#93c5fd" 
+                                                strokeWidth={2}
+                                                strokeDasharray="5 5"
+                                                name="予算売上"
+                                                dot={{ fill: '#93c5fd', r: 3 }}
+                                            />
+                                        )}
+                                        
+                                        {visibleBudgetLines.actualGrossProfit && (
+                                            <Line 
+                                                yAxisId="left"
+                                                type="monotone" 
+                                                dataKey="actualGrossProfit" 
+                                                stroke="#10b981" 
+                                                strokeWidth={2}
+                                                name="実績粗利"
+                                                dot={{ fill: '#10b981', r: 4 }}
+                                            />
+                                        )}
+                                        
+                                        {visibleBudgetLines.budgetGrossProfit && (
+                                            <Line 
+                                                yAxisId="left"
+                                                type="monotone" 
+                                                dataKey="budgetGrossProfit" 
+                                                stroke="#6ee7b7" 
+                                                strokeWidth={2}
+                                                strokeDasharray="5 5"
+                                                name="予算粗利"
+                                                dot={{ fill: '#6ee7b7', r: 3 }}
+                                            />
+                                        )}
+                                        
+                                        {visibleBudgetLines.actualQuantity && (
+                                            <Line 
+                                                yAxisId="left"
+                                                type="monotone" 
+                                                dataKey="actualQuantity" 
+                                                stroke="#8b5cf6" 
+                                                strokeWidth={2}
+                                                name="実績数量"
+                                                dot={{ fill: '#8b5cf6', r: 4 }}
+                                            />
+                                        )}
+                                        
+                                        {visibleBudgetLines.budgetQuantity && (
+                                            <Line 
+                                                yAxisId="left"
+                                                type="monotone" 
+                                                dataKey="budgetQuantity" 
+                                                stroke="#c4b5fd" 
+                                                strokeWidth={2}
+                                                strokeDasharray="5 5"
+                                                name="予算数量"
+                                                dot={{ fill: '#c4b5fd', r: 3 }}
+                                            />
+                                        )}
+                                        
+                                        {visibleBudgetLines.achievementRate && (
+                                            <Line 
+                                                yAxisId="right"
+                                                type="monotone" 
+                                                dataKey="achievementRate" 
+                                                stroke="#f59e0b" 
+                                                strokeWidth={2}
+                                                name="達成率(%)"
+                                                dot={{ fill: '#f59e0b', r: 4 }}
+                                            />
+                                        )}
+                                    </LineChart>
+                                </ResponsiveContainer>
+                            </div>
+                        )}
+                    </div>
+                )}
             </main>
         </div>
     );
