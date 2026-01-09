@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
@@ -117,6 +117,18 @@ const getRange = (type: 'single' | '3mo' | '6mo' | 'fiscal', baseYm: string): { 
 };
 
 export default function PlPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-gray-500 font-medium animate-pulse">読み込み中...</div>
+            </div>
+        }>
+            <PlPageContent />
+        </Suspense>
+    );
+}
+
+function PlPageContent() {
     // Tab state
     const [activeTab, setActiveTab] = useState<'overall' | 'product' | 'category'>('overall');
 
