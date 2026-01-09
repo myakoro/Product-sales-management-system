@@ -147,7 +147,7 @@ export default function PlPage() {
     const [categoryGraphLoading, setCategoryGraphLoading] = useState(false);
     const [showCategoryPrevYear, setShowCategoryPrevYear] = useState(true);
     const [categoryGraphType, setCategoryGraphType] = useState<'line' | 'bar'>('line');
-    
+
     // V1.565: カテゴリーグラフ表示項目選択（初期表示：売上高、粗利、粗利率）
     const [categoryVisibleItems, setCategoryVisibleItems] = useState({
         sales: true,
@@ -324,7 +324,7 @@ export default function PlPage() {
             const res = await fetch(url);
             if (!res.ok) throw new Error('Failed to fetch PL trend data');
             const result = await res.json();
-            
+
             // APIからのレスポンスを変換
             const trendData: PLTrendData[] = result.map((item: any) => ({
                 periodYm: item.periodYm,
@@ -338,7 +338,7 @@ export default function PlPage() {
                 operatingProfitPrevYear: item.data[0]?.operatingProfitPrevYear,
                 sga: item.data[0]?.sga
             }));
-            
+
             setPlTrendData(trendData);
         } catch (err) {
             console.error('PL推移データの取得に失敗しました:', err);
@@ -432,7 +432,7 @@ export default function PlPage() {
             const res = await fetch(url);
             if (!res.ok) throw new Error('Failed to fetch budget vs actual data');
             const result = await res.json();
-            
+
             // APIからのレスポンスを変換
             const budgetData: BudgetVsActualData[] = result.map((item: any) => ({
                 periodYm: item.periodYm,
@@ -447,7 +447,7 @@ export default function PlPage() {
                 prevYearQuantity: item.data[0]?.prevYearQuantity || 0,
                 achievementRate: item.data[0]?.achievementRate || 0
             }));
-            
+
             setBudgetVsActualData(budgetData);
         } catch (err) {
             console.error('予算実績データの取得に失敗しました:', err);
@@ -467,8 +467,8 @@ export default function PlPage() {
                     <button
                         onClick={() => setActiveTab('overall')}
                         className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'overall'
-                                ? 'border-[#00214d] text-[#00214d]'
-                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                            ? 'border-[#00214d] text-[#00214d]'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         全体PL
@@ -476,8 +476,8 @@ export default function PlPage() {
                     <button
                         onClick={() => setActiveTab('product')}
                         className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'product'
-                                ? 'border-[#00214d] text-[#00214d]'
-                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                            ? 'border-[#00214d] text-[#00214d]'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         商品別PL
@@ -485,8 +485,8 @@ export default function PlPage() {
                     <button
                         onClick={() => setActiveTab('category')}
                         className={`px-6 py-3 font-medium transition-colors border-b-2 ${activeTab === 'category'
-                                ? 'border-[#00214d] text-[#00214d]'
-                                : 'border-transparent text-gray-500 hover:text-gray-700'
+                            ? 'border-[#00214d] text-[#00214d]'
+                            : 'border-transparent text-gray-500 hover:text-gray-700'
                             }`}
                     >
                         カテゴリー別PL
@@ -833,19 +833,19 @@ export default function PlPage() {
                                                             />
                                                         </td>
                                                         <td className="py-3 px-4 font-medium">
-                                                        {cat.categoryName || '未分類'}
-                                                    </td>
-                                                    <td className="py-3 px-4 text-right font-mono">
-                                                        {formatCurrency(cat.sales)}
-                                                    </td>
-                                                    <td className="py-3 px-4 text-right font-mono text-gray-600">
-                                                        {formatCurrency(cat.cogs)}
-                                                    </td>
-                                                    <td className="py-3 px-4 text-right font-mono font-semibold">
-                                                        {formatCurrency(cat.grossProfit)}
-                                                    </td>
-                                                    <td className="py-3 px-4 text-right font-mono">
-                                                        {cat.grossProfitRate.toFixed(1)}%
+                                                            {cat.categoryName || '未分類'}
+                                                        </td>
+                                                        <td className="py-3 px-4 text-right font-mono">
+                                                            {formatCurrency(cat.sales)}
+                                                        </td>
+                                                        <td className="py-3 px-4 text-right font-mono text-gray-600">
+                                                            {formatCurrency(cat.cogs)}
+                                                        </td>
+                                                        <td className="py-3 px-4 text-right font-mono font-semibold">
+                                                            {formatCurrency(cat.grossProfit)}
+                                                        </td>
+                                                        <td className="py-3 px-4 text-right font-mono">
+                                                            {cat.grossProfitRate.toFixed(1)}%
                                                         </td>
                                                     </tr>
                                                 );
@@ -886,7 +886,7 @@ export default function PlPage() {
                 {activeTab === 'category' && (
                     <div className="mt-8 bg-white border border-gray-200 rounded p-6 shadow-sm">
                         <div className="mb-4">
-                            <div 
+                            <div
                                 className="flex items-center justify-between cursor-pointer"
                                 onClick={() => setIsGraphOpen(!isGraphOpen)}
                             >
@@ -910,21 +910,19 @@ export default function PlPage() {
                                         <div className="flex gap-2">
                                             <button
                                                 onClick={() => setCategoryGraphType('line')}
-                                                className={`px-4 py-1.5 text-sm font-medium rounded transition-colors ${
-                                                    categoryGraphType === 'line'
-                                                        ? 'bg-[#00214d] text-white'
-                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                }`}
+                                                className={`px-4 py-1.5 text-sm font-medium rounded transition-colors ${categoryGraphType === 'line'
+                                                    ? 'bg-[#00214d] text-white'
+                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                    }`}
                                             >
                                                 折れ線
                                             </button>
                                             <button
                                                 onClick={() => setCategoryGraphType('bar')}
-                                                className={`px-4 py-1.5 text-sm font-medium rounded transition-colors ${
-                                                    categoryGraphType === 'bar'
-                                                        ? 'bg-[#00214d] text-white'
-                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                                }`}
+                                                className={`px-4 py-1.5 text-sm font-medium rounded transition-colors ${categoryGraphType === 'bar'
+                                                    ? 'bg-[#00214d] text-white'
+                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                    }`}
                                             >
                                                 棒
                                             </button>
@@ -986,140 +984,33 @@ export default function PlPage() {
                                     <ResponsiveContainer width="100%" height={400}>
                                         {categoryGraphType === 'line' ? (
                                             <LineChart data={categoryGraphData}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                            <XAxis 
-                                                dataKey="periodYm" 
-                                                stroke="#6b7280"
-                                                style={{ fontSize: '12px' }}
-                                            />
-                                            <YAxis 
-                                                yAxisId="left"
-                                                stroke="#6b7280"
-                                                style={{ fontSize: '12px' }}
-                                                tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
-                                            />
-                                            <YAxis 
-                                                yAxisId="right"
-                                                orientation="right"
-                                                stroke="#6b7280"
-                                                style={{ fontSize: '12px' }}
-                                                tickFormatter={(value) => `${value.toFixed(1)}%`}
-                                            />
-                                            <Tooltip 
-                                                contentStyle={{ 
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                                                    border: '1px solid #d1d5db',
-                                                    borderRadius: '8px',
-                                                    padding: '12px'
-                                                }}
-                                                formatter={(value: any, name: string) => {
-                                                    if (name.includes('率')) {
-                                                        return `${Number(value).toFixed(1)}%`;
-                                                    }
-                                                    return `¥${Number(value).toLocaleString()}`;
-                                                }}
-                                            />
-                                            <Legend />
-                                            
-                                            {selectedCategories.map((categoryId, index) => {
-                                                const category = categoryData.find(c => c.categoryId === categoryId);
-                                                const color = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'][index % 5];
-                                                const lightColor = color + '80';
-                                                const catId = categoryId === null ? 'unclassified' : categoryId;
-                                                
-                                                return (
-                                                    <React.Fragment key={catId}>
-                                                        {categoryVisibleItems.sales && (
-                                                            <Line 
-                                                                yAxisId="left"
-                                                                type="monotone" 
-                                                                dataKey={`sales_${catId}`}
-                                                                stroke={color}
-                                                                strokeWidth={2}
-                                                                name={`${category?.categoryName || '未分類'} - 売上高`}
-                                                                dot={{ fill: color, r: 4 }}
-                                                            />
-                                                        )}
-                                                        {categoryVisibleItems.salesPrevYear && showCategoryPrevYear && (
-                                                            <Line 
-                                                                yAxisId="left"
-                                                                type="monotone" 
-                                                                dataKey={`salesPrevYear_${catId}`}
-                                                                stroke={lightColor}
-                                                                strokeWidth={2}
-                                                                strokeDasharray="5 5"
-                                                                name={`${category?.categoryName || '未分類'} - 売上高(昨年)`}
-                                                                dot={{ fill: lightColor, r: 3 }}
-                                                            />
-                                                        )}
-                                                        {categoryVisibleItems.grossProfit && (
-                                                            <Line 
-                                                                yAxisId="left"
-                                                                type="monotone" 
-                                                                dataKey={`grossProfit_${catId}`}
-                                                                stroke={color}
-                                                                strokeWidth={2}
-                                                                strokeDasharray="3 3"
-                                                                name={`${category?.categoryName || '未分類'} - 粗利`}
-                                                                dot={{ fill: color, r: 3 }}
-                                                            />
-                                                        )}
-                                                        {categoryVisibleItems.grossProfitPrevYear && showCategoryPrevYear && (
-                                                            <Line 
-                                                                yAxisId="left"
-                                                                type="monotone" 
-                                                                dataKey={`grossProfitPrevYear_${catId}`}
-                                                                stroke={lightColor}
-                                                                strokeWidth={2}
-                                                                strokeDasharray="3 3"
-                                                                name={`${category?.categoryName || '未分類'} - 粗利(昨年)`}
-                                                                dot={{ fill: lightColor, r: 2 }}
-                                                            />
-                                                        )}
-                                                        {categoryVisibleItems.grossProfitRate && (
-                                                            <Line 
-                                                                yAxisId="right"
-                                                                type="monotone" 
-                                                                dataKey={`grossProfitRate_${catId}`}
-                                                                stroke={color}
-                                                                strokeWidth={2}
-                                                                name={`${category?.categoryName || '未分類'} - 粗利率`}
-                                                                dot={{ fill: color, r: 4 }}
-                                                            />
-                                                        )}
-                                                    </React.Fragment>
-                                                );
-                                            })}
-                                        </LineChart>
-                                        ) : (
-                                            <BarChart data={categoryGraphData} barCategoryGap="20%" barGap={2}>
                                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                                <XAxis 
-                                                    dataKey="periodYm" 
+                                                <XAxis
+                                                    dataKey="periodYm"
                                                     stroke="#6b7280"
                                                     style={{ fontSize: '12px' }}
                                                 />
-                                                <YAxis 
+                                                <YAxis
                                                     yAxisId="left"
                                                     stroke="#6b7280"
                                                     style={{ fontSize: '12px' }}
                                                     tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
                                                 />
-                                                <YAxis 
+                                                <YAxis
                                                     yAxisId="right"
                                                     orientation="right"
                                                     stroke="#6b7280"
                                                     style={{ fontSize: '12px' }}
                                                     tickFormatter={(value) => `${value.toFixed(1)}%`}
                                                 />
-                                                <Tooltip 
-                                                    contentStyle={{ 
+                                                <Tooltip
+                                                    contentStyle={{
                                                         backgroundColor: 'rgba(255, 255, 255, 0.95)',
                                                         border: '1px solid #d1d5db',
                                                         borderRadius: '8px',
                                                         padding: '12px'
                                                     }}
-                                                    formatter={(value: any, name: string) => {
+                                                    formatter={(value: any, name: any) => {
                                                         if (name.includes('率')) {
                                                             return `${Number(value).toFixed(1)}%`;
                                                         }
@@ -1127,17 +1018,124 @@ export default function PlPage() {
                                                     }}
                                                 />
                                                 <Legend />
-                                                
+
                                                 {selectedCategories.map((categoryId, index) => {
                                                     const category = categoryData.find(c => c.categoryId === categoryId);
                                                     const color = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'][index % 5];
                                                     const lightColor = color + '80';
                                                     const catId = categoryId === null ? 'unclassified' : categoryId;
-                                                    
+
                                                     return (
                                                         <React.Fragment key={catId}>
                                                             {categoryVisibleItems.sales && (
-                                                                <Bar 
+                                                                <Line
+                                                                    yAxisId="left"
+                                                                    type="monotone"
+                                                                    dataKey={`sales_${catId}`}
+                                                                    stroke={color}
+                                                                    strokeWidth={2}
+                                                                    name={`${category?.categoryName || '未分類'} - 売上高`}
+                                                                    dot={{ fill: color, r: 4 }}
+                                                                />
+                                                            )}
+                                                            {categoryVisibleItems.salesPrevYear && showCategoryPrevYear && (
+                                                                <Line
+                                                                    yAxisId="left"
+                                                                    type="monotone"
+                                                                    dataKey={`salesPrevYear_${catId}`}
+                                                                    stroke={lightColor}
+                                                                    strokeWidth={2}
+                                                                    strokeDasharray="5 5"
+                                                                    name={`${category?.categoryName || '未分類'} - 売上高(昨年)`}
+                                                                    dot={{ fill: lightColor, r: 3 }}
+                                                                />
+                                                            )}
+                                                            {categoryVisibleItems.grossProfit && (
+                                                                <Line
+                                                                    yAxisId="left"
+                                                                    type="monotone"
+                                                                    dataKey={`grossProfit_${catId}`}
+                                                                    stroke={color}
+                                                                    strokeWidth={2}
+                                                                    strokeDasharray="3 3"
+                                                                    name={`${category?.categoryName || '未分類'} - 粗利`}
+                                                                    dot={{ fill: color, r: 3 }}
+                                                                />
+                                                            )}
+                                                            {categoryVisibleItems.grossProfitPrevYear && showCategoryPrevYear && (
+                                                                <Line
+                                                                    yAxisId="left"
+                                                                    type="monotone"
+                                                                    dataKey={`grossProfitPrevYear_${catId}`}
+                                                                    stroke={lightColor}
+                                                                    strokeWidth={2}
+                                                                    strokeDasharray="3 3"
+                                                                    name={`${category?.categoryName || '未分類'} - 粗利(昨年)`}
+                                                                    dot={{ fill: lightColor, r: 2 }}
+                                                                />
+                                                            )}
+                                                            {categoryVisibleItems.grossProfitRate && (
+                                                                <Line
+                                                                    yAxisId="right"
+                                                                    type="monotone"
+                                                                    dataKey={`grossProfitRate_${catId}`}
+                                                                    stroke={color}
+                                                                    strokeWidth={2}
+                                                                    name={`${category?.categoryName || '未分類'} - 粗利率`}
+                                                                    dot={{ fill: color, r: 4 }}
+                                                                />
+                                                            )}
+                                                        </React.Fragment>
+                                                    );
+                                                })}
+                                            </LineChart>
+                                        ) : (
+                                            <BarChart data={categoryGraphData} barCategoryGap="20%" barGap={2}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                                <XAxis
+                                                    dataKey="periodYm"
+                                                    stroke="#6b7280"
+                                                    style={{ fontSize: '12px' }}
+                                                />
+                                                <YAxis
+                                                    yAxisId="left"
+                                                    stroke="#6b7280"
+                                                    style={{ fontSize: '12px' }}
+                                                    tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
+                                                />
+                                                <YAxis
+                                                    yAxisId="right"
+                                                    orientation="right"
+                                                    stroke="#6b7280"
+                                                    style={{ fontSize: '12px' }}
+                                                    tickFormatter={(value) => `${value.toFixed(1)}%`}
+                                                />
+                                                <Tooltip
+                                                    contentStyle={{
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                        border: '1px solid #d1d5db',
+                                                        borderRadius: '8px',
+                                                        padding: '12px'
+                                                    }}
+                                                    formatter={(value: any, name: any) => {
+                                                        if (name.includes('率')) {
+                                                            return `${Number(value).toFixed(1)}%`;
+                                                        }
+                                                        return `¥${Number(value).toLocaleString()}`;
+                                                    }}
+                                                />
+                                                <Legend />
+
+                                                {selectedCategories.map((categoryId, index) => {
+                                                    const category = categoryData.find(c => c.categoryId === categoryId);
+                                                    const color = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'][index % 5];
+                                                    const lightColor = color + '80';
+                                                    const catId = categoryId === null ? 'unclassified' : categoryId;
+
+                                                    return (
+                                                        <React.Fragment key={catId}>
+                                                            {categoryVisibleItems.sales && (
+                                                                <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`sales_${catId}`}
                                                                     fill={color}
@@ -1145,7 +1143,7 @@ export default function PlPage() {
                                                                 />
                                                             )}
                                                             {categoryVisibleItems.salesPrevYear && showCategoryPrevYear && (
-                                                                <Bar 
+                                                                <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`salesPrevYear_${catId}`}
                                                                     fill={lightColor}
@@ -1153,7 +1151,7 @@ export default function PlPage() {
                                                                 />
                                                             )}
                                                             {categoryVisibleItems.grossProfit && (
-                                                                <Bar 
+                                                                <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`grossProfit_${catId}`}
                                                                     fill={color}
@@ -1161,7 +1159,7 @@ export default function PlPage() {
                                                                 />
                                                             )}
                                                             {categoryVisibleItems.grossProfitPrevYear && showCategoryPrevYear && (
-                                                                <Bar 
+                                                                <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`grossProfitPrevYear_${catId}`}
                                                                     fill={lightColor}
@@ -1169,7 +1167,7 @@ export default function PlPage() {
                                                                 />
                                                             )}
                                                             {categoryVisibleItems.grossProfitRate && (
-                                                                <Bar 
+                                                                <Bar
                                                                     yAxisId="right"
                                                                     dataKey={`grossProfitRate_${catId}`}
                                                                     fill={color}
@@ -1191,7 +1189,7 @@ export default function PlPage() {
                 {/* PL推移グラフ */}
                 {(plTrendData.length > 0 || budgetVsActualData.length > 0) && plTrendData.length > 0 && (
                     <div className="bg-white border border-gray-200 rounded p-6 shadow-sm mt-8">
-                        <div 
+                        <div
                             className="flex items-center justify-between cursor-pointer mb-4"
                             onClick={() => setIsGraphOpen(!isGraphOpen)}
                         >
@@ -1272,18 +1270,18 @@ export default function PlPage() {
                                 <ResponsiveContainer width="100%" height={400}>
                                     <LineChart data={plTrendData}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                        <XAxis 
-                                            dataKey="periodYm" 
+                                        <XAxis
+                                            dataKey="periodYm"
                                             stroke="#6b7280"
                                             style={{ fontSize: '12px' }}
                                         />
-                                        <YAxis 
+                                        <YAxis
                                             stroke="#6b7280"
                                             style={{ fontSize: '12px' }}
                                             tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
                                         />
-                                        <Tooltip 
-                                            contentStyle={{ 
+                                        <Tooltip
+                                            contentStyle={{
                                                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
                                                 border: '1px solid #d1d5db',
                                                 borderRadius: '8px',
@@ -1292,21 +1290,21 @@ export default function PlPage() {
                                             formatter={(value: any) => `¥${value.toLocaleString()}`}
                                         />
                                         <Legend />
-                                        
+
                                         {visibleLines.sales && (
                                             <>
-                                                <Line 
-                                                    type="monotone" 
-                                                    dataKey="sales" 
-                                                    stroke="#3b82f6" 
+                                                <Line
+                                                    type="monotone"
+                                                    dataKey="sales"
+                                                    stroke="#3b82f6"
                                                     strokeWidth={2}
                                                     name="売上高"
                                                     dot={{ fill: '#3b82f6', r: 4 }}
                                                 />
-                                                <Line 
-                                                    type="monotone" 
-                                                    dataKey="salesPrevYear" 
-                                                    stroke="#93c5fd" 
+                                                <Line
+                                                    type="monotone"
+                                                    dataKey="salesPrevYear"
+                                                    stroke="#93c5fd"
                                                     strokeWidth={2}
                                                     strokeDasharray="5 5"
                                                     name="売上高(昨年)"
@@ -1314,21 +1312,21 @@ export default function PlPage() {
                                                 />
                                             </>
                                         )}
-                                        
+
                                         {visibleLines.grossProfit && (
                                             <>
-                                                <Line 
-                                                    type="monotone" 
-                                                    dataKey="grossProfit" 
-                                                    stroke="#10b981" 
+                                                <Line
+                                                    type="monotone"
+                                                    dataKey="grossProfit"
+                                                    stroke="#10b981"
                                                     strokeWidth={2}
                                                     name="粗利"
                                                     dot={{ fill: '#10b981', r: 4 }}
                                                 />
-                                                <Line 
-                                                    type="monotone" 
-                                                    dataKey="grossProfitPrevYear" 
-                                                    stroke="#6ee7b7" 
+                                                <Line
+                                                    type="monotone"
+                                                    dataKey="grossProfitPrevYear"
+                                                    stroke="#6ee7b7"
                                                     strokeWidth={2}
                                                     strokeDasharray="5 5"
                                                     name="粗利(昨年)"
@@ -1336,21 +1334,21 @@ export default function PlPage() {
                                                 />
                                             </>
                                         )}
-                                        
+
                                         {visibleLines.grossProfitRate && (
                                             <>
-                                                <Line 
-                                                    type="monotone" 
-                                                    dataKey="grossProfitRate" 
-                                                    stroke="#f59e0b" 
+                                                <Line
+                                                    type="monotone"
+                                                    dataKey="grossProfitRate"
+                                                    stroke="#f59e0b"
                                                     strokeWidth={2}
                                                     name="粗利率(%)"
                                                     dot={{ fill: '#f59e0b', r: 4 }}
                                                 />
-                                                <Line 
-                                                    type="monotone" 
-                                                    dataKey="grossProfitRatePrevYear" 
-                                                    stroke="#fcd34d" 
+                                                <Line
+                                                    type="monotone"
+                                                    dataKey="grossProfitRatePrevYear"
+                                                    stroke="#fcd34d"
                                                     strokeWidth={2}
                                                     strokeDasharray="5 5"
                                                     name="粗利率(昨年)"
@@ -1358,21 +1356,21 @@ export default function PlPage() {
                                                 />
                                             </>
                                         )}
-                                        
+
                                         {activeTab === 'overall' && visibleLines.operatingProfit && (
                                             <>
-                                                <Line 
-                                                    type="monotone" 
-                                                    dataKey="operatingProfit" 
-                                                    stroke="#8b5cf6" 
+                                                <Line
+                                                    type="monotone"
+                                                    dataKey="operatingProfit"
+                                                    stroke="#8b5cf6"
                                                     strokeWidth={2}
                                                     name="営業利益"
                                                     dot={{ fill: '#8b5cf6', r: 4 }}
                                                 />
-                                                <Line 
-                                                    type="monotone" 
-                                                    dataKey="operatingProfitPrevYear" 
-                                                    stroke="#c4b5fd" 
+                                                <Line
+                                                    type="monotone"
+                                                    dataKey="operatingProfitPrevYear"
+                                                    stroke="#c4b5fd"
                                                     strokeWidth={2}
                                                     strokeDasharray="5 5"
                                                     name="営業利益(昨年)"
@@ -1380,12 +1378,12 @@ export default function PlPage() {
                                                 />
                                             </>
                                         )}
-                                        
+
                                         {activeTab === 'overall' && visibleLines.sga && (
-                                            <Line 
-                                                type="monotone" 
-                                                dataKey="sga" 
-                                                stroke="#ef4444" 
+                                            <Line
+                                                type="monotone"
+                                                dataKey="sga"
+                                                stroke="#ef4444"
                                                 strokeWidth={2}
                                                 name="SGA"
                                                 dot={{ fill: '#ef4444', r: 4 }}
@@ -1401,7 +1399,7 @@ export default function PlPage() {
                 {/* 予算実績推移グラフ */}
                 {budgetVsActualData.length > 0 && (
                     <div className="bg-white border border-gray-200 rounded p-6 shadow-sm mt-8">
-                        <div 
+                        <div
                             className="flex items-center justify-between cursor-pointer mb-4"
                             onClick={() => setIsBudgetGraphOpen(!isBudgetGraphOpen)}
                         >
@@ -1502,121 +1500,121 @@ export default function PlPage() {
                                 <ResponsiveContainer width="100%" height={400}>
                                     <LineChart data={budgetVsActualData}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                        <XAxis 
-                                            dataKey="periodYm" 
+                                        <XAxis
+                                            dataKey="periodYm"
                                             stroke="#6b7280"
                                             style={{ fontSize: '12px' }}
                                         />
-                                        <YAxis 
+                                        <YAxis
                                             yAxisId="left"
                                             stroke="#6b7280"
                                             style={{ fontSize: '12px' }}
                                             tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
                                         />
-                                        <YAxis 
+                                        <YAxis
                                             yAxisId="right"
                                             orientation="right"
                                             stroke="#f59e0b"
                                             style={{ fontSize: '12px' }}
                                             tickFormatter={(value) => `${value.toFixed(0)}%`}
                                         />
-                                        <Tooltip 
-                                            contentStyle={{ 
+                                        <Tooltip
+                                            contentStyle={{
                                                 backgroundColor: 'rgba(255, 255, 255, 0.95)',
                                                 border: '1px solid #d1d5db',
                                                 borderRadius: '8px',
                                                 padding: '12px'
                                             }}
-                                            formatter={(value: any, name: string) => {
-                                                if (name.includes('達成率')) {
-                                                    return `${value.toFixed(1)}%`;
+                                            formatter={(value: any, name?: string) => {
+                                                if (name && name.includes('達成率')) {
+                                                    return `${Number(value).toFixed(1)}%`;
                                                 }
-                                                return `¥${value.toLocaleString()}`;
+                                                return `¥${Number(value).toLocaleString()}`;
                                             }}
                                         />
                                         <Legend />
-                                        
+
                                         {visibleBudgetLines.actualSales && (
-                                            <Line 
+                                            <Line
                                                 yAxisId="left"
-                                                type="monotone" 
-                                                dataKey="actualSales" 
-                                                stroke="#3b82f6" 
+                                                type="monotone"
+                                                dataKey="actualSales"
+                                                stroke="#3b82f6"
                                                 strokeWidth={2}
                                                 name="実績売上"
                                                 dot={{ fill: '#3b82f6', r: 4 }}
                                             />
                                         )}
-                                        
+
                                         {visibleBudgetLines.budgetSales && (
-                                            <Line 
+                                            <Line
                                                 yAxisId="left"
-                                                type="monotone" 
-                                                dataKey="budgetSales" 
-                                                stroke="#93c5fd" 
+                                                type="monotone"
+                                                dataKey="budgetSales"
+                                                stroke="#93c5fd"
                                                 strokeWidth={2}
                                                 strokeDasharray="5 5"
                                                 name="予算売上"
                                                 dot={{ fill: '#93c5fd', r: 3 }}
                                             />
                                         )}
-                                        
+
                                         {visibleBudgetLines.actualGrossProfit && (
-                                            <Line 
+                                            <Line
                                                 yAxisId="left"
-                                                type="monotone" 
-                                                dataKey="actualGrossProfit" 
-                                                stroke="#10b981" 
+                                                type="monotone"
+                                                dataKey="actualGrossProfit"
+                                                stroke="#10b981"
                                                 strokeWidth={2}
                                                 name="実績粗利"
                                                 dot={{ fill: '#10b981', r: 4 }}
                                             />
                                         )}
-                                        
+
                                         {visibleBudgetLines.budgetGrossProfit && (
-                                            <Line 
+                                            <Line
                                                 yAxisId="left"
-                                                type="monotone" 
-                                                dataKey="budgetGrossProfit" 
-                                                stroke="#6ee7b7" 
+                                                type="monotone"
+                                                dataKey="budgetGrossProfit"
+                                                stroke="#6ee7b7"
                                                 strokeWidth={2}
                                                 strokeDasharray="5 5"
                                                 name="予算粗利"
                                                 dot={{ fill: '#6ee7b7', r: 3 }}
                                             />
                                         )}
-                                        
+
                                         {visibleBudgetLines.actualQuantity && (
-                                            <Line 
+                                            <Line
                                                 yAxisId="left"
-                                                type="monotone" 
-                                                dataKey="actualQuantity" 
-                                                stroke="#8b5cf6" 
+                                                type="monotone"
+                                                dataKey="actualQuantity"
+                                                stroke="#8b5cf6"
                                                 strokeWidth={2}
                                                 name="実績数量"
                                                 dot={{ fill: '#8b5cf6', r: 4 }}
                                             />
                                         )}
-                                        
+
                                         {visibleBudgetLines.budgetQuantity && (
-                                            <Line 
+                                            <Line
                                                 yAxisId="left"
-                                                type="monotone" 
-                                                dataKey="budgetQuantity" 
-                                                stroke="#c4b5fd" 
+                                                type="monotone"
+                                                dataKey="budgetQuantity"
+                                                stroke="#c4b5fd"
                                                 strokeWidth={2}
                                                 strokeDasharray="5 5"
                                                 name="予算数量"
                                                 dot={{ fill: '#c4b5fd', r: 3 }}
                                             />
                                         )}
-                                        
+
                                         {visibleBudgetLines.achievementRate && (
-                                            <Line 
+                                            <Line
                                                 yAxisId="right"
-                                                type="monotone" 
-                                                dataKey="achievementRate" 
-                                                stroke="#f59e0b" 
+                                                type="monotone"
+                                                dataKey="achievementRate"
+                                                stroke="#f59e0b"
                                                 strokeWidth={2}
                                                 name="達成率(%)"
                                                 dot={{ fill: '#f59e0b', r: 4 }}

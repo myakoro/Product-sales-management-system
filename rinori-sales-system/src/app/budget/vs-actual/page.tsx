@@ -69,7 +69,7 @@ export default function BudgetVsActualPage() {
     const [graphLoading, setGraphLoading] = useState(false);
     const [showPrevYear, setShowPrevYear] = useState(true);
     const [graphType, setGraphType] = useState<'line' | 'bar'>('line');
-    
+
     // V1.565: 表示項目選択（初期表示：実績売上、予算売上、達成率）
     const [visibleItems, setVisibleItems] = useState({
         actualSales: true,
@@ -524,17 +524,15 @@ export default function BudgetVsActualPage() {
                                                         <div className="flex items-center justify-end gap-2">
                                                             <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">
                                                                 <div
-                                                                    className={`h-full transition-all duration-500 ${
-                                                                        p.quantityAchievementRate >= 100 ? 'bg-green-500' :
+                                                                    className={`h-full transition-all duration-500 ${p.quantityAchievementRate >= 100 ? 'bg-green-500' :
                                                                         p.quantityAchievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
-                                                                    }`}
+                                                                        }`}
                                                                     style={{ width: `${Math.min(p.quantityAchievementRate, 100)}%` }}
                                                                 />
                                                             </div>
-                                                            <span className={`font-bold text-sm ${
-                                                                p.quantityAchievementRate >= 100 ? 'text-green-600' :
+                                                            <span className={`font-bold text-sm ${p.quantityAchievementRate >= 100 ? 'text-green-600' :
                                                                 p.quantityAchievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
-                                                            }`}>
+                                                                }`}>
                                                                 {p.quantityAchievementRate.toFixed(1)}%
                                                             </span>
                                                         </div>
@@ -544,18 +542,16 @@ export default function BudgetVsActualPage() {
                                                     <td className="px-4 py-4 text-right">
                                                         <div className="flex items-center justify-end gap-2">
                                                             <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">
-                                                                <div 
-                                                                    className={`h-full transition-all duration-500 ${
-                                                                        p.salesAchievementRate >= 100 ? 'bg-green-500' :
+                                                                <div
+                                                                    className={`h-full transition-all duration-500 ${p.salesAchievementRate >= 100 ? 'bg-green-500' :
                                                                         p.salesAchievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
-                                                                    }`}
+                                                                        }`}
                                                                     style={{ width: `${Math.min(p.salesAchievementRate, 100)}%` }}
                                                                 />
                                                             </div>
-                                                            <span className={`font-bold text-sm ${
-                                                                p.salesAchievementRate >= 100 ? 'text-green-600' :
+                                                            <span className={`font-bold text-sm ${p.salesAchievementRate >= 100 ? 'text-green-600' :
                                                                 p.salesAchievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
-                                                            }`}>
+                                                                }`}>
                                                                 {p.salesAchievementRate.toFixed(1)}%
                                                             </span>
                                                         </div>
@@ -565,23 +561,21 @@ export default function BudgetVsActualPage() {
                                                     <td className="px-4 py-4 text-right">
                                                         <div className="flex items-center justify-end gap-2">
                                                             <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">
-                                                                <div 
-                                                                    className={`h-full transition-all duration-500 ${
-                                                                        p.grossProfitAchievementRate >= 100 ? 'bg-green-500' :
+                                                                <div
+                                                                    className={`h-full transition-all duration-500 ${p.grossProfitAchievementRate >= 100 ? 'bg-green-500' :
                                                                         p.grossProfitAchievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
-                                                                    }`}
+                                                                        }`}
                                                                     style={{ width: `${Math.min(p.grossProfitAchievementRate, 100)}%` }}
                                                                 />
                                                             </div>
-                                                            <span className={`font-bold text-sm ${
-                                                                p.grossProfitAchievementRate >= 100 ? 'text-green-600' :
+                                                            <span className={`font-bold text-sm ${p.grossProfitAchievementRate >= 100 ? 'text-green-600' :
                                                                 p.grossProfitAchievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
-                                                            }`}>
+                                                                }`}>
                                                                 {p.grossProfitAchievementRate.toFixed(1)}%
                                                             </span>
                                                         </div>
                                                     </td>
-                                            </tr>
+                                                </tr>
                                             );
                                         })}
                                     </tbody>
@@ -604,11 +598,11 @@ export default function BudgetVsActualPage() {
                             </p>
                         </div>
                         <div style={{ marginBottom: '1.5rem' }}>
-                            <div 
-                                style={{ 
-                                    display: 'flex', 
-                                    justifyContent: 'space-between', 
-                                    alignItems: 'center', 
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
                                     cursor: 'pointer'
                                 }}
                                 onClick={() => setIsGraphOpen(!isGraphOpen)}
@@ -739,142 +733,19 @@ export default function BudgetVsActualPage() {
                                     <ResponsiveContainer width="100%" height={400}>
                                         {graphType === 'line' ? (
                                             <LineChart data={graphData}>
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                            <XAxis 
-                                                dataKey="periodYm" 
-                                                stroke="#6b7280"
-                                                style={{ fontSize: '12px' }}
-                                            />
-                                            <YAxis 
-                                                yAxisId="left"
-                                                stroke="#6b7280"
-                                                style={{ fontSize: '12px' }}
-                                                tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
-                                            />
-                                            <YAxis 
-                                                yAxisId="right"
-                                                orientation="right"
-                                                stroke="#6b7280"
-                                                style={{ fontSize: '12px' }}
-                                                tickFormatter={(value) => {
-                                                    if (visibleItems.actualQuantity || visibleItems.budgetQuantity) {
-                                                        return `${Math.round(value)}`;
-                                                    }
-                                                    return `${value.toFixed(1)}%`;
-                                                }}
-                                            />
-                                            <Tooltip 
-                                                contentStyle={{ 
-                                                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                                                    border: '1px solid #d1d5db',
-                                                    borderRadius: '8px',
-                                                    padding: '12px'
-                                                }}
-                                                formatter={(value: any, name: string) => {
-                                                    if (name.includes('率') || name.includes('数量')) {
-                                                        return name.includes('率') ? `${Number(value).toFixed(1)}%` : `${Number(value).toLocaleString()}個`;
-                                                    }
-                                                    return `¥${Number(value).toLocaleString()}`;
-                                                }}
-                                            />
-                                            <Legend />
-                                            
-                                            {selectedProducts.map((productCode, index) => {
-                                                const product = products.find(p => p.productCode === productCode);
-                                                const color = colorPalette[index % colorPalette.length];
-                                                const lightColor = color + '80';
-                                                
-                                                return (
-                                                    <React.Fragment key={productCode}>
-                                                        {visibleItems.actualSales && (
-                                                            <Line 
-                                                                yAxisId="left"
-                                                                type="monotone" 
-                                                                dataKey={`actualSales_${productCode}`}
-                                                                stroke={color}
-                                                                strokeWidth={2}
-                                                                name={`${product?.productName || productCode} - 実績売上`}
-                                                                dot={{ fill: color, r: 4 }}
-                                                            />
-                                                        )}
-                                                        {visibleItems.budgetSales && (
-                                                            <Line 
-                                                                yAxisId="left"
-                                                                type="monotone" 
-                                                                dataKey={`budgetSales_${productCode}`}
-                                                                stroke={lightColor}
-                                                                strokeWidth={2}
-                                                                strokeDasharray="5 5"
-                                                                name={`${product?.productName || productCode} - 予算売上`}
-                                                                dot={{ fill: lightColor, r: 3 }}
-                                                            />
-                                                        )}
-                                                        {visibleItems.prevYearSales && showPrevYear && (
-                                                            <Line 
-                                                                yAxisId="left"
-                                                                type="monotone" 
-                                                                dataKey={`prevYearSales_${productCode}`}
-                                                                stroke={color}
-                                                                strokeWidth={2}
-                                                                strokeDasharray="3 3"
-                                                                name={`${product?.productName || productCode} - 昨年売上`}
-                                                                dot={{ fill: color, r: 3 }}
-                                                            />
-                                                        )}
-                                                        {visibleItems.achievementRate && (
-                                                            <Line 
-                                                                yAxisId="right"
-                                                                type="monotone" 
-                                                                dataKey={`achievementRate_${productCode}`}
-                                                                stroke={color}
-                                                                strokeWidth={2}
-                                                                name={`${product?.productName || productCode} - 達成率`}
-                                                                dot={{ fill: color, r: 4 }}
-                                                            />
-                                                        )}
-                                                        {visibleItems.actualQuantity && (
-                                                            <Line 
-                                                                yAxisId="right"
-                                                                type="monotone" 
-                                                                dataKey={`actualQuantity_${productCode}`}
-                                                                stroke={color}
-                                                                strokeWidth={2}
-                                                                strokeDasharray="2 2"
-                                                                name={`${product?.productName || productCode} - 実績数量`}
-                                                                dot={{ fill: color, r: 3 }}
-                                                            />
-                                                        )}
-                                                        {visibleItems.budgetQuantity && (
-                                                            <Line 
-                                                                yAxisId="right"
-                                                                type="monotone" 
-                                                                dataKey={`budgetQuantity_${productCode}`}
-                                                                stroke={lightColor}
-                                                                strokeWidth={2}
-                                                                strokeDasharray="2 2"
-                                                                name={`${product?.productName || productCode} - 予算数量`}
-                                                                dot={{ fill: lightColor, r: 2 }}
-                                                            />
-                                                        )}
-                                                    </React.Fragment>
-                                                );
-                                            })}
-                                        </LineChart>
-                                        ) : (
-                                            <BarChart data={graphData} barCategoryGap="20%" barGap={2}>
                                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                                <XAxis 
-                                                    dataKey="periodYm" 
+                                                <XAxis
+                                                    dataKey="periodYm"
                                                     stroke="#6b7280"
                                                     style={{ fontSize: '12px' }}
                                                 />
-                                                <YAxis 
+                                                <YAxis
                                                     yAxisId="left"
                                                     stroke="#6b7280"
                                                     style={{ fontSize: '12px' }}
                                                     tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
                                                 />
-                                                <YAxis 
+                                                <YAxis
                                                     yAxisId="right"
                                                     orientation="right"
                                                     stroke="#6b7280"
@@ -886,31 +757,154 @@ export default function BudgetVsActualPage() {
                                                         return `${value.toFixed(1)}%`;
                                                     }}
                                                 />
-                                                <Tooltip 
-                                                    contentStyle={{ 
+                                                <Tooltip
+                                                    contentStyle={{
                                                         backgroundColor: 'rgba(255, 255, 255, 0.95)',
                                                         border: '1px solid #d1d5db',
                                                         borderRadius: '8px',
                                                         padding: '12px'
                                                     }}
-                                                    formatter={(value: any, name: string) => {
-                                                        if (name.includes('率') || name.includes('数量')) {
+                                                    formatter={(value: any, name?: string) => {
+                                                        if (name && (name.includes('率') || name.includes('数量'))) {
                                                             return name.includes('率') ? `${Number(value).toFixed(1)}%` : `${Number(value).toLocaleString()}個`;
                                                         }
                                                         return `¥${Number(value).toLocaleString()}`;
                                                     }}
                                                 />
                                                 <Legend />
-                                                
+
                                                 {selectedProducts.map((productCode, index) => {
                                                     const product = products.find(p => p.productCode === productCode);
                                                     const color = colorPalette[index % colorPalette.length];
                                                     const lightColor = color + '80';
-                                                    
+
                                                     return (
                                                         <React.Fragment key={productCode}>
                                                             {visibleItems.actualSales && (
-                                                                <Bar 
+                                                                <Line
+                                                                    yAxisId="left"
+                                                                    type="monotone"
+                                                                    dataKey={`actualSales_${productCode}`}
+                                                                    stroke={color}
+                                                                    strokeWidth={2}
+                                                                    name={`${product?.productName || productCode} - 実績売上`}
+                                                                    dot={{ fill: color, r: 4 }}
+                                                                />
+                                                            )}
+                                                            {visibleItems.budgetSales && (
+                                                                <Line
+                                                                    yAxisId="left"
+                                                                    type="monotone"
+                                                                    dataKey={`budgetSales_${productCode}`}
+                                                                    stroke={lightColor}
+                                                                    strokeWidth={2}
+                                                                    strokeDasharray="5 5"
+                                                                    name={`${product?.productName || productCode} - 予算売上`}
+                                                                    dot={{ fill: lightColor, r: 3 }}
+                                                                />
+                                                            )}
+                                                            {visibleItems.prevYearSales && showPrevYear && (
+                                                                <Line
+                                                                    yAxisId="left"
+                                                                    type="monotone"
+                                                                    dataKey={`prevYearSales_${productCode}`}
+                                                                    stroke={color}
+                                                                    strokeWidth={2}
+                                                                    strokeDasharray="3 3"
+                                                                    name={`${product?.productName || productCode} - 昨年売上`}
+                                                                    dot={{ fill: color, r: 3 }}
+                                                                />
+                                                            )}
+                                                            {visibleItems.achievementRate && (
+                                                                <Line
+                                                                    yAxisId="right"
+                                                                    type="monotone"
+                                                                    dataKey={`achievementRate_${productCode}`}
+                                                                    stroke={color}
+                                                                    strokeWidth={2}
+                                                                    name={`${product?.productName || productCode} - 達成率`}
+                                                                    dot={{ fill: color, r: 4 }}
+                                                                />
+                                                            )}
+                                                            {visibleItems.actualQuantity && (
+                                                                <Line
+                                                                    yAxisId="right"
+                                                                    type="monotone"
+                                                                    dataKey={`actualQuantity_${productCode}`}
+                                                                    stroke={color}
+                                                                    strokeWidth={2}
+                                                                    strokeDasharray="2 2"
+                                                                    name={`${product?.productName || productCode} - 実績数量`}
+                                                                    dot={{ fill: color, r: 3 }}
+                                                                />
+                                                            )}
+                                                            {visibleItems.budgetQuantity && (
+                                                                <Line
+                                                                    yAxisId="right"
+                                                                    type="monotone"
+                                                                    dataKey={`budgetQuantity_${productCode}`}
+                                                                    stroke={lightColor}
+                                                                    strokeWidth={2}
+                                                                    strokeDasharray="2 2"
+                                                                    name={`${product?.productName || productCode} - 予算数量`}
+                                                                    dot={{ fill: lightColor, r: 2 }}
+                                                                />
+                                                            )}
+                                                        </React.Fragment>
+                                                    );
+                                                })}
+                                            </LineChart>
+                                        ) : (
+                                            <BarChart data={graphData} barCategoryGap="20%" barGap={2}>
+                                                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                                                <XAxis
+                                                    dataKey="periodYm"
+                                                    stroke="#6b7280"
+                                                    style={{ fontSize: '12px' }}
+                                                />
+                                                <YAxis
+                                                    yAxisId="left"
+                                                    stroke="#6b7280"
+                                                    style={{ fontSize: '12px' }}
+                                                    tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
+                                                />
+                                                <YAxis
+                                                    yAxisId="right"
+                                                    orientation="right"
+                                                    stroke="#6b7280"
+                                                    style={{ fontSize: '12px' }}
+                                                    tickFormatter={(value) => {
+                                                        if (visibleItems.actualQuantity || visibleItems.budgetQuantity) {
+                                                            return `${Math.round(value)}`;
+                                                        }
+                                                        return `${value.toFixed(1)}%`;
+                                                    }}
+                                                />
+                                                <Tooltip
+                                                    contentStyle={{
+                                                        backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                                                        border: '1px solid #d1d5db',
+                                                        borderRadius: '8px',
+                                                        padding: '12px'
+                                                    }}
+                                                    formatter={(value: any, name?: string) => {
+                                                        if (name && (name.includes('率') || name.includes('数量'))) {
+                                                            return name.includes('率') ? `${Number(value).toFixed(1)}%` : `${Number(value).toLocaleString()}個`;
+                                                        }
+                                                        return `¥${Number(value).toLocaleString()}`;
+                                                    }}
+                                                />
+                                                <Legend />
+
+                                                {selectedProducts.map((productCode, index) => {
+                                                    const product = products.find(p => p.productCode === productCode);
+                                                    const color = colorPalette[index % colorPalette.length];
+                                                    const lightColor = color + '80';
+
+                                                    return (
+                                                        <React.Fragment key={productCode}>
+                                                            {visibleItems.actualSales && (
+                                                                <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`actualSales_${productCode}`}
                                                                     fill={color}
@@ -918,7 +912,7 @@ export default function BudgetVsActualPage() {
                                                                 />
                                                             )}
                                                             {visibleItems.budgetSales && (
-                                                                <Bar 
+                                                                <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`budgetSales_${productCode}`}
                                                                     fill={lightColor}
@@ -926,7 +920,7 @@ export default function BudgetVsActualPage() {
                                                                 />
                                                             )}
                                                             {visibleItems.prevYearSales && showPrevYear && (
-                                                                <Bar 
+                                                                <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`prevYearSales_${productCode}`}
                                                                     fill={color}
@@ -934,7 +928,7 @@ export default function BudgetVsActualPage() {
                                                                 />
                                                             )}
                                                             {visibleItems.achievementRate && (
-                                                                <Bar 
+                                                                <Bar
                                                                     yAxisId="right"
                                                                     dataKey={`achievementRate_${productCode}`}
                                                                     fill={color}
@@ -942,7 +936,7 @@ export default function BudgetVsActualPage() {
                                                                 />
                                                             )}
                                                             {visibleItems.actualQuantity && (
-                                                                <Bar 
+                                                                <Bar
                                                                     yAxisId="right"
                                                                     dataKey={`actualQuantity_${productCode}`}
                                                                     fill={color}
@@ -950,7 +944,7 @@ export default function BudgetVsActualPage() {
                                                                 />
                                                             )}
                                                             {visibleItems.budgetQuantity && (
-                                                                <Bar 
+                                                                <Bar
                                                                     yAxisId="right"
                                                                     dataKey={`budgetQuantity_${productCode}`}
                                                                     fill={lightColor}

@@ -37,7 +37,7 @@ export default function ProductPLPage() {
     const [graphLoading, setGraphLoading] = useState(false);
     const [showPrevYear, setShowPrevYear] = useState(true);
     const [graphType, setGraphType] = useState<'line' | 'bar'>('line');
-    
+
     // V1.565: 表示項目選択（初期表示：売上高、粗利、粗利率）
     const [visibleItems, setVisibleItems] = useState({
         sales: true,
@@ -330,12 +330,12 @@ export default function ProductPLPage() {
                                                 />
                                             </td>
                                             <td className="px-4 py-4 font-mono font-semibold text-[#00214d]">{item.productCode}</td>
-                                        <td className="px-4 py-4 text-neutral-700">{item.productName}</td>
-                                        <td className="px-4 py-4 text-right font-semibold text-neutral-800">{formatCurrency(item.sales)}</td>
-                                        <td className="px-4 py-4 text-right text-neutral-600">{formatCurrency(item.cost)}</td>
-                                        <td className="px-4 py-4 text-right font-bold text-green-600">{formatCurrency(item.grossProfit)}</td>
-                                        <td className="px-4 py-4 text-right text-neutral-600">{formatPercent(item.costRate)}</td>
-                                        <td className="px-4 py-4 text-right font-bold text-green-600">{formatPercent(item.grossProfitRate)}</td>
+                                            <td className="px-4 py-4 text-neutral-700">{item.productName}</td>
+                                            <td className="px-4 py-4 text-right font-semibold text-neutral-800">{formatCurrency(item.sales)}</td>
+                                            <td className="px-4 py-4 text-right text-neutral-600">{formatCurrency(item.cost)}</td>
+                                            <td className="px-4 py-4 text-right font-bold text-green-600">{formatCurrency(item.grossProfit)}</td>
+                                            <td className="px-4 py-4 text-right text-neutral-600">{formatPercent(item.costRate)}</td>
+                                            <td className="px-4 py-4 text-right font-bold text-green-600">{formatPercent(item.grossProfitRate)}</td>
                                         </tr>
                                     );
                                 })}
@@ -371,7 +371,7 @@ export default function ProductPLPage() {
                 {/* グラフエリア */}
                 <div className="mt-8 bg-white border-2 border-neutral-200 rounded-xl p-6 shadow-lg">
                     <div className="mb-4">
-                        <div 
+                        <div
                             className="flex items-center justify-between cursor-pointer"
                             onClick={() => setIsGraphOpen(!isGraphOpen)}
                         >
@@ -395,21 +395,19 @@ export default function ProductPLPage() {
                                     <div className="flex gap-2">
                                         <button
                                             onClick={() => setGraphType('line')}
-                                            className={`px-4 py-1.5 text-sm font-medium rounded transition-colors ${
-                                                graphType === 'line'
-                                                    ? 'bg-[#00214d] text-white'
-                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                            }`}
+                                            className={`px-4 py-1.5 text-sm font-medium rounded transition-colors ${graphType === 'line'
+                                                ? 'bg-[#00214d] text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
                                         >
                                             折れ線
                                         </button>
                                         <button
                                             onClick={() => setGraphType('bar')}
-                                            className={`px-4 py-1.5 text-sm font-medium rounded transition-colors ${
-                                                graphType === 'bar'
-                                                    ? 'bg-[#00214d] text-white'
-                                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                            }`}
+                                            className={`px-4 py-1.5 text-sm font-medium rounded transition-colors ${graphType === 'bar'
+                                                ? 'bg-[#00214d] text-white'
+                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
                                         >
                                             棒
                                         </button>
@@ -472,32 +470,32 @@ export default function ProductPLPage() {
                                     {graphType === 'line' ? (
                                         <LineChart data={graphData}>
                                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                            <XAxis 
-                                                dataKey="periodYm" 
+                                            <XAxis
+                                                dataKey="periodYm"
                                                 stroke="#6b7280"
                                                 style={{ fontSize: '12px' }}
                                             />
-                                            <YAxis 
+                                            <YAxis
                                                 yAxisId="left"
                                                 stroke="#6b7280"
                                                 style={{ fontSize: '12px' }}
                                                 tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
                                             />
-                                            <YAxis 
+                                            <YAxis
                                                 yAxisId="right"
                                                 orientation="right"
                                                 stroke="#6b7280"
                                                 style={{ fontSize: '12px' }}
                                                 tickFormatter={(value) => `${value.toFixed(1)}%`}
                                             />
-                                            <Tooltip 
-                                                contentStyle={{ 
+                                            <Tooltip
+                                                contentStyle={{
                                                     backgroundColor: 'rgba(255, 255, 255, 0.95)',
                                                     border: '1px solid #d1d5db',
                                                     borderRadius: '8px',
                                                     padding: '12px'
                                                 }}
-                                                formatter={(value: any, name: string) => {
+                                                formatter={(value: any, name: any) => {
                                                     if (name.includes('率')) {
                                                         return `${Number(value).toFixed(1)}%`;
                                                     }
@@ -505,18 +503,18 @@ export default function ProductPLPage() {
                                                 }}
                                             />
                                             <Legend />
-                                            
+
                                             {selectedProducts.map((productCode, index) => {
                                                 const product = plData.find(p => p.productCode === productCode);
                                                 const color = colorPalette[index % colorPalette.length];
                                                 const lightColor = color + '80';
-                                                
+
                                                 return (
                                                     <React.Fragment key={productCode}>
                                                         {visibleItems.sales && (
-                                                            <Line 
+                                                            <Line
                                                                 yAxisId="left"
-                                                                type="monotone" 
+                                                                type="monotone"
                                                                 dataKey={`sales_${productCode}`}
                                                                 stroke={color}
                                                                 strokeWidth={2}
@@ -525,9 +523,9 @@ export default function ProductPLPage() {
                                                             />
                                                         )}
                                                         {visibleItems.salesPrevYear && showPrevYear && (
-                                                            <Line 
+                                                            <Line
                                                                 yAxisId="left"
-                                                                type="monotone" 
+                                                                type="monotone"
                                                                 dataKey={`salesPrevYear_${productCode}`}
                                                                 stroke={lightColor}
                                                                 strokeWidth={2}
@@ -537,9 +535,9 @@ export default function ProductPLPage() {
                                                             />
                                                         )}
                                                         {visibleItems.grossProfit && (
-                                                            <Line 
+                                                            <Line
                                                                 yAxisId="left"
-                                                                type="monotone" 
+                                                                type="monotone"
                                                                 dataKey={`grossProfit_${productCode}`}
                                                                 stroke={color}
                                                                 strokeWidth={2}
@@ -549,9 +547,9 @@ export default function ProductPLPage() {
                                                             />
                                                         )}
                                                         {visibleItems.grossProfitPrevYear && showPrevYear && (
-                                                            <Line 
+                                                            <Line
                                                                 yAxisId="left"
-                                                                type="monotone" 
+                                                                type="monotone"
                                                                 dataKey={`grossProfitPrevYear_${productCode}`}
                                                                 stroke={lightColor}
                                                                 strokeWidth={2}
@@ -561,9 +559,9 @@ export default function ProductPLPage() {
                                                             />
                                                         )}
                                                         {visibleItems.grossProfitRate && (
-                                                            <Line 
+                                                            <Line
                                                                 yAxisId="right"
-                                                                type="monotone" 
+                                                                type="monotone"
                                                                 dataKey={`grossProfitRate_${productCode}`}
                                                                 stroke={color}
                                                                 strokeWidth={2}
@@ -578,32 +576,32 @@ export default function ProductPLPage() {
                                     ) : (
                                         <BarChart data={graphData} barCategoryGap="20%" barGap={2}>
                                             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-                                            <XAxis 
-                                                dataKey="periodYm" 
+                                            <XAxis
+                                                dataKey="periodYm"
                                                 stroke="#6b7280"
                                                 style={{ fontSize: '12px' }}
                                             />
-                                            <YAxis 
+                                            <YAxis
                                                 yAxisId="left"
                                                 stroke="#6b7280"
                                                 style={{ fontSize: '12px' }}
                                                 tickFormatter={(value) => `¥${(value / 10000).toFixed(0)}万`}
                                             />
-                                            <YAxis 
+                                            <YAxis
                                                 yAxisId="right"
                                                 orientation="right"
                                                 stroke="#6b7280"
                                                 style={{ fontSize: '12px' }}
                                                 tickFormatter={(value) => `${value.toFixed(1)}%`}
                                             />
-                                            <Tooltip 
-                                                contentStyle={{ 
+                                            <Tooltip
+                                                contentStyle={{
                                                     backgroundColor: 'rgba(255, 255, 255, 0.95)',
                                                     border: '1px solid #d1d5db',
                                                     borderRadius: '8px',
                                                     padding: '12px'
                                                 }}
-                                                formatter={(value: any, name: string) => {
+                                                formatter={(value: any, name: any) => {
                                                     if (name.includes('率')) {
                                                         return `${Number(value).toFixed(1)}%`;
                                                     }
@@ -611,16 +609,16 @@ export default function ProductPLPage() {
                                                 }}
                                             />
                                             <Legend />
-                                            
+
                                             {selectedProducts.map((productCode, index) => {
                                                 const product = plData.find(p => p.productCode === productCode);
                                                 const color = colorPalette[index % colorPalette.length];
                                                 const lightColor = color + '80';
-                                                
+
                                                 return (
                                                     <React.Fragment key={productCode}>
                                                         {visibleItems.sales && (
-                                                            <Bar 
+                                                            <Bar
                                                                 yAxisId="left"
                                                                 dataKey={`sales_${productCode}`}
                                                                 fill={color}
@@ -628,7 +626,7 @@ export default function ProductPLPage() {
                                                             />
                                                         )}
                                                         {visibleItems.salesPrevYear && showPrevYear && (
-                                                            <Bar 
+                                                            <Bar
                                                                 yAxisId="left"
                                                                 dataKey={`salesPrevYear_${productCode}`}
                                                                 fill={lightColor}
@@ -636,7 +634,7 @@ export default function ProductPLPage() {
                                                             />
                                                         )}
                                                         {visibleItems.grossProfit && (
-                                                            <Bar 
+                                                            <Bar
                                                                 yAxisId="left"
                                                                 dataKey={`grossProfit_${productCode}`}
                                                                 fill={color}
@@ -644,7 +642,7 @@ export default function ProductPLPage() {
                                                             />
                                                         )}
                                                         {visibleItems.grossProfitPrevYear && showPrevYear && (
-                                                            <Bar 
+                                                            <Bar
                                                                 yAxisId="left"
                                                                 dataKey={`grossProfitPrevYear_${productCode}`}
                                                                 fill={lightColor}
@@ -652,7 +650,7 @@ export default function ProductPLPage() {
                                                             />
                                                         )}
                                                         {visibleItems.grossProfitRate && (
-                                                            <Bar 
+                                                            <Bar
                                                                 yAxisId="right"
                                                                 dataKey={`grossProfitRate_${productCode}`}
                                                                 fill={color}
