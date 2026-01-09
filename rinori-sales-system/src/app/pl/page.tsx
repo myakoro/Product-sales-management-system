@@ -1204,6 +1204,9 @@ function PlPageContent() {
                                                                     yAxisId="left"
                                                                     dataKey={`grossProfit_${catId}`}
                                                                     fill={color}
+                                                                    fillOpacity={0.6}
+                                                                    stroke={color}
+                                                                    strokeWidth={1}
                                                                     name={`${category?.categoryName || '未分類'} - 粗利`}
                                                                 />
                                                             )}
@@ -1211,7 +1214,10 @@ function PlPageContent() {
                                                                 <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`grossProfitPrevYear_${catId}`}
-                                                                    fill={lightColor}
+                                                                    fill={color}
+                                                                    fillOpacity={0.3}
+                                                                    stroke={color}
+                                                                    strokeDasharray="2 2"
                                                                     name={`${category?.categoryName || '未分類'} - 粗利(昨年)`}
                                                                 />
                                                             )}
@@ -1220,6 +1226,9 @@ function PlPageContent() {
                                                                     yAxisId="right"
                                                                     dataKey={`grossProfitRate_${catId}`}
                                                                     fill={color}
+                                                                    fillOpacity={0.2}
+                                                                    stroke={color}
+                                                                    strokeWidth={1}
                                                                     name={`${category?.categoryName || '未分類'} - 粗利率`}
                                                                 />
                                                             )}
