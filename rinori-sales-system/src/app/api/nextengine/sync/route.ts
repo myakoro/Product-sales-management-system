@@ -106,7 +106,18 @@ export async function POST(request: Request) {
         let fr013TotalQty = 0;
         const fr013Details: any[] = [];
 
+        // 重複除外用: 受注番号のSet
+        const processedRowNos = new Set<string>();
+
         for (const row of orderData.data) {
+            const rowNo = row.receive_order_row_no;
+
+            // 重複チェック: 同じ受注番号は1回だけ処理
+            if (processedRowNos.has(rowNo)) {
+                continue;
+            }
+            processedRowNos.add(rowNo);
+
             const sku = row.receive_order_row_goods_id;
             const productName = row.receive_order_row_goods_name || null;
 
