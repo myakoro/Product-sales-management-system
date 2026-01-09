@@ -93,8 +93,8 @@ export async function POST(request: Request) {
         }>();
 
         for (const row of rows) {
-            const sku = row['商品コード（SKU）'] || row['商品コード'] || row['商品ｺｰﾄﾞ'] || row['SKU'] || row['sku'] || row['商品CD'] || row['商品コード*'] || '';
-            const name = row['商品名'] || row['商品名*'] || row['name'] || null;
+            const sku = row['コード'] || row['商品コード（SKU）'] || row['商品コード'] || row['商品ｺｰﾄﾞ'] || row['SKU'] || row['sku'] || row['商品CD'] || row['商品コード*'] || '';
+            const name = row['名称'] || row['商品名'] || row['商品名*'] || row['name'] || null;
             const asin = row['ASIN'] || row['asin'] || row['Asin'] || null;
             const salesPriceStr = row['販売価格（税別）'] || row['販売価格'] || row['定価'] || row['sales_price'] || '0';
             const costStr = row['原価（税別）'] || row['原価'] || row['cost'] || '0';
