@@ -1066,8 +1066,10 @@ function PlPageContent() {
 
                                                 {selectedCategories.map((categoryId, index) => {
                                                     const category = categoryData.find(c => c.categoryId === categoryId);
-                                                    const color = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'][index % 5];
-                                                    const lightColor = color + '80';
+                                                    // プレミアムな金融ダッシュボード風カラーパレット
+                                                    const premiumColors = ['#1E40AF', '#047857', '#B45309', '#9F1239', '#6D28D9'];
+                                                    const color = premiumColors[index % 5];
+                                                    const lightColor = color + '70'; // より透明感のある昨年データ
                                                     const catId = categoryId === null ? 'unclassified' : categoryId;
 
                                                     return (
@@ -1078,9 +1080,9 @@ function PlPageContent() {
                                                                     type="monotone"
                                                                     dataKey={`sales_${catId}`}
                                                                     stroke={color}
-                                                                    strokeWidth={2}
+                                                                    strokeWidth={2.5}
                                                                     name={`${category?.categoryName || '未分類'} - 売上高`}
-                                                                    dot={{ fill: color, r: 4 }}
+                                                                    dot={{ fill: color, r: 4, strokeWidth: 0 }}
                                                                 />
                                                             )}
                                                             {categoryVisibleItems.salesPrevYear && showCategoryPrevYear && (
@@ -1089,10 +1091,10 @@ function PlPageContent() {
                                                                     type="monotone"
                                                                     dataKey={`salesPrevYear_${catId}`}
                                                                     stroke={lightColor}
-                                                                    strokeWidth={2}
-                                                                    strokeDasharray="5 5"
+                                                                    strokeWidth={1.8}
+                                                                    strokeDasharray="8 4"
                                                                     name={`${category?.categoryName || '未分類'} - 売上高(昨年)`}
-                                                                    dot={{ fill: lightColor, r: 3 }}
+                                                                    dot={{ fill: lightColor, r: 2.5, strokeWidth: 0 }}
                                                                 />
                                                             )}
                                                             {categoryVisibleItems.grossProfit && (
@@ -1101,10 +1103,10 @@ function PlPageContent() {
                                                                     type="monotone"
                                                                     dataKey={`grossProfit_${catId}`}
                                                                     stroke={color}
-                                                                    strokeWidth={2}
-                                                                    strokeDasharray="3 3"
+                                                                    strokeWidth={2.5}
+                                                                    strokeDasharray="4 2"
                                                                     name={`${category?.categoryName || '未分類'} - 粗利`}
-                                                                    dot={{ fill: color, r: 3 }}
+                                                                    dot={{ fill: color, r: 3.5, strokeWidth: 0 }}
                                                                 />
                                                             )}
                                                             {categoryVisibleItems.grossProfitPrevYear && showCategoryPrevYear && (
@@ -1113,10 +1115,10 @@ function PlPageContent() {
                                                                     type="monotone"
                                                                     dataKey={`grossProfitPrevYear_${catId}`}
                                                                     stroke={lightColor}
-                                                                    strokeWidth={2}
-                                                                    strokeDasharray="3 3"
+                                                                    strokeWidth={1.8}
+                                                                    strokeDasharray="4 2"
                                                                     name={`${category?.categoryName || '未分類'} - 粗利(昨年)`}
-                                                                    dot={{ fill: lightColor, r: 2 }}
+                                                                    dot={{ fill: lightColor, r: 2, strokeWidth: 0 }}
                                                                 />
                                                             )}
                                                             {categoryVisibleItems.grossProfitRate && (
@@ -1125,9 +1127,9 @@ function PlPageContent() {
                                                                     type="monotone"
                                                                     dataKey={`grossProfitRate_${catId}`}
                                                                     stroke={color}
-                                                                    strokeWidth={2}
+                                                                    strokeWidth={2.5}
                                                                     name={`${category?.categoryName || '未分類'} - 粗利率`}
-                                                                    dot={{ fill: color, r: 4 }}
+                                                                    dot={{ fill: color, r: 4, strokeWidth: 0 }}
                                                                 />
                                                             )}
                                                         </React.Fragment>
@@ -1173,8 +1175,10 @@ function PlPageContent() {
 
                                                 {selectedCategories.map((categoryId, index) => {
                                                     const category = categoryData.find(c => c.categoryId === categoryId);
-                                                    const color = ['#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EF4444'][index % 5];
-                                                    const lightColor = color + '80';
+                                                    // プレミアムな金融ダッシュボード風カラーパレット
+                                                    const premiumColors = ['#1E40AF', '#047857', '#B45309', '#9F1239', '#6D28D9'];
+                                                    const color = premiumColors[index % 5];
+                                                    const lightColor = color + '70'; // より透明感のある昨年データ
                                                     const catId = categoryId === null ? 'unclassified' : categoryId;
 
                                                     return (
