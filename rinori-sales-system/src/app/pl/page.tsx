@@ -477,7 +477,7 @@ export default function PlPage() {
             <main className="max-w-7xl mx-auto px-6 py-8">
                 <h2 className="text-3xl font-bold text-[#00214d] mb-6 flex items-center gap-2">
                     <span className="w-1 h-8 bg-[#d4af37] rounded-full"></span>
-                    損益計算書 (PL)
+                    月次・期間PL分析
                 </h2>
 
                 {/* Tabs */}
