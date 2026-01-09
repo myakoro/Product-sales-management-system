@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
@@ -7,13 +6,11 @@ export async function GET(request: Request) {
     const startYm = searchParams.get('startYm');
     const endYm = searchParams.get('endYm');
     const salesChannelIdStr = searchParams.get('salesChannelId');
+    const salesChannelId = (salesChannelIdStr && salesChannelIdStr !== 'all') ? parseInt(salesChannelIdStr, 10) : null;
 
     if (!startYm || !endYm) {
         return NextResponse.json({ error: 'Missing startYm or endYm' }, { status: 400 });
     }
-
-    const salesChannelId = salesChannelIdStr ? parseInt(salesChannelIdStr, 10) : null;
-    const isChannelFiltered = salesChannelId !== null && salesChannelId > 0;
 
     try {
         // 1. Calculate Sales, Cost, Gross Profit from SalesRecords
@@ -32,7 +29,7 @@ export async function GET(request: Request) {
                 product: {
                     managementStatus: { in: ['管理中', 'managed'] }
                 },
-                ...(isChannelFiltered ? { salesChannelId: salesChannelId } : {})
+                ...(salesChannelId ? { salesChannelId: salesChannelId } : {})
             },
         });
 
@@ -66,7 +63,7 @@ export async function GET(request: Request) {
         });
 
         // 販路別の場合は広告費・営業利益を返さない（V1.4設計書方針）
-        if (isChannelFiltered) {
+        if (salesChannelId) {
             return NextResponse.json({
                 sales,
                 cost,

@@ -267,7 +267,10 @@ export default function PlPage() {
                 targetYm = range.end;
             }
 
-            const url = `/api/pl/category?targetYm=${targetYm}&sortBy=${categorySortBy}&sortOrder=${categorySortOrder}`;
+            let url = `/api/pl/category?targetYm=${targetYm}&sortBy=${categorySortBy}&sortOrder=${categorySortOrder}`;
+            if (salesChannelId && salesChannelId !== 'all') {
+                url += `&salesChannelId=${salesChannelId}`;
+            }
             const res = await fetch(url);
             if (!res.ok) throw new Error("Failed to fetch category data");
             const result = await res.json();
@@ -320,7 +323,10 @@ export default function PlPage() {
             }
 
             const type = activeTab === 'overall' ? 'overall' : activeTab === 'product' ? 'product' : 'category';
-            const url = `/api/charts/pl-trend?startYm=${sDate}&endYm=${eDate}&type=${type}`;
+            let url = `/api/charts/pl-trend?startYm=${sDate}&endYm=${eDate}&type=${type}`;
+            if (salesChannelId && salesChannelId !== 'all') {
+                url += `&salesChannelId=${salesChannelId}`;
+            }
             const res = await fetch(url);
             if (!res.ok) throw new Error('Failed to fetch PL trend data');
             const result = await res.json();
@@ -370,10 +376,16 @@ export default function PlPage() {
                 eDate = customEnd;
             }
 
-            const ids = selectedCategories.map(id => id === null ? 'unclassified' : id).join(',');
-            const url = `/api/charts/pl-trend?startYm=${sDate}&endYm=${eDate}&type=category&ids=${ids}`;
+            const ids = encodeURIComponent(selectedCategories.map(id => id === null ? 'unclassified' : id).join(','));
+            let url = `/api/charts/pl-trend?startYm=${sDate}&endYm=${eDate}&type=category&ids=${ids}`;
+            if (salesChannelId && salesChannelId !== 'all') {
+                url += `&salesChannelId=${salesChannelId}`;
+            }
             const res = await fetch(url);
-            if (!res.ok) throw new Error('Failed to fetch category graph data');
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || 'Failed to fetch category graph data');
+            }
             const result = await res.json();
 
             // APIレスポンスをRechartsフォーマットに変換
@@ -405,7 +417,7 @@ export default function PlPage() {
         } else {
             setCategoryGraphData([]);
         }
-    }, [selectedCategories, periodMode, presetType, baseYm, customStart, customEnd, activeTab]);
+    }, [selectedCategories, periodMode, presetType, baseYm, customStart, customEnd, activeTab, salesChannelId]);
 
     const toggleLine = (line: keyof typeof visibleLines) => {
         setVisibleLines(prev => ({ ...prev, [line]: !prev[line] }));
@@ -428,9 +440,15 @@ export default function PlPage() {
                 eDate = customEnd;
             }
 
-            const url = `/api/charts/budget-vs-actual?startYm=${sDate}&endYm=${eDate}`;
+            let url = `/api/charts/budget-vs-actual?startYm=${sDate}&endYm=${eDate}`;
+            if (salesChannelId && salesChannelId !== 'all') {
+                url += `&salesChannelId=${salesChannelId}`;
+            }
             const res = await fetch(url);
-            if (!res.ok) throw new Error('Failed to fetch budget vs actual data');
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || 'Failed to fetch budget vs actual data');
+            }
             const result = await res.json();
 
             // APIからのレスポンスを変換

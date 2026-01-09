@@ -6,6 +6,8 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url);
         const startYm = searchParams.get('startYm');
         const endYm = searchParams.get('endYm');
+        const salesChannelIdStr = searchParams.get('salesChannelId');
+        const salesChannelId = (salesChannelIdStr && salesChannelIdStr !== 'all') ? parseInt(salesChannelIdStr, 10) : null;
 
         if (!startYm || !endYm) {
             return NextResponse.json(
@@ -70,7 +72,8 @@ export async function GET(request: Request) {
                 periodYm: {
                     gte: startYm,
                     lte: endYm
-                }
+                },
+                ...(salesChannelId ? { salesChannelId: salesChannelId } : {})
             },
             _sum: {
                 quantity: true,

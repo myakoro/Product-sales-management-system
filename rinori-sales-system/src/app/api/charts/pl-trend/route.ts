@@ -17,10 +17,11 @@ export async function GET(request: Request) {
         const type = searchParams.get('type') || 'overall'; // overall, product, category
         const ids = searchParams.get('ids')?.split(',').filter(Boolean) || [];
         const salesChannelId = searchParams.get('salesChannelId');
-
         if (!startYm || !endYm) {
             return NextResponse.json({ error: '期間(startYm, endYm)の指定が必要です' }, { status: 400 });
         }
+
+        const channelId = (salesChannelId && salesChannelId !== 'all') ? parseInt(salesChannelId) : null;
 
         // 月次リスト作成 (例: 2025-01 から 2025-12)
         const months: string[] = [];
@@ -38,7 +39,7 @@ export async function GET(request: Request) {
         const salesRecords = (type === 'overall' || ids.length > 0) ? await prisma.salesRecord.findMany({
             where: {
                 periodYm: { in: [...months, ...prevYearMonths] },
-                ...(salesChannelId ? { salesChannelId: parseInt(salesChannelId) } : {}),
+                ...(channelId ? { salesChannelId: channelId } : {}),
                 ...(type === 'product' && ids.length > 0 ? { productCode: { in: ids } } : {}),
                 ...(type === 'category' && ids.length > 0 ? {
                     product: {
@@ -72,7 +73,7 @@ export async function GET(request: Request) {
 
         // 広告費取得 (全体PLの場合のみ)
         let adExpenses: any[] = [];
-        if (type === 'overall' && !salesChannelId) {
+        if (type === 'overall' && !channelId) {
             const startDate = parse(months[0], 'yyyy-MM', new Date());
             const endDate = addMonths(parse(months[months.length - 1], 'yyyy-MM', new Date()), 1);
             const prevStartDate = subYears(startDate, 1);
@@ -99,7 +100,7 @@ export async function GET(request: Request) {
             // 月全体としてのデータ存在判定
             const hasActDataOverall = allCurrentSales.length > 0;
             const hasPrevDataOverall = allPrevSales.length > 0;
-            const isFiltered = !!salesChannelId;
+            const isFiltered = !!channelId;
 
             const data: any[] = [];
 

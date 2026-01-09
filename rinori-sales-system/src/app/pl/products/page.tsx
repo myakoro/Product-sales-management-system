@@ -80,10 +80,13 @@ export default function ProductPLPage() {
 
         setGraphLoading(true);
         try {
-            const ids = selectedProducts.join(',');
-            const url = `/api/charts/pl-trend?startYm=${startYm}&endYm=${endYm}&type=product&ids=${ids}&salesChannelId=${salesChannelId}`;
+            const idsParam = encodeURIComponent(selectedProducts.join(','));
+            const url = `/api/charts/pl-trend?startYm=${startYm}&endYm=${endYm}&type=product&ids=${idsParam}&salesChannelId=${salesChannelId}`;
             const res = await fetch(url);
-            if (!res.ok) throw new Error('Failed to fetch graph data');
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || 'Failed to fetch graph data');
+            }
             const result = await res.json();
 
             // APIレスポンスをRechartsフォーマットに変換

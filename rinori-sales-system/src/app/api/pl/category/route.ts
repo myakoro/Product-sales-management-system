@@ -9,6 +9,9 @@ export async function GET(request: NextRequest) {
         const sortBy = searchParams.get('sortBy') || 'sales';
         const sortOrder = searchParams.get('sortOrder') || 'desc';
 
+        const salesChannelIdStr = searchParams.get('salesChannelId');
+        const salesChannelId = (salesChannelIdStr && salesChannelIdStr !== 'all') ? parseInt(salesChannelIdStr, 10) : null;
+
         if (!targetYm) {
             return NextResponse.json(
                 { error: '対象年月（targetYm）は必須です' },
@@ -18,7 +21,10 @@ export async function GET(request: NextRequest) {
 
         // 売上実績を取得
         const salesRecords = await prisma.salesRecord.findMany({
-            where: { periodYm: targetYm },
+            where: {
+                periodYm: targetYm,
+                ...(salesChannelId ? { salesChannelId: salesChannelId } : {})
+            },
             include: {
                 product: {
                     include: {

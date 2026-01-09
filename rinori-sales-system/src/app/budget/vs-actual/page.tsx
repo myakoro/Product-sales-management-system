@@ -61,6 +61,8 @@ export default function BudgetVsActualPage() {
     const [sortKey, setSortKey] = useState<SortKey>('productCode');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [hideZeroRows, setHideZeroRows] = useState(true);
+    const [salesChannels, setSalesChannels] = useState<{ id: number, name: string }[]>([]);
+    const [salesChannelId, setSalesChannelId] = useState<string>("all");
 
     // V1.565: 商品選択状態（最大5件）
     const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
@@ -112,10 +114,13 @@ export default function BudgetVsActualPage() {
 
         setGraphLoading(true);
         try {
-            const ids = selectedProducts.join(',');
-            const url = `/api/charts/budget-vs-actual?startYm=${startYm}&endYm=${endYm}&type=product&ids=${ids}`;
+            const idsParam = encodeURIComponent(selectedProducts.join(','));
+            const url = `/api/charts/budget-vs-actual?startYm=${startYm}&endYm=${endYm}&type=product&ids=${idsParam}&salesChannelId=${salesChannelId}`;
             const res = await fetch(url);
-            if (!res.ok) throw new Error('Failed to fetch graph data');
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || 'Failed to fetch graph data');
+            }
             const result = await res.json();
 
             const formattedData = result.map((item: any) => {
@@ -145,7 +150,17 @@ export default function BudgetVsActualPage() {
         } else {
             setGraphData([]);
         }
-    }, [selectedProducts, startYm, endYm]);
+    }, [selectedProducts, startYm, endYm, salesChannelId]);
+
+    useEffect(() => {
+        fetch('/api/settings/sales-channels')
+            .then(res => res.json())
+            .then(data => {
+                const active = data.filter((c: any) => c.isActive);
+                setSalesChannels(active);
+            })
+            .catch(err => console.error('Failed to fetch sales channels:', err));
+    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -159,7 +174,7 @@ export default function BudgetVsActualPage() {
         try {
             // API 側の periodYm（sales_records.period_ym / monthly_budgets.period_ym）は "YYYY-MM" 形式なので
             // ここでも type="month" の値（YYYY-MM）をそのまま渡す
-            const res = await fetch(`/api/budget/vs-actual?startYm=${startYm}&endYm=${endYm}`);
+            const res = await fetch(`/api/budget/vs-actual?startYm=${startYm}&endYm=${endYm}&salesChannelId=${salesChannelId}`);
 
             if (res.ok) {
                 const data = await res.json();
@@ -262,14 +277,42 @@ export default function BudgetVsActualPage() {
                         <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: '500' }}>
                             期間設定 <span style={{ color: 'red' }}>*</span>
                         </label>
-                        <PeriodNavigator
-                            startYm={startYm}
-                            endYm={endYm}
-                            onChange={(start, end) => {
-                                setStartYm(start);
-                                setEndYm(end);
-                            }}
-                        />
+                        <div style={{ display: 'flex', gap: '2rem', alignItems: 'end' }}>
+                            <div style={{ flex: 1 }}>
+                                <PeriodNavigator
+                                    startYm={startYm}
+                                    onChange={(start, end) => {
+                                        setStartYm(start);
+                                        setEndYm(end);
+                                    }}
+                                    endYm={endYm}
+                                />
+                            </div>
+                            <div style={{ width: '200px' }}>
+                                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500', color: '#4b5563' }}>
+                                    販路絞り込み
+                                </label>
+                                <select
+                                    value={salesChannelId}
+                                    onChange={(e) => setSalesChannelId(e.target.value)}
+                                    style={{
+                                        width: '100%',
+                                        padding: '0.625rem',
+                                        borderRadius: '0.375rem',
+                                        border: '1px solid #d1d5db',
+                                        backgroundColor: 'white',
+                                        fontSize: '0.875rem'
+                                    }}
+                                >
+                                    <option value="all">すべての販路</option>
+                                    {salesChannels.map((channel) => (
+                                        <option key={channel.id} value={channel.id}>
+                                            {channel.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
 

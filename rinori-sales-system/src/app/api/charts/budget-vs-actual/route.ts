@@ -17,10 +17,11 @@ export async function GET(request: Request) {
         const type = searchParams.get('type') || 'product'; // product, category
         const ids = searchParams.get('ids')?.split(',').filter(Boolean) || [];
         const salesChannelId = searchParams.get('salesChannelId');
-
         if (!startYm || !endYm) {
             return NextResponse.json({ error: '期間の指定が必要です' }, { status: 400 });
         }
+
+        const channelId = (salesChannelId && salesChannelId !== 'all') ? parseInt(salesChannelId) : null;
 
         const months: string[] = [];
         let current = parse(startYm, 'yyyy-MM', new Date());
@@ -36,7 +37,7 @@ export async function GET(request: Request) {
         const actuals = (type === 'overall' || ids.length > 0) ? await prisma.salesRecord.findMany({
             where: {
                 periodYm: { in: [...months, ...prevYearMonths] },
-                ...(salesChannelId ? { salesChannelId: parseInt(salesChannelId) } : {}),
+                ...(channelId ? { salesChannelId: channelId } : {}),
                 ...(type === 'product' && ids.length > 0 ? { productCode: { in: ids } } : {}),
                 ...(type === 'category' && ids.length > 0 ? {
                     product: {
@@ -109,7 +110,7 @@ export async function GET(request: Request) {
             const hasActDataOverall = allCurrentActuals.length > 0;
             const hasPrevDataOverall = allPrevActuals.length > 0;
             const hasBudDataOverall = allCurrentBudgets.length > 0;
-            const isFiltered = !!salesChannelId;
+            const isFiltered = !!channelId;
 
             const data: any[] = [];
 
