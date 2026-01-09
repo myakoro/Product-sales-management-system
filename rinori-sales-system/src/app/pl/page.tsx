@@ -1062,7 +1062,7 @@ function PlPageContent() {
                                                         return `¥${Number(value).toLocaleString()}`;
                                                     }}
                                                 />
-                                                <Legend />
+                                                <Legend iconType="plainline" />
 
                                                 {selectedCategories.map((categoryId, index) => {
                                                     const category = categoryData.find(c => c.categoryId === categoryId);
@@ -1072,6 +1072,10 @@ function PlPageContent() {
                                                     const lightColor = color + '70'; // より透明感のある昨年データ
                                                     const catId = categoryId === null ? 'unclassified' : categoryId;
 
+                                                    const colorSales = color;
+                                                    const colorGP = color + 'A6'; // 65% opacity
+                                                    const colorRate = color + '66'; // 40% opacity
+
                                                     return (
                                                         <React.Fragment key={catId}>
                                                             {categoryVisibleItems.sales && (
@@ -1079,10 +1083,10 @@ function PlPageContent() {
                                                                     yAxisId="left"
                                                                     type="monotone"
                                                                     dataKey={`sales_${catId}`}
-                                                                    stroke={color}
+                                                                    stroke={colorSales}
                                                                     strokeWidth={2.5}
                                                                     name={`${category?.categoryName || '未分類'} - 売上高`}
-                                                                    dot={{ fill: color, r: 4, strokeWidth: 0 }}
+                                                                    dot={{ fill: colorSales, r: 4, strokeWidth: 0 }}
                                                                 />
                                                             )}
                                                             {categoryVisibleItems.salesPrevYear && showCategoryPrevYear && (
@@ -1101,11 +1105,11 @@ function PlPageContent() {
                                                                     yAxisId="left"
                                                                     type="monotone"
                                                                     dataKey={`grossProfit_${catId}`}
-                                                                    stroke={color}
+                                                                    stroke={colorGP}
                                                                     strokeWidth={2}
                                                                     strokeDasharray="6 4"
                                                                     name={`${category?.categoryName || '未分類'} - 粗利`}
-                                                                    dot={{ fill: color, r: 3.5, strokeWidth: 0 }}
+                                                                    dot={{ fill: colorGP, r: 3.5, strokeWidth: 0 }}
                                                                 />
                                                             )}
                                                             {categoryVisibleItems.grossProfitPrevYear && showCategoryPrevYear && (
@@ -1125,11 +1129,11 @@ function PlPageContent() {
                                                                     yAxisId="right"
                                                                     type="monotone"
                                                                     dataKey={`grossProfitRate_${catId}`}
-                                                                    stroke={color}
+                                                                    stroke={colorRate}
                                                                     strokeWidth={2}
                                                                     strokeDasharray="2 3"
                                                                     name={`${category?.categoryName || '未分類'} - 粗利率`}
-                                                                    dot={{ fill: color, r: 3.5, strokeWidth: 0 }}
+                                                                    dot={{ fill: colorRate, r: 3.5, strokeWidth: 0 }}
                                                                 />
                                                             )}
                                                         </React.Fragment>
@@ -1181,13 +1185,17 @@ function PlPageContent() {
                                                     const lightColor = color + '70'; // より透明感のある昨年データ
                                                     const catId = categoryId === null ? 'unclassified' : categoryId;
 
+                                                    const colorSalesBar = color;
+                                                    const colorGPBar = color + 'A6'; // 65% opacity
+                                                    const colorRateBar = color + '66'; // 40% opacity
+
                                                     return (
                                                         <React.Fragment key={catId}>
                                                             {categoryVisibleItems.sales && (
                                                                 <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`sales_${catId}`}
-                                                                    fill={color}
+                                                                    fill={colorSalesBar}
                                                                     name={`${category?.categoryName || '未分類'} - 売上高`}
                                                                 />
                                                             )}
@@ -1203,8 +1211,7 @@ function PlPageContent() {
                                                                 <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`grossProfit_${catId}`}
-                                                                    fill={color}
-                                                                    fillOpacity={0.6}
+                                                                    fill={colorGPBar}
                                                                     stroke={color}
                                                                     strokeWidth={1}
                                                                     name={`${category?.categoryName || '未分類'} - 粗利`}
@@ -1214,8 +1221,7 @@ function PlPageContent() {
                                                                 <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`grossProfitPrevYear_${catId}`}
-                                                                    fill={color}
-                                                                    fillOpacity={0.3}
+                                                                    fill={color + '4D'} // 30% opacity
                                                                     stroke={color}
                                                                     strokeDasharray="2 2"
                                                                     name={`${category?.categoryName || '未分類'} - 粗利(昨年)`}
@@ -1225,8 +1231,7 @@ function PlPageContent() {
                                                                 <Bar
                                                                     yAxisId="right"
                                                                     dataKey={`grossProfitRate_${catId}`}
-                                                                    fill={color}
-                                                                    fillOpacity={0.2}
+                                                                    fill={colorRateBar}
                                                                     stroke={color}
                                                                     strokeWidth={1}
                                                                     name={`${category?.categoryName || '未分類'} - 粗利率`}
