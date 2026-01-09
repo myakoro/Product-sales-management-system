@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ChevronDown, ChevronUp } from 'lucide-react';
@@ -148,6 +149,18 @@ export default function PlPage() {
     const [showCategoryPrevYear, setShowCategoryPrevYear] = useState(true);
     const [categoryGraphType, setCategoryGraphType] = useState<'line' | 'bar'>('line');
 
+    // Query params for tab selection
+    const searchParams = useSearchParams();
+    const tabParam = searchParams.get('tab');
+
+    useEffect(() => {
+        if (tabParam === 'category') {
+            setActiveTab('category');
+        } else if (tabParam === 'product') {
+            setActiveTab('product');
+        }
+    }, [tabParam]);
+
     // V1.565: カテゴリーグラフ表示項目選択（初期表示：売上高、粗利、粗利率）
     const [categoryVisibleItems, setCategoryVisibleItems] = useState({
         sales: true,
@@ -223,11 +236,8 @@ export default function PlPage() {
     const userRole = user?.role || 'staff'; // Default to staff if not loaded yet, or handle loading state
 
     const fetchData = async () => {
-        setLoading(true);
-        setError("");
         try {
             let sDate, eDate;
-
             if (periodMode === 'preset') {
                 const range = getRange(presetType, baseYm);
                 sDate = range.start;
@@ -238,7 +248,7 @@ export default function PlPage() {
             }
 
             let url = `/api/pl?startYm=${sDate}&endYm=${eDate}`;
-            if (salesChannelId) {
+            if (salesChannelId && salesChannelId !== 'all') {
                 url += `&salesChannelId=${salesChannelId}`;
             }
             const res = await fetch(url);
@@ -248,14 +258,10 @@ export default function PlPage() {
         } catch (err) {
             console.error(err);
             setError("データの取得に失敗しました。");
-        } finally {
-            setLoading(false);
         }
     };
 
     const fetchCategoryData = async () => {
-        setLoading(true);
-        setError("");
         try {
             let targetYm;
             if (periodMode === 'preset' && presetType === 'single') {
@@ -278,20 +284,29 @@ export default function PlPage() {
         } catch (err) {
             console.error(err);
             setError("カテゴリー別データの取得に失敗しました。");
-        } finally {
-            setLoading(false);
         }
     };
 
-    const handleFetchData = () => {
-        if (activeTab === 'category') {
-            fetchCategoryData();
-        } else {
-            fetchData();
+    const handleFetchData = async () => {
+        setLoading(true);
+        setError("");
+        try {
+            if (activeTab === 'category') {
+                await fetchCategoryData();
+            } else if (activeTab === 'overall') {
+                await fetchData();
+            }
+            // グラフデータも並行して取得
+            await Promise.all([
+                fetchPlTrendData(),
+                fetchBudgetVsActualData()
+            ]);
+        } catch (err) {
+            console.error("Fetch failed:", err);
+            setError("データの読み込みに失敗しました。");
+        } finally {
+            setLoading(false);
         }
-        // グラフデータも取得
-        fetchPlTrendData();
-        fetchBudgetVsActualData();
     };
 
     const handleSortCategory = (sortBy: 'sales' | 'grossProfit' | 'grossProfitRate') => {

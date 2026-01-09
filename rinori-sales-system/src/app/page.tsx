@@ -335,6 +335,11 @@ export default function HomePage() {
                                     </Link>
                                 </li>
                                 <li>
+                                    <Link href="/pl?tab=category" className="block px-4 py-3 text-[#00214d] hover:bg-purple-50 rounded-lg transition-all duration-200 font-medium border border-transparent hover:border-purple-200">
+                                        カテゴリー別PL分析
+                                    </Link>
+                                </li>
+                                <li>
                                     <Link href="/pl/products" className="block px-4 py-3 text-[#00214d] hover:bg-purple-50 rounded-lg transition-all duration-200 font-medium border border-transparent hover:border-purple-200">
                                         商品別PL分析
                                     </Link>
