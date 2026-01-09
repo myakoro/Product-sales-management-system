@@ -275,17 +275,17 @@ function PlPageContent() {
 
     const fetchCategoryData = async () => {
         try {
-            let targetYm;
-            if (periodMode === 'preset' && presetType === 'single') {
-                targetYm = baseYm;
-            } else if (periodMode === 'custom') {
-                targetYm = customEnd;
-            } else {
+            let sDate, eDate;
+            if (periodMode === 'preset') {
                 const range = getRange(presetType, baseYm);
-                targetYm = range.end;
+                sDate = range.start;
+                eDate = range.end;
+            } else {
+                sDate = customStart;
+                eDate = customEnd;
             }
 
-            let url = `/api/pl/category?targetYm=${targetYm}&sortBy=${categorySortBy}&sortOrder=${categorySortOrder}`;
+            let url = `/api/pl/category?startYm=${sDate}&endYm=${eDate}&sortBy=${categorySortBy}&sortOrder=${categorySortOrder}`;
             if (salesChannelId && salesChannelId !== 'all') {
                 url += `&salesChannelId=${salesChannelId}`;
             }

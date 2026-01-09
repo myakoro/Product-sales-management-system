@@ -5,6 +5,8 @@ import { prisma } from '@/lib/prisma';
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
+        const startYm = searchParams.get('startYm');
+        const endYm = searchParams.get('endYm');
         const targetYm = searchParams.get('targetYm');
         const sortBy = searchParams.get('sortBy') || 'sales';
         const sortOrder = searchParams.get('sortOrder') || 'desc';
@@ -12,19 +14,27 @@ export async function GET(request: NextRequest) {
         const salesChannelIdStr = searchParams.get('salesChannelId');
         const salesChannelId = (salesChannelIdStr && salesChannelIdStr !== 'all') ? parseInt(salesChannelIdStr, 10) : null;
 
-        if (!targetYm) {
+        if (!startYm && !endYm && !targetYm) {
             return NextResponse.json(
-                { error: '対象年月（targetYm）は必須です' },
+                { error: '対象期間（startYm/endYm または targetYm）は必須です' },
                 { status: 400 }
             );
         }
 
+        // 期間の構築
+        const whereClause: any = {
+            ...(salesChannelId ? { salesChannelId: salesChannelId } : {})
+        };
+
+        if (startYm && endYm) {
+            whereClause.periodYm = { gte: startYm, lte: endYm };
+        } else {
+            whereClause.periodYm = targetYm;
+        }
+
         // 売上実績を取得
         const salesRecords = await prisma.salesRecord.findMany({
-            where: {
-                periodYm: targetYm,
-                ...(salesChannelId ? { salesChannelId: salesChannelId } : {})
-            },
+            where: whereClause,
             include: {
                 product: {
                     include: {
