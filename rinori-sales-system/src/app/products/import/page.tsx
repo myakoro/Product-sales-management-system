@@ -87,19 +87,28 @@ export default function ProductImportPage() {
 
             if (res.ok) {
                 const data = await res.json();
-                setNewProducts(data.newProducts || []);
-                setUpdateProducts(data.updateProducts || []);
+                const totalFound = (data.newProducts?.length || 0) + (data.updateProducts?.length || 0);
 
-                // デフォルトで全て選択
-                setSelectedNew(new Set(data.newProducts?.map((p: NewProduct) => p.productCode) || []));
-                setSelectedUpdate(new Set(data.updateProducts?.map((p: UpdateProduct) => p.productCode) || []));
+                if (totalFound === 0) {
+                    alert('CSVファイルの内容と現在のデータベースに差分は見つかりませんでした。すべて最新の状態です。');
+                } else {
+                    setNewProducts(data.newProducts || []);
+                    setUpdateProducts(data.updateProducts || []);
+
+                    // デフォルトで全て選択
+                    setSelectedNew(new Set(data.newProducts?.map((p: NewProduct) => p.productCode) || []));
+                    setSelectedUpdate(new Set(data.updateProducts?.map((p: UpdateProduct) => p.productCode) || []));
+
+                    // スムーズな遷移
+                    window.scrollTo({ top: 500, behavior: 'smooth' });
+                }
             } else {
                 const error = await res.json();
                 alert('エラー: ' + (error.error || '差分チェックに失敗しました'));
             }
         } catch (error) {
             console.error('差分チェックエラー:', error);
-            alert('通信エラーが発生しました');
+            alert('通信エラーが発生しました:' + (error as Error).message);
         } finally {
             setChecking(false);
         }
@@ -363,9 +372,9 @@ export default function ProductImportPage() {
                                         const hasInvalidCategory = product.categoryExists === false;
                                         const hasDuplicateAsin = product.asinDuplicate === true;
                                         return (
-                                            <tr 
-                                                key={product.productCode} 
-                                                style={{ 
+                                            <tr
+                                                key={product.productCode}
+                                                style={{
                                                     borderBottom: '1px solid #eee',
                                                     backgroundColor: hasInvalidCategory ? '#fef2f2' : 'transparent'
                                                 }}
@@ -472,9 +481,9 @@ export default function ProductImportPage() {
                                         const hasInvalidCategory = product.categoryExists === false;
                                         const hasDuplicateAsin = product.asinDuplicate === true;
                                         return (
-                                            <tr 
-                                                key={product.productCode} 
-                                                style={{ 
+                                            <tr
+                                                key={product.productCode}
+                                                style={{
                                                     borderBottom: '1px solid #eee',
                                                     backgroundColor: hasInvalidCategory ? '#fef2f2' : 'transparent'
                                                 }}

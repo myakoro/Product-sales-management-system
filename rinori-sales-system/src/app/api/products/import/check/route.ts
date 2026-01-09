@@ -93,14 +93,14 @@ export async function POST(request: Request) {
         }>();
 
         for (const row of rows) {
-            const sku = row['商品コード（SKU）'] || row['商品コード'] || row['商品ｺｰﾄﾞ'] || '';
-            const name = row['商品名'] || null;
-            const asin = row['ASIN'] || row['asin'] || null;
-            const salesPriceStr = row['販売価格（税別）'] || row['販売価格'] || row['定価'] || '0';
-            const costStr = row['原価（税別）'] || row['原価'] || '0';
-            const typeStr = row['商品区分'] || '自社';
-            const statusStr = row['管理ステータス'] || '管理中';
-            const categoryName = row['カテゴリー'] || row['カテゴリ'] || null;
+            const sku = row['商品コード（SKU）'] || row['商品コード'] || row['商品ｺｰﾄﾞ'] || row['SKU'] || row['sku'] || row['商品CD'] || row['商品コード*'] || '';
+            const name = row['商品名'] || row['商品名*'] || row['name'] || null;
+            const asin = row['ASIN'] || row['asin'] || row['Asin'] || null;
+            const salesPriceStr = row['販売価格（税別）'] || row['販売価格'] || row['定価'] || row['sales_price'] || '0';
+            const costStr = row['原価（税別）'] || row['原価'] || row['cost'] || '0';
+            const typeStr = row['商品区分'] || row['区分'] || '自社';
+            const statusStr = row['管理ステータス'] || row['ステータス'] || '管理中';
+            const categoryName = row['カテゴリー'] || row['カテゴリ'] || row['category'] || null;
 
             if (!sku) continue;
 
@@ -133,6 +133,16 @@ export async function POST(request: Request) {
                     categoryExists
                 });
             }
+        }
+
+        console.log(`[商品CSV差分チェック] 親コード集約完了: ${productMap.size}件`);
+
+        if (productMap.size === 0) {
+            console.warn('[商品CSV差分チェック] 有効な商品データが見つかりませんでした。ヘッダーを確認してください:', Object.keys(rows[0] || {}));
+            return NextResponse.json(
+                { error: 'CSVから有効な商品データを読み取れませんでした。ヘッダー（商品コード 等）を確認してください。' },
+                { status: 400 }
+            );
         }
 
         // 既存の商品マスタを取得
