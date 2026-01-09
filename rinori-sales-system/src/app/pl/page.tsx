@@ -1091,8 +1091,7 @@ function PlPageContent() {
                                                                     type="monotone"
                                                                     dataKey={`salesPrevYear_${catId}`}
                                                                     stroke={lightColor}
-                                                                    strokeWidth={1.8}
-                                                                    strokeDasharray="8 4"
+                                                                    strokeWidth={1.2}
                                                                     name={`${category?.categoryName || '未分類'} - 売上高(昨年)`}
                                                                     dot={{ fill: lightColor, r: 2.5, strokeWidth: 0 }}
                                                                 />
@@ -1103,8 +1102,8 @@ function PlPageContent() {
                                                                     type="monotone"
                                                                     dataKey={`grossProfit_${catId}`}
                                                                     stroke={color}
-                                                                    strokeWidth={2.5}
-                                                                    strokeDasharray="4 2"
+                                                                    strokeWidth={2}
+                                                                    strokeDasharray="6 4"
                                                                     name={`${category?.categoryName || '未分類'} - 粗利`}
                                                                     dot={{ fill: color, r: 3.5, strokeWidth: 0 }}
                                                                 />
@@ -1115,8 +1114,8 @@ function PlPageContent() {
                                                                     type="monotone"
                                                                     dataKey={`grossProfitPrevYear_${catId}`}
                                                                     stroke={lightColor}
-                                                                    strokeWidth={1.8}
-                                                                    strokeDasharray="4 2"
+                                                                    strokeWidth={1}
+                                                                    strokeDasharray="6 4"
                                                                     name={`${category?.categoryName || '未分類'} - 粗利(昨年)`}
                                                                     dot={{ fill: lightColor, r: 2, strokeWidth: 0 }}
                                                                 />
@@ -1127,9 +1126,10 @@ function PlPageContent() {
                                                                     type="monotone"
                                                                     dataKey={`grossProfitRate_${catId}`}
                                                                     stroke={color}
-                                                                    strokeWidth={2.5}
+                                                                    strokeWidth={2}
+                                                                    strokeDasharray="2 3"
                                                                     name={`${category?.categoryName || '未分類'} - 粗利率`}
-                                                                    dot={{ fill: color, r: 4, strokeWidth: 0 }}
+                                                                    dot={{ fill: color, r: 3.5, strokeWidth: 0 }}
                                                                 />
                                                             )}
                                                         </React.Fragment>
