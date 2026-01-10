@@ -152,6 +152,7 @@ export class NextEngineClient {
             'receive_order_send_date-gte': formatDate(startDate),
             'receive_order_send_date-lte': formatDate(endDate),
             'receive_order_shop_id-in': shopIds.join(','),
+            'receive_order_cancel_type_id-eq': '0', // キャンセルされていない有効な受注のみ
             wait_flag: '1'
         });
     }
