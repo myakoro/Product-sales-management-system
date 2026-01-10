@@ -208,13 +208,17 @@ export async function GET(request: Request) {
 
         console.log(`[予実集計] 結果: ${productResults.length}商品`);
 
+        // 予算データが存在するかチェック
+        const hasBudgetData = totalBudgetQuantity > 0 || totalBudgetSales > 0 || totalBudgetGrossProfit > 0;
+
         return NextResponse.json({
             period: {
                 startYm,
                 endYm
             },
             products: productResults,
-            summary
+            summary,
+            hasBudgetData  // 予算データの有無を追加
         });
 
     } catch (error: any) {

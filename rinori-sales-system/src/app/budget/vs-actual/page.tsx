@@ -62,11 +62,13 @@ export default function BudgetVsActualPage() {
     const [loading, setLoading] = useState(false);
     const [products, setProducts] = useState<ProductResult[]>([]);
     const [summary, setSummary] = useState<Summary | null>(null);
+    const [hasBudgetData, setHasBudgetData] = useState(true); // 予算データの有無
     const [sortKey, setSortKey] = useState<SortKey>('productCode');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
     const [hideZeroRows, setHideZeroRows] = useState(true);
     const [salesChannels, setSalesChannels] = useState<{ id: number, name: string }[]>([]);
     const [salesChannelId, setSalesChannelId] = useState<string>("all");
+
 
     // V1.565: 商品選択状態（最大5件）
     const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
@@ -184,6 +186,7 @@ export default function BudgetVsActualPage() {
                 const data = await res.json();
                 setProducts(data.products);
                 setSummary(data.summary);
+                setHasBudgetData(data.hasBudgetData ?? true); // デフォルトはtrueとしておく
             } else {
                 const error = await res.json();
                 alert('エラー: ' + (error.error || 'データ取得に失敗しました'));
@@ -498,72 +501,74 @@ export default function BudgetVsActualPage() {
                                                     <span className="text-[#d4af37]">{getSortIcon('productName')}</span>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('budgetQuantity')}>
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <span>予算数量</span>
-                                                    <span className="text-[#d4af37]">{getSortIcon('budgetQuantity')}</span>
-                                                </div>
-                                            </th>
+                                            {hasBudgetData && (
+                                                <>
+                                                    <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('budgetQuantity')}>
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <span>予算数量</span>
+                                                            <span className="text-[#d4af37]">{getSortIcon('budgetQuantity')}</span>
+                                                        </div>
+                                                    </th>
+                                                </>
+                                            )}
                                             <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('actualQuantity')}>
                                                 <div className="flex items-center justify-end gap-2">
                                                     <span>実績数量</span>
                                                     <span className="text-[#d4af37]">{getSortIcon('actualQuantity')}</span>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('quantityAchievementRate')}>
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <span>数量達成率</span>
-                                                    <span className="text-[#d4af37]">{getSortIcon('quantityAchievementRate')}</span>
-                                                </div>
-                                            </th>
-                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('budgetSales')}>
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <span>予算売上</span>
-                                                    <span className="text-[#d4af37]">{getSortIcon('budgetSales')}</span>
-                                                </div>
-                                            </th>
+                                            {hasBudgetData && (
+                                                <>
+                                                    <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('quantityAchievementRate')}>
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <span>数量達成率</span>
+                                                            <span className="text-[#d4af37]">{getSortIcon('quantityAchievementRate')}</span>
+                                                        </div>
+                                                    </th>
+                                                    <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('budgetSales')}>
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <span>予算売上</span>
+                                                            <span className="text-[#d4af37]">{getSortIcon('budgetSales')}</span>
+                                                        </div>
+                                                    </th>
+                                                </>
+                                            )}
                                             <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('actualSales')}>
                                                 <div className="flex items-center justify-end gap-2">
                                                     <span>実績売上</span>
                                                     <span className="text-[#d4af37]">{getSortIcon('actualSales')}</span>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('salesAchievementRate')}>
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <span>売上達成率</span>
-                                                    <span className="text-[#d4af37]">{getSortIcon('salesAchievementRate')}</span>
-                                                </div>
-                                            </th>
-                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('budgetGrossProfit')}>
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <span>予算粗利</span>
-                                                    <span className="text-[#d4af37]">{getSortIcon('budgetGrossProfit')}</span>
-                                                </div>
-                                            </th>
-                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('budgetGrossProfitRate')}>
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <span>予算粗利率</span>
-                                                    <span className="text-[#d4af37]">{getSortIcon('budgetGrossProfitRate')}</span>
-                                                </div>
-                                            </th>
+                                            {hasBudgetData && (
+                                                <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('salesAchievementRate')}>
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <span>売上達成率</span>
+                                                        <span className="text-[#d4af37]">{getSortIcon('salesAchievementRate')}</span>
+                                                    </div>
+                                                </th>
+                                            )}
+                                            {hasBudgetData && (
+                                                <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('budgetGrossProfit')}>
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <span>予算粗利(率)</span>
+                                                        <span className="text-[#d4af37]">{getSortIcon('budgetGrossProfit')}</span>
+                                                    </div>
+                                                </th>
+                                            )}
                                             <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('actualGrossProfit')}>
                                                 <div className="flex items-center justify-end gap-2">
-                                                    <span>実績粗利</span>
+                                                    <span>実績粗利(率)</span>
                                                     <span className="text-[#d4af37]">{getSortIcon('actualGrossProfit')}</span>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('actualGrossProfitRate')}>
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <span>実績粗利率</span>
-                                                    <span className="text-[#d4af37]">{getSortIcon('actualGrossProfitRate')}</span>
-                                                </div>
-                                            </th>
-                                            <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('grossProfitAchievementRate')}>
-                                                <div className="flex items-center justify-end gap-2">
-                                                    <span>粗利達成率</span>
-                                                    <span className="text-[#d4af37]">{getSortIcon('grossProfitAchievementRate')}</span>
-                                                </div>
-                                            </th>
+                                            {hasBudgetData && (
+                                                <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('grossProfitAchievementRate')}>
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <span>粗利達成率</span>
+                                                        <span className="text-[#d4af37]">{getSortIcon('grossProfitAchievementRate')}</span>
+                                                    </div>
+                                                </th>
+                                            )}
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-neutral-100">
@@ -583,73 +588,85 @@ export default function BudgetVsActualPage() {
                                                     </td>
                                                     <td className="px-4 py-4 font-mono font-semibold text-[#00214d]">{p.productCode}</td>
                                                     <td className="px-4 py-4 text-neutral-700">{p.productName}</td>
-                                                    <td className="px-4 py-4 text-right text-neutral-600">{p.budgetQuantity.toLocaleString()}</td>
+                                                    {hasBudgetData && (
+                                                        <td className="px-4 py-4 text-right text-neutral-600">{p.budgetQuantity.toLocaleString()}</td>
+                                                    )}
                                                     <td className="px-4 py-4 text-right font-semibold text-neutral-800">{p.actualQuantity.toLocaleString()}</td>
-                                                    <td className="px-4 py-4 text-right">
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">
-                                                                <div
-                                                                    className={`h-full transition-all duration-500 ${p.quantityAchievementRate >= 100 ? 'bg-green-500' :
-                                                                        p.quantityAchievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
-                                                                        }`}
-                                                                    style={{ width: `${Math.min(p.quantityAchievementRate, 100)}%` }}
-                                                                />
-                                                            </div>
-                                                            <span className={`font-bold text-sm ${p.quantityAchievementRate >= 100 ? 'text-green-600' :
-                                                                p.quantityAchievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
-                                                                }`}>
-                                                                {p.quantityAchievementRate.toFixed(1)}%
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-right text-neutral-600">¥{Math.round(p.budgetSales).toLocaleString()}</td>
+                                                    {hasBudgetData && (
+                                                        <>
+                                                            <td className="px-4 py-4 text-right">
+                                                                <div className="flex items-center justify-end gap-2">
+                                                                    <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">
+                                                                        <div
+                                                                            className={`h-full transition-all duration-500 ${p.quantityAchievementRate >= 100 ? 'bg-green-500' :
+                                                                                p.quantityAchievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
+                                                                                }`}
+                                                                            style={{ width: `${Math.min(p.quantityAchievementRate, 100)}%` }}
+                                                                        />
+                                                                    </div>
+                                                                    <span className={`font-bold text-sm ${p.quantityAchievementRate >= 100 ? 'text-green-600' :
+                                                                        p.quantityAchievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
+                                                                        }`}>
+                                                                        {p.quantityAchievementRate.toFixed(1)}%
+                                                                    </span>
+                                                                </div>
+                                                            </td>
+                                                            <td className="px-4 py-4 text-right text-neutral-600">¥{Math.round(p.budgetSales).toLocaleString()}</td>
+                                                        </>
+                                                    )}
                                                     <td className="px-4 py-4 text-right font-semibold text-neutral-800">¥{Math.round(p.actualSales).toLocaleString()}</td>
-                                                    <td className="px-4 py-4 text-right">
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">
-                                                                <div
-                                                                    className={`h-full transition-all duration-500 ${p.salesAchievementRate >= 100 ? 'bg-green-500' :
-                                                                        p.salesAchievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
-                                                                        }`}
-                                                                    style={{ width: `${Math.min(p.salesAchievementRate, 100)}%` }}
-                                                                />
+                                                    {hasBudgetData && (
+                                                        <td className="px-4 py-4 text-right">
+                                                            <div className="flex items-center justify-end gap-2">
+                                                                <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">
+                                                                    <div
+                                                                        className={`h-full transition-all duration-500 ${p.salesAchievementRate >= 100 ? 'bg-green-500' :
+                                                                            p.salesAchievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
+                                                                            }`}
+                                                                        style={{ width: `${Math.min(p.salesAchievementRate, 100)}%` }}
+                                                                    />
+                                                                </div>
+                                                                <span className={`font-bold text-sm ${p.salesAchievementRate >= 100 ? 'text-green-600' :
+                                                                    p.salesAchievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
+                                                                    }`}>
+                                                                    {p.salesAchievementRate.toFixed(1)}%
+                                                                </span>
                                                             </div>
-                                                            <span className={`font-bold text-sm ${p.salesAchievementRate >= 100 ? 'text-green-600' :
-                                                                p.salesAchievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
-                                                                }`}>
-                                                                {p.salesAchievementRate.toFixed(1)}%
-                                                            </span>
-                                                        </div>
-                                                    </td>
-                                                    <td className="px-4 py-4 text-right text-neutral-600">
-                                                        <div className="flex flex-col items-end">
-                                                            <span>¥{Math.round(p.budgetGrossProfit).toLocaleString()}</span>
-                                                            <span className="text-[10px] text-gray-400 font-sans italic">({p.budgetGrossProfitRate.toFixed(1)}%)</span>
-                                                        </div>
-                                                    </td>
+                                                        </td>
+                                                    )}
+                                                    {hasBudgetData && (
+                                                        <td className="px-4 py-4 text-right text-neutral-600">
+                                                            <div className="flex flex-col items-end">
+                                                                <span>¥{Math.round(p.budgetGrossProfit).toLocaleString()}</span>
+                                                                <span className="text-[10px] text-gray-400 font-sans italic">({p.budgetGrossProfitRate.toFixed(1)}%)</span>
+                                                            </div>
+                                                        </td>
+                                                    )}
                                                     <td className="px-4 py-4 text-right font-semibold text-neutral-800">
                                                         <div className="flex flex-col items-end">
                                                             <span>¥{Math.round(p.actualGrossProfit).toLocaleString()}</span>
                                                             <span className="text-[10px] text-gray-500 font-sans italic">({p.actualGrossProfitRate.toFixed(1)}%)</span>
                                                         </div>
                                                     </td>
-                                                    <td className="px-4 py-4 text-right">
-                                                        <div className="flex items-center justify-end gap-2">
-                                                            <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">
-                                                                <div
-                                                                    className={`h-full transition-all duration-500 ${p.grossProfitAchievementRate >= 100 ? 'bg-green-500' :
-                                                                        p.grossProfitAchievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
-                                                                        }`}
-                                                                    style={{ width: `${Math.min(p.grossProfitAchievementRate, 100)}%` }}
-                                                                />
+                                                    {hasBudgetData && (
+                                                        <td className="px-4 py-4 text-right">
+                                                            <div className="flex items-center justify-end gap-2">
+                                                                <div className="flex-1 max-w-[80px] h-2 bg-neutral-200 rounded-full overflow-hidden">
+                                                                    <div
+                                                                        className={`h-full transition-all duration-500 ${p.grossProfitAchievementRate >= 100 ? 'bg-green-500' :
+                                                                            p.grossProfitAchievementRate >= 80 ? 'bg-yellow-500' : 'bg-red-500'
+                                                                            }`}
+                                                                        style={{ width: `${Math.min(p.grossProfitAchievementRate, 100)}%` }}
+                                                                    />
+                                                                </div>
+                                                                <span className={`font-bold text-sm ${p.grossProfitAchievementRate >= 100 ? 'text-green-600' :
+                                                                    p.grossProfitAchievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
+                                                                    }`}>
+                                                                    {p.grossProfitAchievementRate.toFixed(1)}%
+                                                                </span>
                                                             </div>
-                                                            <span className={`font-bold text-sm ${p.grossProfitAchievementRate >= 100 ? 'text-green-600' :
-                                                                p.grossProfitAchievementRate >= 80 ? 'text-yellow-600' : 'text-red-600'
-                                                                }`}>
-                                                                {p.grossProfitAchievementRate.toFixed(1)}%
-                                                            </span>
-                                                        </div>
-                                                    </td>
+                                                        </td>
+                                                    )}
                                                 </tr>
                                             );
                                         })}
