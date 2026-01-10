@@ -59,6 +59,12 @@ export async function POST(request: Request) {
             });
         }
 
+        // 【修正】SY002の数量ズレの原因となっている不正データ("1")などを削除
+        // 過去のテストデータや不整合データが残っているため
+        await prisma.salesRecord.deleteMany({
+            where: { externalOrderId: '1' }
+        });
+
         // 3. 既存データ集計レコードを削除 (重複回避)
         // NE自動同期によって作成されたこの「月・販路」のレコードを一旦削除する
         const deletedPeriodRecords = await prisma.salesRecord.deleteMany({
