@@ -119,6 +119,16 @@ export async function POST(request: Request) {
             );
             if (isExcluded) continue;
 
+            // キャンセルフラグのチェック (1=キャンセルの場合はスキップ)
+            const cancelFlag = row.receive_order_row_cancel_flag;
+            if (cancelFlag === '1' || cancelFlag === 1) {
+                const parentCode = convertSkuToParentCode(sku).trim().toUpperCase();
+                if (parentCode.toUpperCase().includes('FR013')) {
+                    console.log(`[NE Sync] FR013 CANCELLED: orderId=${row.receive_order_id}, SKU=${sku}`);
+                }
+                continue;
+            }
+
             const parentCode = convertSkuToParentCode(sku).trim().toUpperCase();
             const quantity = parseInt(row.receive_order_row_quantity);
             // receive_order_row_sub_total_price（行小計：割引などを反映した後の金額）を使用
