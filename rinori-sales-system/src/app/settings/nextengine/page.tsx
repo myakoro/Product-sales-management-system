@@ -240,6 +240,19 @@ export default function NextEngineSettingsPage() {
             const data = await res.json();
 
             if (res.ok) {
+                // デバッグ用CSVデータを自動ダウンロード
+                if (data.debugCsvData) {
+                    const blob = new Blob([data.debugCsvData], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `debug_ne_data_${targetYm}.csv`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
+
                 if (data.recordCount > 0) {
                     setSyncResult({
                         type: 'success',
