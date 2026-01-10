@@ -148,7 +148,7 @@ export class NextEngineClient {
         };
 
         return await this.apiPost('/api_v1_receiveorder_row/search', {
-            fields: 'receive_order_row_no,receive_order_row_goods_id,receive_order_row_goods_name,receive_order_row_quantity,receive_order_row_unit_price,receive_order_row_sub_total_price',
+            fields: 'receive_order_id,receive_order_row_no,receive_order_row_goods_id,receive_order_row_goods_name,receive_order_row_quantity,receive_order_row_unit_price,receive_order_row_sub_total_price',
             'receive_order_send_date-gte': formatDate(startDate),
             'receive_order_send_date-lte': formatDate(endDate),
             'receive_order_shop_id-in': shopIds.join(','),

@@ -106,23 +106,8 @@ export async function POST(request: Request) {
         let fr013TotalQty = 0;
         const fr013Details: any[] = [];
 
-        // 重複除外用: SKU+受注番号の組み合わせでユニーク判定
-        const processedRows = new Set<string>();
-
         for (const row of orderData.data) {
-            const rowNo = row.receive_order_row_no;
             const sku = row.receive_order_row_goods_id;
-
-            // SKU+受注番号の組み合わせでユニークキーを作成
-            const uniqueKey = `${sku}_${rowNo}`;
-
-            // 重複チェック: 同じSKU+受注番号の組み合わせは1回だけ処理
-            if (processedRows.has(uniqueKey)) {
-                continue;
-            }
-            processedRows.add(uniqueKey);
-
-            // SKUは上で取得済み
             const productName = row.receive_order_row_goods_name || null;
 
             // 除外キーワードのチェック (一致したらスキップ)
