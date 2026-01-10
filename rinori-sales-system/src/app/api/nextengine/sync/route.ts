@@ -302,9 +302,9 @@ export async function POST(request: Request) {
 
         const dbLog: string[] = [];
         dbLog.push('\n\n===== DB RECORDS (SY002) =====');
-        dbLog.push('ID,SalesDate,Quantity,Amount,ChannelId,ExternalOrderId,PeriodYM');
+        dbLog.push('ID,SalesDate,Quantity,AmountExclTax,ChannelId,ExternalOrderId,PeriodYM');
         sy002Records.forEach(r => {
-            dbLog.push(`${r.id},${r.salesDate.toISOString()},${r.quantity},${r.amount},${r.salesChannelId},${r.externalOrderId},${r.periodYm}`);
+            dbLog.push(`${r.id},${r.salesDate.toISOString()},${r.quantity},${r.salesAmountExclTax},${r.salesChannelId},${r.externalOrderId},${r.periodYm}`);
         });
 
         // CSVデータをレスポンスに含める（集計ログ + DBダンプ付き）
