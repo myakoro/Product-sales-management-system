@@ -116,9 +116,16 @@ export async function POST(request: Request) {
         let fr013TotalQty = 0;
         const fr013Details: any[] = [];
 
+        // デバッグ用: 集計ログ
+        const debugLog: string[] = [];
+        debugLog.push('\n\n===== AGGREGATION DETAILS =====');
+        debugLog.push('ParentCode,OriginalSKU,Quantity,OrderId,RowNo,CancelFlag,TotalAmount');
+
+
         for (const row of orderData.data) {
             const sku = row.receive_order_row_goods_id;
             const productName = row.receive_order_row_goods_name || null;
+            const cancelFlag = row.receive_order_row_cancel_flag;
 
             // 除外キーワードのチェック (一致したらスキップ)
             const isExcluded = exclusionKeywords.some(k =>
@@ -126,20 +133,27 @@ export async function POST(request: Request) {
             );
             if (isExcluded) continue;
 
-            // キャンセルフラグのチェック (1=キャンセルの場合はスキップ)
-            const cancelFlag = row.receive_order_row_cancel_flag;
+            const parentCode = convertSkuToParentCode(sku).trim().toUpperCase();
+
+            // キャンセルの場合もログには残すが、集計はスキップ
             if (cancelFlag === '1' || cancelFlag === 1) {
-                const parentCode = convertSkuToParentCode(sku).trim().toUpperCase();
+                // キャンセル行もログに残す
+                debugLog.push(`${parentCode},"${sku}",${row.receive_order_row_quantity},${row.receive_order_id},${row.receive_order_row_no},1,0`);
+
                 if (parentCode.toUpperCase().includes('FR013')) {
                     console.log(`[NE Sync] FR013 CANCELLED: orderId=${row.receive_order_id}, SKU=${sku}`);
                 }
                 continue;
             }
 
-            const parentCode = convertSkuToParentCode(sku).trim().toUpperCase();
             const quantity = parseInt(row.receive_order_row_quantity);
             // receive_order_row_sub_total_price（行小計：割引などを反映した後の金額）を使用
             const subTotal = parseFloat(row.receive_order_row_sub_total_price || '0');
+
+            // 集計ログに追加
+            debugLog.push(`${parentCode},"${sku}",${quantity},${row.receive_order_id},${row.receive_order_row_no},0,${subTotal}`);
+
+
 
             // デバッグ: Fr013関連のログ
             if (parentCode.toUpperCase().includes('FR013')) {
@@ -281,8 +295,8 @@ export async function POST(request: Request) {
 
         console.log('[NE Sync] Sync completed:', { recordCount: salesRecords.length });
 
-        // CSVデータをレスポンスに含める
-        const csvData = csvHeader + '\n' + csvRows;
+        // CSVデータをレスポンスに含める（集計ログ付き）
+        const csvData = csvHeader + '\n' + csvRows + '\n' + debugLog.join('\n');
 
         return NextResponse.json({
             success: true,
