@@ -101,16 +101,15 @@ export async function POST(request: Request) {
         // exclusionKeywordsを取得
         const exclusionKeywords = await prisma.exclusionKeyword.findMany();
 
-        // デバッグ: APIから取得した生データをCSVで出力
-        const fs = require('fs');
-        const path = require('path');
-        const csvPath = path.join(process.cwd(), 'debug_ne_data.csv');
-        const csvHeader = 'receive_order_id,receive_order_row_no,SKU,product_name,quantity,unit_price,sub_total,cancel_flag\n';
+        // デバッグ: APIから取得した生データをログに出力
+        const csvHeader = 'receive_order_id,receive_order_row_no,SKU,product_name,quantity,unit_price,sub_total,cancel_flag';
         const csvRows = orderData.data.map((row: any) => {
             return `${row.receive_order_id},${row.receive_order_row_no},"${row.receive_order_row_goods_id}","${(row.receive_order_row_goods_name || '').replace(/"/g, '""')}",${row.receive_order_row_quantity},${row.receive_order_row_unit_price},${row.receive_order_row_sub_total_price},${row.receive_order_row_cancel_flag || '0'}`;
         }).join('\n');
-        fs.writeFileSync(csvPath, csvHeader + csvRows, 'utf-8');
-        console.log('[NE Sync] Debug CSV exported to:', csvPath);
+        console.log('[NE Sync] ===== CSV DATA START =====');
+        console.log(csvHeader);
+        console.log(csvRows);
+        console.log('[NE Sync] ===== CSV DATA END =====');
 
         // デバッグ用: Fr013関連のログ
         let fr013RowCount = 0;
