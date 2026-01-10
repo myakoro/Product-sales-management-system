@@ -122,6 +122,11 @@ export async function POST(request: Request) {
 
 
 
+        // デバッグ用: 集計ログ
+        const debugLog: string[] = [];
+        debugLog.push('\n\n===== AGGREGATION DETAILS =====');
+        debugLog.push('ParentCode,OriginalSKU,Quantity,OrderId,RowNo,CancelFlag,TotalAmount');
+
         for (const row of orderData.data) {
             const sku = row.receive_order_row_goods_id;
             const productName = row.receive_order_row_goods_name || null;
@@ -137,7 +142,8 @@ export async function POST(request: Request) {
 
             // キャンセルの場合もログには残すが、集計はスキップ
             if (cancelFlag === '1' || cancelFlag === 1) {
-                // キャンセル行もログには残さない（コメントアウト、またはコンソールのみ）
+                // キャンセル行もログに残す
+                debugLog.push(`${parentCode},"${sku}",${row.receive_order_row_quantity},${row.receive_order_id},${row.receive_order_row_no},1,0`);
 
 
                 if (parentCode.toUpperCase().includes('FR013')) {
@@ -153,6 +159,9 @@ export async function POST(request: Request) {
 
 
 
+
+            // 集計ログに追加
+            debugLog.push(`${parentCode},"${sku}",${quantity},${row.receive_order_id},${row.receive_order_row_no},0,${subTotal}`);
 
             // デバッグ: Fr013関連のログ
             if (parentCode.toUpperCase().includes('FR013')) {
@@ -294,14 +303,26 @@ export async function POST(request: Request) {
 
         console.log('[NE Sync] Sync completed:', { recordCount: salesRecords.length });
 
+        // デバッグ用: その月の全データを取得してダンプ（全チャネル対象）
+        const allRecordsForMonth = await prisma.salesRecord.findMany({
+            where: { periodYm: targetYm }
+        });
+
+        const dbLog: string[] = [];
+        dbLog.push('\n\n===== DB RECORDS FOR MONTH (ALL CHANNELS) =====');
+        dbLog.push('ID,SalesDate,Quantity,AmountExclTax,ChannelId,ExternalOrderId,PeriodYM,ProductCode');
+        allRecordsForMonth.forEach(r => {
+            dbLog.push(`${r.id},${r.salesDate.toISOString()},${r.quantity},${r.salesAmountExclTax},${r.salesChannelId},${r.externalOrderId},${r.periodYm},${r.productCode}`);
+        });
+
         // CSVデータをレスポンスに含める
-        // const finalCsvData = csvHeader + '\n' + csvRows;
+        const finalCsvData = csvHeader + '\n' + csvRows + '\n' + debugLog.join('\n') + '\n' + dbLog.join('\n');
 
         return NextResponse.json({
             success: true,
             recordCount: salesRecords.length,
-            message: `${salesRecords.length}件のデータを同期しました`,
-            // debugCsvData: finalCsvData // デバッグ用CSVデータ (明細のみ)
+            message: `${salesRecords.length}件のデータを同期しました（既存の${deletedPeriodRecords.count}件を削除）`,
+            debugCsvData: finalCsvData // デバッグ用CSVデータ
         });
 
 
