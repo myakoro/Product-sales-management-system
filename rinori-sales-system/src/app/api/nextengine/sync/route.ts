@@ -116,7 +116,7 @@ export async function POST(request: Request) {
             );
             if (isExcluded) continue;
 
-            const parentCode = convertSkuToParentCode(sku);
+            const parentCode = convertSkuToParentCode(sku).trim().toUpperCase();
             const quantity = parseInt(row.receive_order_row_quantity);
             // receive_order_row_sub_total_price（行小計：割引などを反映した後の金額）を使用
             const subTotal = parseFloat(row.receive_order_row_sub_total_price || '0');
@@ -135,6 +135,13 @@ export async function POST(request: Request) {
                     subTotal,
                     productName
                 });
+            }
+
+            const hasExisting = aggregatedData.has(parentCode);
+            const existingQty = hasExisting ? aggregatedData.get(parentCode)!.quantity : 0;
+
+            if (parentCode === 'RINO-FR013') {
+                console.log(`[NE Sync] FR013 aggregation: hasExisting=${hasExisting}, existingQty=${existingQty}, adding=${quantity}`);
             }
 
             if (aggregatedData.has(parentCode)) {
