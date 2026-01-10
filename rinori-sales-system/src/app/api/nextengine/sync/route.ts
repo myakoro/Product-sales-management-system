@@ -116,9 +116,6 @@ export async function POST(request: Request) {
         let fr013TotalQty = 0;
         const fr013Details: any[] = [];
 
-        // 受注ID単位で重複除外（セット商品対応）
-        const processedOrders = new Map<string, Set<string>>();
-
         for (const row of orderData.data) {
             const sku = row.receive_order_row_goods_id;
             const productName = row.receive_order_row_goods_name || null;
@@ -144,19 +141,6 @@ export async function POST(request: Request) {
             // receive_order_row_sub_total_price（行小計：割引などを反映した後の金額）を使用
             const subTotal = parseFloat(row.receive_order_row_sub_total_price || '0');
 
-            // 受注ID単位で重複チェック（セット商品対応）
-            const orderId = row.receive_order_id;
-            if (!processedOrders.has(parentCode)) {
-                processedOrders.set(parentCode, new Set());
-            }
-            const orderSet = processedOrders.get(parentCode)!;
-
-            // この受注IDが既に処理済みの場合はスキップ（金額のみ加算）
-            const isNewOrder = !orderSet.has(orderId);
-            if (isNewOrder) {
-                orderSet.add(orderId);
-            }
-
             // デバッグ: Fr013関連のログ
             if (parentCode.toUpperCase().includes('FR013')) {
                 fr013RowCount++;
@@ -172,19 +156,14 @@ export async function POST(request: Request) {
                 });
             }
 
-
             if (aggregatedData.has(parentCode)) {
                 const existing = aggregatedData.get(parentCode)!;
-                // 数量は新しい受注の場合のみ加算（セット商品対応）
-                if (isNewOrder) {
-                    existing.quantity += quantity;
-                }
-                // 金額は常に加算
+                existing.quantity += quantity;
                 existing.totalAmount税込 += subTotal;
                 // 商品名は最初に見つかったものを保持
             } else {
                 aggregatedData.set(parentCode, {
-                    quantity: isNewOrder ? quantity : 0,
+                    quantity,
                     totalAmount税込: subTotal,
                     productCode: parentCode,
                     productName
