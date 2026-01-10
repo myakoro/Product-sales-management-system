@@ -295,14 +295,26 @@ export async function POST(request: Request) {
 
         console.log('[NE Sync] Sync completed:', { recordCount: salesRecords.length });
 
-        // CSVデータをレスポンスに含める（集計ログ付き）
-        const csvData = csvHeader + '\n' + csvRows + '\n' + debugLog.join('\n');
+        // 確認用: SY002のDB状態をダンプ
+        const sy002Records = await prisma.salesRecord.findMany({
+            where: { productCode: { contains: 'SY002' } }
+        });
+
+        const dbLog: string[] = [];
+        dbLog.push('\n\n===== DB RECORDS (SY002) =====');
+        dbLog.push('ID,SalesDate,Quantity,Amount,ChannelId,ExternalOrderId,PeriodYM');
+        sy002Records.forEach(r => {
+            dbLog.push(`${r.id},${r.salesDate.toISOString()},${r.quantity},${r.amount},${r.salesChannelId},${r.externalOrderId},${r.periodYm}`);
+        });
+
+        // CSVデータをレスポンスに含める（集計ログ + DBダンプ付き）
+        const finalCsvData = csvHeader + '\n' + csvRows + '\n' + debugLog.join('\n') + '\n' + dbLog.join('\n');
 
         return NextResponse.json({
             success: true,
             recordCount: salesRecords.length,
             message: `${salesRecords.length}件のデータを同期しました`,
-            debugCsvData: csvData // デバッグ用CSVデータ
+            debugCsvData: finalCsvData // デバッグ用CSVデータ
         });
 
     } catch (error: any) {
