@@ -298,13 +298,13 @@ export async function POST(request: Request) {
         console.log('[NE Sync] Sync completed:', { recordCount: salesRecords.length });
 
         // CSVデータをレスポンスに含める
-        const finalCsvData = csvHeader + '\n' + csvRows;
+        // const finalCsvData = csvHeader + '\n' + csvRows;
 
         return NextResponse.json({
             success: true,
             recordCount: salesRecords.length,
             message: `${salesRecords.length}件のデータを同期しました`,
-            debugCsvData: finalCsvData // デバッグ用CSVデータ (明細のみ)
+            // debugCsvData: finalCsvData // デバッグ用CSVデータ (明細のみ)
         });
 
 
