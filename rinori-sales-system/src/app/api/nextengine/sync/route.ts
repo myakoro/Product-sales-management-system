@@ -123,6 +123,7 @@ export async function POST(request: Request) {
 
             // デバッグ: Fr013関連のログ
             if (parentCode.toUpperCase().includes('FR013')) {
+                console.log(`[NE Sync] FR013 conversion: SKU="${sku}" -> ParentCode="${parentCode}"`);
                 fr013RowCount++;
                 fr013TotalQty += quantity;
                 fr013Details.push({
