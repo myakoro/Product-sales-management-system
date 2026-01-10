@@ -302,10 +302,14 @@ export async function POST(request: Request) {
 
         console.log('[NE Sync] Sync completed:', { recordCount: salesRecords.length });
 
+        // CSVデータをレスポンスに含める
+        const csvData = csvHeader + '\n' + csvRows;
+
         return NextResponse.json({
             success: true,
             recordCount: salesRecords.length,
-            message: `${salesRecords.length}件のデータを同期しました`
+            message: `${salesRecords.length}件のデータを同期しました`,
+            debugCsvData: csvData // デバッグ用CSVデータ
         });
 
     } catch (error: any) {
