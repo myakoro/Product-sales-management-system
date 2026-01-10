@@ -122,10 +122,7 @@ export async function POST(request: Request) {
         let fr013TotalQty = 0;
         const fr013Details: any[] = [];
 
-        // デバッグ用: 集計ログ
-        const debugLog: string[] = [];
-        debugLog.push('\n\n===== AGGREGATION DETAILS =====');
-        debugLog.push('ParentCode,OriginalSKU,Quantity,OrderId,RowNo,CancelFlag,TotalAmount');
+
 
 
         for (const row of orderData.data) {
@@ -143,8 +140,8 @@ export async function POST(request: Request) {
 
             // キャンセルの場合もログには残すが、集計はスキップ
             if (cancelFlag === '1' || cancelFlag === 1) {
-                // キャンセル行もログに残す
-                debugLog.push(`${parentCode},"${sku}",${row.receive_order_row_quantity},${row.receive_order_id},${row.receive_order_row_no},1,0`);
+                // キャンセル行もログには残さない（コメントアウト、またはコンソールのみ）
+
 
                 if (parentCode.toUpperCase().includes('FR013')) {
                     console.log(`[NE Sync] FR013 CANCELLED: orderId=${row.receive_order_id}, SKU=${sku}`);
@@ -156,8 +153,7 @@ export async function POST(request: Request) {
             // receive_order_row_sub_total_price（行小計：割引などを反映した後の金額）を使用
             const subTotal = parseFloat(row.receive_order_row_sub_total_price || '0');
 
-            // 集計ログに追加
-            debugLog.push(`${parentCode},"${sku}",${quantity},${row.receive_order_id},${row.receive_order_row_no},0,${subTotal}`);
+
 
 
 
@@ -301,27 +297,16 @@ export async function POST(request: Request) {
 
         console.log('[NE Sync] Sync completed:', { recordCount: salesRecords.length });
 
-        // 確認用: SY002のDB状態をダンプ
-        const sy002Records = await prisma.salesRecord.findMany({
-            where: { productCode: { contains: 'SY002' } }
-        });
-
-        const dbLog: string[] = [];
-        dbLog.push('\n\n===== DB RECORDS (SY002) =====');
-        dbLog.push('ID,SalesDate,Quantity,AmountExclTax,ChannelId,ExternalOrderId,PeriodYM');
-        sy002Records.forEach(r => {
-            dbLog.push(`${r.id},${r.salesDate.toISOString()},${r.quantity},${r.salesAmountExclTax},${r.salesChannelId},${r.externalOrderId},${r.periodYm}`);
-        });
-
-        // CSVデータをレスポンスに含める（集計ログ + DBダンプ付き）
-        const finalCsvData = csvHeader + '\n' + csvRows + '\n' + debugLog.join('\n') + '\n' + dbLog.join('\n');
+        // CSVデータをレスポンスに含める
+        const finalCsvData = csvHeader + '\n' + csvRows;
 
         return NextResponse.json({
             success: true,
             recordCount: salesRecords.length,
             message: `${salesRecords.length}件のデータを同期しました`,
-            debugCsvData: finalCsvData // デバッグ用CSVデータ
+            debugCsvData: finalCsvData // デバッグ用CSVデータ (明細のみ)
         });
+
 
     } catch (error: any) {
         console.error('[NE Sync] Error:', error);
