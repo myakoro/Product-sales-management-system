@@ -66,17 +66,14 @@ export async function POST(request: Request) {
         });
 
         // 3. 既存データ集計レコードを削除 (重複回避)
-        // NE自動同期によって作成されたこの「月・販路」のレコードを一旦削除する
+        // この「月・販路」のレコードを一旦すべて削除する（手動インポート分も含めて上書きリセット）
         const deletedPeriodRecords = await prisma.salesRecord.deleteMany({
             where: {
                 periodYm: targetYm,
-                salesChannelId: parseInt(channelId),
-                externalOrderId: {
-                    startsWith: `NE-${channelId}-${targetYm}-`
-                }
+                salesChannelId: parseInt(channelId)
             }
         });
-        console.log('[NE Sync] Cleaned up existing sync records:', deletedPeriodRecords.count);
+        console.log('[NE Sync] Cleaned up existing records for the period:', deletedPeriodRecords.count);
 
         // 4. 取込履歴を作成
         const importHistory = await prisma.importHistory.create({
