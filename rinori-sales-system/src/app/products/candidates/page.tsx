@@ -63,8 +63,9 @@ export default function NewProductCandidatesPage() {
         }
     };
 
-    const handleBulkRegister = async () => {
-        if (!confirm(`選択した${selectedIds.length}件の商品を管理中として一括登録しますか？\n\n※ 販売価格・原価が空欄の場合は0で登録されます。\n後で商品マスタCSVで更新できます。`)) {
+    const handleBulkRegister = async (status: 'managed' | 'unmanaged' = 'managed') => {
+        const statusLabel = status === 'managed' ? '管理中' : '管理外';
+        if (!confirm(`選択した${selectedIds.length}件の商品を${statusLabel}として一括登録しますか？\n\n※ 販売価格・原価が空欄の場合は0で登録されます。\n後で商品マスタCSVで更新できます。`)) {
             return;
         }
 
@@ -78,13 +79,13 @@ export default function NewProductCandidatesPage() {
                     defaultSalesPriceExclTax: bulkSalesPrice ? parseFloat(bulkSalesPrice) : 0,
                     defaultCostExclTax: bulkCost ? parseFloat(bulkCost) : 0,
                     productType: bulkProductType,
-                    managementStatus: bulkManagementStatus
+                    managementStatus: status
                 })
             });
 
             if (res.ok) {
                 const data = await res.json();
-                alert(`${data.registeredCount}件の商品を登録しました`);
+                alert(`${data.registeredCount}件の商品を${statusLabel}として登録しました`);
                 setShowBulkModal(false);
                 setSelectedIds([]);
                 setBulkSalesPrice('');
@@ -96,6 +97,38 @@ export default function NewProductCandidatesPage() {
             }
         } catch (error) {
             console.error('一括登録エラー:', error);
+            alert('通信エラーが発生しました');
+        } finally {
+            setBulkProcessing(false);
+        }
+    };
+
+    const handleBulkIgnore = async () => {
+        if (!confirm(`選択した${selectedIds.length}件の商品を一括で無視リストに移動しますか？`)) {
+            return;
+        }
+
+        setBulkProcessing(true);
+        try {
+            const res = await fetch('/api/products/candidates/bulk-ignore', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    candidateIds: selectedIds
+                })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                alert(`${data.count}件の商品を無視リストに移動しました`);
+                setSelectedIds([]);
+                fetchCandidates();
+            } else {
+                const error = await res.json();
+                alert('エラー: ' + (error.error || '一括無視に失敗しました'));
+            }
+        } catch (error) {
+            console.error('一括無視エラー:', error);
             alert('通信エラーが発生しました');
         } finally {
             setBulkProcessing(false);
@@ -209,14 +242,62 @@ export default function NewProductCandidatesPage() {
                 </div>
 
                 {selectedIds.length > 0 && (
-                    <div className="mb-6 p-4 bg-rinori-gold/10 border-2 border-rinori-gold rounded-lg flex justify-between items-center">
+                    <div className="mb-6 p-4 bg-rinori-gold/10 border-2 border-rinori-gold rounded-lg flex justify-between items-center shadow-sm">
                         <span className="font-semibold text-rinori-navy">{selectedIds.length}件選択中</span>
-                        <button
-                            onClick={() => setShowBulkModal(true)}
-                            className="px-5 py-2.5 bg-rinori-navy text-white rounded-md hover:bg-rinori-navy/90 shadow-md hover:shadow-lg transition-all duration-200 font-medium"
-                        >
-                            選択した商品を管理中として一括登録
-                        </button>
+                        <div className="flex gap-3">
+                            {activeTab === 'pending' && (
+                                <>
+                                    <button
+                                        onClick={() => {
+                                            setBulkManagementStatus('managed');
+                                            setShowBulkModal(true);
+                                        }}
+                                        disabled={bulkProcessing}
+                                        className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 shadow-sm hover:shadow-md transition-all duration-200 font-medium text-sm disabled:opacity-50"
+                                    >
+                                        管理中として一括登録...
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setBulkManagementStatus('unmanaged');
+                                            setShowBulkModal(true);
+                                        }}
+                                        disabled={bulkProcessing}
+                                        className="px-4 py-2 bg-neutral-600 text-white rounded-md hover:bg-neutral-700 shadow-sm hover:shadow-md transition-all duration-200 font-medium text-sm disabled:opacity-50"
+                                    >
+                                        管理外として一括登録...
+                                    </button>
+                                    <button
+                                        onClick={handleBulkIgnore}
+                                        disabled={bulkProcessing}
+                                        className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 shadow-sm hover:shadow-md transition-all duration-200 font-medium text-sm disabled:opacity-50"
+                                    >
+                                        一括無視
+                                    </button>
+                                </>
+                            )}
+                            {activeTab === 'ignored' && (
+                                <button
+                                    onClick={async () => {
+                                        if (!confirm(`選択した${selectedIds.length}件の商品を一括で未登録に戻しますか？`)) return;
+                                        setBulkProcessing(true);
+                                        try {
+                                            for (const id of selectedIds) {
+                                                const candidate = candidates.find(c => c.id === id);
+                                                if (candidate) await updateStatus(id, candidate.productCode, 'pending');
+                                            }
+                                            setSelectedIds([]);
+                                        } finally {
+                                            setBulkProcessing(false);
+                                        }
+                                    }}
+                                    disabled={bulkProcessing}
+                                    className="px-4 py-2 bg-rinori-navy text-white rounded-md hover:bg-rinori-navy/90 shadow-sm hover:shadow-md transition-all duration-200 font-medium text-sm disabled:opacity-50"
+                                >
+                                    選択した商品を一括で未登録に戻す
+                                </button>
+                            )}
+                        </div>
                     </div>
                 )}
 
@@ -385,7 +466,7 @@ export default function NewProductCandidatesPage() {
                                     キャンセル
                                 </button>
                                 <button
-                                    onClick={handleBulkRegister}
+                                    onClick={() => handleBulkRegister(bulkManagementStatus)}
                                     disabled={bulkProcessing}
                                     className="flex-1 px-6 py-2.5 bg-rinori-navy text-white rounded-md hover:bg-rinori-navy/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg font-medium transition-all duration-200"
                                 >
