@@ -162,6 +162,12 @@ export async function POST(request: Request) {
             }
         }
 
+        // 集計後のFR013データを確認
+        const fr013Aggregated = aggregatedData.get('RINO-FR013');
+        if (fr013Aggregated) {
+            console.log(`[NE Sync] Fr013 AGGREGATED: quantity=${fr013Aggregated.quantity}, amount=${fr013Aggregated.totalAmount税込}`);
+        }
+
         // 税率の取得
         const taxRateRecord = await prisma.taxRate.findFirst({
             where: { startYm: { lte: targetYm } },
