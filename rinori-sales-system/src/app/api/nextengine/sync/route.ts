@@ -123,6 +123,12 @@ export async function POST(request: Request) {
             const quantity = parseInt(row.receive_order_row_quantity);
             // receive_order_row_sub_total_price（行小計：割引などを反映した後の金額）を使用
             const subTotal = parseFloat(row.receive_order_row_sub_total_price || '0');
+            const cancelType = row.receive_order_cancel_type || '0';
+
+            // デバッグ: キャンセルタイプを確認
+            if (parentCode.toUpperCase().includes('FR013') && cancelType !== '0') {
+                console.log(`[NE Sync] FR013 CANCELLED: orderId=${row.receive_order_id}, cancelType=${cancelType}, SKU=${sku}`);
+            }
 
             // 受注ID単位で重複チェック（セット商品対応）
             const orderId = row.receive_order_id;
