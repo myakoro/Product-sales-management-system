@@ -126,6 +126,7 @@ export async function POST(request: Request) {
                 fr013RowCount++;
                 fr013TotalQty += quantity;
                 fr013Details.push({
+                    orderId: row.receive_order_id,
                     rowNo: row.receive_order_row_no,
                     sku,
                     parentCode,
@@ -154,7 +155,7 @@ export async function POST(request: Request) {
         if (fr013Details.length > 0) {
             console.log('[NE Sync] Fr013 details (first 20):');
             fr013Details.slice(0, 20).forEach((d, i) => {
-                console.log(`  ${i + 1}. 受注番号:${d.rowNo}, SKU:${d.sku}, 数量:${d.quantity}, 金額:${d.subTotal}`);
+                console.log(`  ${i + 1}. 受注ID:${d.orderId}, 明細番号:${d.rowNo}, SKU:${d.sku}, 数量:${d.quantity}, 金額:${d.subTotal}`);
             });
             if (fr013Details.length > 20) {
                 console.log(`  ... 他 ${fr013Details.length - 20}件`);
