@@ -206,6 +206,7 @@ function PlPageContent() {
     // PL Trend Graph state
     const [plTrendData, setPlTrendData] = useState<PLTrendData[]>([]);
     const [isGraphOpen, setIsGraphOpen] = useState(true);
+    const [showOverallPrevYear, setShowOverallPrevYear] = useState(true);
     const [visibleLines, setVisibleLines] = useState({
         sales: true,
         grossProfit: true,
@@ -1287,6 +1288,15 @@ function PlPageContent() {
                                 PL推移グラフ
                             </h3>
                             <div className="flex gap-4 items-center" onClick={(e) => e.stopPropagation()}>
+                                <label className="flex items-center gap-2 text-sm cursor-pointer mr-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={showOverallPrevYear}
+                                        onChange={(e) => setShowOverallPrevYear(e.target.checked)}
+                                        className="w-4 h-4"
+                                    />
+                                    <span className="font-medium text-gray-700">昨年対比を表示</span>
+                                </label>
                                 <label className="flex items-center gap-2 text-sm cursor-pointer">
                                     <input
                                         type="checkbox"
@@ -1390,15 +1400,17 @@ function PlPageContent() {
                                                     name="売上高"
                                                     dot={{ fill: '#3b82f6', r: 4 }}
                                                 />
-                                                <Line
-                                                    type="monotone"
-                                                    dataKey="salesPrevYear"
-                                                    stroke="#93c5fd"
-                                                    strokeWidth={2}
-                                                    strokeDasharray="5 5"
-                                                    name="売上高(昨年)"
-                                                    dot={{ fill: '#93c5fd', r: 3 }}
-                                                />
+                                                {showOverallPrevYear && (
+                                                    <Line
+                                                        type="monotone"
+                                                        dataKey="salesPrevYear"
+                                                        stroke="#93c5fd"
+                                                        strokeWidth={2}
+                                                        strokeDasharray="5 5"
+                                                        name="売上高(昨年)"
+                                                        dot={{ fill: '#93c5fd', r: 3 }}
+                                                    />
+                                                )}
                                             </>
                                         )}
 
@@ -1412,15 +1424,17 @@ function PlPageContent() {
                                                     name="粗利"
                                                     dot={{ fill: '#10b981', r: 4 }}
                                                 />
-                                                <Line
-                                                    type="monotone"
-                                                    dataKey="grossProfitPrevYear"
-                                                    stroke="#6ee7b7"
-                                                    strokeWidth={2}
-                                                    strokeDasharray="5 5"
-                                                    name="粗利(昨年)"
-                                                    dot={{ fill: '#6ee7b7', r: 3 }}
-                                                />
+                                                {showOverallPrevYear && (
+                                                    <Line
+                                                        type="monotone"
+                                                        dataKey="grossProfitPrevYear"
+                                                        stroke="#6ee7b7"
+                                                        strokeWidth={2}
+                                                        strokeDasharray="5 5"
+                                                        name="粗利(昨年)"
+                                                        dot={{ fill: '#6ee7b7', r: 3 }}
+                                                    />
+                                                )}
                                             </>
                                         )}
 
@@ -1434,15 +1448,17 @@ function PlPageContent() {
                                                     name="粗利率(%)"
                                                     dot={{ fill: '#f59e0b', r: 4 }}
                                                 />
-                                                <Line
-                                                    type="monotone"
-                                                    dataKey="grossProfitRatePrevYear"
-                                                    stroke="#fcd34d"
-                                                    strokeWidth={2}
-                                                    strokeDasharray="5 5"
-                                                    name="粗利率(昨年)"
-                                                    dot={{ fill: '#fcd34d', r: 3 }}
-                                                />
+                                                {showOverallPrevYear && (
+                                                    <Line
+                                                        type="monotone"
+                                                        dataKey="grossProfitRatePrevYear"
+                                                        stroke="#fcd34d"
+                                                        strokeWidth={2}
+                                                        strokeDasharray="5 5"
+                                                        name="粗利率(昨年)"
+                                                        dot={{ fill: '#fcd34d', r: 3 }}
+                                                    />
+                                                )}
                                             </>
                                         )}
 
@@ -1456,15 +1472,17 @@ function PlPageContent() {
                                                     name="営業利益"
                                                     dot={{ fill: '#8b5cf6', r: 4 }}
                                                 />
-                                                <Line
-                                                    type="monotone"
-                                                    dataKey="operatingProfitPrevYear"
-                                                    stroke="#c4b5fd"
-                                                    strokeWidth={2}
-                                                    strokeDasharray="5 5"
-                                                    name="営業利益(昨年)"
-                                                    dot={{ fill: '#c4b5fd', r: 3 }}
-                                                />
+                                                {showOverallPrevYear && (
+                                                    <Line
+                                                        type="monotone"
+                                                        dataKey="operatingProfitPrevYear"
+                                                        stroke="#c4b5fd"
+                                                        strokeWidth={2}
+                                                        strokeDasharray="5 5"
+                                                        name="営業利益(昨年)"
+                                                        dot={{ fill: '#c4b5fd', r: 3 }}
+                                                    />
+                                                )}
                                             </>
                                         )}
 

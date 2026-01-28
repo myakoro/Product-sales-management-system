@@ -131,15 +131,15 @@ export async function GET(request: Request) {
                     id: 'overall',
                     name: '全体',
                     actualSales: hasActDataOverall ? actSales : null,
-                    budgetSales: isFiltered ? null : (hasBudDataOverall ? budSales : null),
+                    budgetSales: hasBudDataOverall ? budSales : null,
                     prevYearSales: hasPrevDataOverall ? prevSales : null,
                     actualGrossProfit: hasActDataOverall ? actGP : null,
-                    budgetGrossProfit: isFiltered ? null : (hasBudDataOverall ? budGP : null),
+                    budgetGrossProfit: hasBudDataOverall ? budGP : null,
                     prevYearGrossProfit: hasPrevDataOverall ? prevGP : null,
                     actualQuantity: hasActDataOverall ? actQty : null,
-                    budgetQuantity: isFiltered ? null : (hasBudDataOverall ? budQty : null),
+                    budgetQuantity: hasBudDataOverall ? budQty : null,
                     prevYearQuantity: hasPrevDataOverall ? prevQty : null,
-                    achievementRate: (!isFiltered && hasBudDataOverall && budSales > 0) ? (actSales / budSales) * 100 : (hasBudDataOverall ? 0 : null)
+                    achievementRate: (hasBudDataOverall && budSales > 0) ? (actSales / budSales) * 100 : (hasBudDataOverall ? 0 : null)
                 });
             } else if (type === 'product') {
                 const productCodes = ids.length > 0 ? ids : [];
@@ -166,15 +166,15 @@ export async function GET(request: Request) {
                         id: code,
                         name,
                         actualSales: hasActDataOverall ? actSales : null,
-                        budgetSales: isFiltered ? null : (hasBudDataOverall ? budSales : null),
+                        budgetSales: hasBudDataOverall ? budSales : null,
                         prevYearSales: hasPrevDataOverall ? prevSales : null,
                         actualGrossProfit: hasActDataOverall ? actGP : null,
-                        budgetGrossProfit: isFiltered ? null : (hasBudDataOverall ? budGP : null),
+                        budgetGrossProfit: hasBudDataOverall ? budGP : null,
                         prevYearGrossProfit: hasPrevDataOverall ? prevGP : null,
                         actualQuantity: hasActDataOverall ? actQty : null,
-                        budgetQuantity: isFiltered ? null : (hasBudDataOverall ? budQty : null),
+                        budgetQuantity: hasBudDataOverall ? budQty : null,
                         prevYearQuantity: hasPrevDataOverall ? prevQty : null,
-                        achievementRate: (!isFiltered && hasBudDataOverall && budSales > 0) ? (actSales / budSales) * 100 : (hasBudDataOverall ? 0 : null)
+                        achievementRate: (hasBudDataOverall && budSales > 0) ? (actSales / budSales) * 100 : (hasBudDataOverall ? 0 : null)
                     });
                 });
             } else if (type === 'category') {
@@ -205,15 +205,15 @@ export async function GET(request: Request) {
                         id: isUnclassified ? 'unclassified' : reqId,
                         name,
                         actualSales: hasActDataOverall ? actSales : null,
-                        budgetSales: isFiltered ? null : (hasBudDataOverall ? budSales : null),
+                        budgetSales: hasBudDataOverall ? budSales : null,
                         prevYearSales: hasPrevDataOverall ? prevSales : null,
                         actualGrossProfit: hasActDataOverall ? actGP : null,
-                        budgetGrossProfit: isFiltered ? null : (hasBudDataOverall ? budGP : null),
+                        budgetGrossProfit: hasBudDataOverall ? budGP : null,
                         prevYearGrossProfit: hasPrevDataOverall ? prevGP : null,
                         actualQuantity: hasActDataOverall ? actQty : null,
-                        budgetQuantity: isFiltered ? null : (hasBudDataOverall ? budQty : null),
+                        budgetQuantity: hasBudDataOverall ? budQty : null,
                         prevYearQuantity: hasPrevDataOverall ? prevQty : null,
-                        achievementRate: (!isFiltered && hasBudDataOverall && budSales > 0) ? (actSales / budSales) * 100 : (hasBudDataOverall ? 0 : null)
+                        achievementRate: (hasBudDataOverall && budSales > 0) ? (actSales / budSales) * 100 : (hasBudDataOverall ? 0 : null)
                     });
                 });
             }
