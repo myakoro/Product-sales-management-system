@@ -87,7 +87,9 @@ export default function HomePage() {
     };
 
     const formatMonth = (ym: string): string => {
-        return `${ym.substring(0, 4)}年${ym.substring(4, 6)}月`;
+        // YYYY-MM 形式（例: 2026-01）を想定
+        const [year, month] = ym.split('-');
+        return `${year}年${month}月`;
     };
 
     return (
