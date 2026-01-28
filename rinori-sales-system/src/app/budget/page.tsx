@@ -32,8 +32,22 @@ function getProductCodePriority(code: string): number {
 type SortKey = 'productCode' | 'productName' | 'categoryName' | 'periodTotal' | 'periodSales' | 'periodProfit';
 
 export default function BudgetPage() {
-    const [startYm, setStartYm] = useState("2025-01");
-    const [endYm, setEndYm] = useState("2025-03");
+    // V1.571: 初期値を当月から3ヶ月間に設定
+    const getCurrentYm = (date: Date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        return `${year}-${month}`;
+    };
+
+    const today = new Date();
+    const startDefault = getCurrentYm(today);
+
+    const endDefaultDate = new Date(today);
+    endDefaultDate.setMonth(today.getMonth() + 2); // 当月含め3ヶ月分
+    const endDefault = getCurrentYm(endDefaultDate);
+
+    const [startYm, setStartYm] = useState(startDefault);
+    const [endYm, setEndYm] = useState(endDefault);
     const [searchTerm, setSearchTerm] = useState("");
     const [months, setMonths] = useState<string[]>([]);
     const [budgetData, setBudgetData] = useState<any[]>([]);
