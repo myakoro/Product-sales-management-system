@@ -892,9 +892,9 @@ function PlPageContent() {
                                                             {cat.categoryName || '未分類'}
                                                         </td>
                                                         <td className="py-3 px-4 text-right font-mono">
-                                                            <div className="flex flex-col items-end gap-1">
+                                                            <div className="flex flex-col items-end gap-1.5">
                                                                 <span>{formatCurrency(cat.sales)}</span>
-                                                                <span className="text-xs text-gray-600 font-semibold font-sans">
+                                                                <span className="text-sm text-gray-700 font-bold font-sans">
                                                                     ({categoryData.reduce((acc, c) => acc + c.sales, 0) > 0 ? Math.floor((cat.sales / categoryData.reduce((acc, c) => acc + c.sales, 0)) * 100) : 0}%)
                                                                 </span>
                                                             </div>
