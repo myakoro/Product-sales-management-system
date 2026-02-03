@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import PeriodNavigator from "@/components/PeriodNavigator";
 
 type ManagementBudgetRow = { periodYm: string; amount: number };
@@ -59,6 +60,7 @@ export default function BudgetPage() {
     const [sortKey, setSortKey] = useState<SortKey>('productCode');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
+    const { data: session, status } = useSession();
     const [targetAmount, setTargetAmount] = useState(0);
     const [targetLoading, setTargetLoading] = useState(false);
 
@@ -111,16 +113,21 @@ export default function BudgetPage() {
     }, [startYm, endYm]);
 
     const fetchTargetAmount = async () => {
-        if (!startYm || !endYm) return;
+        if (!startYm || !endYm || status !== 'authenticated') return;
         setTargetLoading(true);
         try {
+            console.log(`[BudgetPage] Fetching target amount for ${startYm} to ${endYm}`);
             const res = await fetch(`/api/settings/management-budget?startYm=${startYm}&endYm=${endYm}`);
-            if (!res.ok) throw new Error('Failed to fetch');
+            if (!res.ok) {
+                const errorText = await res.text();
+                throw new Error(`Failed to fetch target amount: ${res.status} ${errorText}`);
+            }
             const rows: ManagementBudgetRow[] = await res.json();
+            console.log(`[BudgetPage] Received ${rows.length} rows for target amount`);
             const sum = rows.reduce((acc, r) => acc + (r.amount || 0), 0);
             setTargetAmount(Math.round(sum));
         } catch (e) {
-            console.error(e);
+            console.error('[BudgetPage] fetchTargetAmount error:', e);
             setTargetAmount(0);
         } finally {
             setTargetLoading(false);
@@ -129,7 +136,7 @@ export default function BudgetPage() {
 
     useEffect(() => {
         fetchTargetAmount();
-    }, [startYm, endYm]);
+    }, [startYm, endYm, status]);
 
     // 期間合計から月別に配分（productCode ベースで更新）
     const handlePeriodTotalChange = (productCode: string, value: number) => {
@@ -290,16 +297,6 @@ export default function BudgetPage() {
 
     return (
         <div className="min-h-screen">
-            <header className="bg-white border-b border-gray-200 px-6 py-3 flex justify-between items-center">
-                <h1 className="text-lg font-semibold">Rinori 売上管理システム</h1>
-                <div className="flex items-center gap-4">
-                    <Link href="/" className="text-xl text-gray-600 hover:text-primary">
-                        ダッシュボード
-                    </Link>
-                    <span className="text-xl text-gray-600">ユーザー: 管理者</span>
-                </div>
-            </header>
-
             <main className="max-w-[1600px] mx-auto px-6 py-8">
                 <h2 className="text-2xl font-semibold mb-6">商品予算設定</h2>
 

@@ -1,16 +1,14 @@
-// V1.58 管理売上予算 API
 import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { PrismaClient } from '@prisma/client';
-
-const prisma = new PrismaClient();
+import { prisma } from '@/lib/prisma';
 
 // GET: 管理売上予算の取得
 export async function GET(request: Request) {
     try {
         const session = await getServerSession(authOptions);
         if (!session) {
+            console.log('[ManagementBudget API] Unauthorized access attempt');
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
@@ -18,27 +16,30 @@ export async function GET(request: Request) {
         const startYm = searchParams.get('startYm');
         const endYm = searchParams.get('endYm');
 
-        let budgets;
-        if (startYm && endYm) {
-            budgets = await prisma.managementBudget.findMany({
-                where: {
-                    periodYm: {
-                        gte: startYm,
-                        lte: endYm,
-                    },
-                },
-                orderBy: { periodYm: 'asc' },
-            });
-        } else {
-            budgets = await prisma.managementBudget.findMany({
-                orderBy: { periodYm: 'asc' },
-            });
+        console.log(`[ManagementBudget API] GET request: startYm=${startYm}, endYm=${endYm}`);
+
+        if (!startYm || !endYm) {
+            return NextResponse.json({ error: 'Missing startYm or endYm' }, { status: 400 });
         }
 
+        const budgets = await prisma.managementBudget.findMany({
+            where: {
+                periodYm: {
+                    gte: startYm,
+                    lte: endYm,
+                },
+            },
+            orderBy: {
+                periodYm: 'asc',
+            },
+        });
+
+        console.log(`[ManagementBudget API] Returning ${budgets.length} budgets. Sample:`, budgets[0]);
+
         return NextResponse.json(budgets);
-    } catch (error: any) {
-        console.error('[Management Budget GET] Error:', error);
-        return NextResponse.json({ error: error.message }, { status: 500 });
+    } catch (error) {
+        console.error('[ManagementBudget API] GET error:', error);
+        return NextResponse.json({ error: 'Failed to fetch management budgets' }, { status: 500 });
     }
 }
 
@@ -47,11 +48,13 @@ export async function POST(request: Request) {
     try {
         const session = await getServerSession(authOptions);
         if (!session || (session.user as any).role !== 'master') {
-            return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
         const body = await request.json();
         const { budgets } = body; // Array of { periodYm: string, amount: number }
+
+        console.log(`[ManagementBudget API] POST request: saving ${budgets?.length} periods`);
 
         if (!Array.isArray(budgets)) {
             return NextResponse.json({ error: 'Invalid request format' }, { status: 400 });

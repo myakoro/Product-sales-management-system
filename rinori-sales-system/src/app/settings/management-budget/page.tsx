@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
-import Header from '@/components/Header';
 
 type ManagementBudgetRow = {
     periodYm: string;
@@ -76,9 +75,11 @@ export default function ManagementBudgetSettingsPage() {
             const endYm = toYm(year, 12);
             const res = await fetch(`/api/settings/management-budget?startYm=${startYm}&endYm=${endYm}`);
             if (!res.ok) {
-                throw new Error('Failed to fetch');
+                const text = await res.text();
+                throw new Error(`Failed to fetch: ${res.status} ${text}`);
             }
             const rows: ManagementBudgetRow[] = await res.json();
+            console.log('[ManagementBudget] Fetched rows:', rows);
 
             const map = new Map(rows.map((r) => [r.periodYm, r.amount] as const));
             const next = Array.from({ length: 12 }, (_, idx) => {
@@ -87,9 +88,9 @@ export default function ManagementBudgetSettingsPage() {
                 return typeof v === 'number' ? Math.trunc(v) : 0;
             });
             setMonthlyAmounts(next);
-        } catch (e) {
-            console.error(e);
-            setMessage({ type: 'error', text: 'データの取得に失敗しました。' });
+        } catch (e: any) {
+            console.error('[ManagementBudget] Fetch error:', e);
+            setMessage({ type: 'error', text: `データの取得に失敗しました。(${e.message})` });
         } finally {
             setLoading(false);
         }
@@ -168,8 +169,6 @@ export default function ManagementBudgetSettingsPage() {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Header />
-
             <main className="max-w-5xl mx-auto py-10 px-6">
                 <div className="flex items-start justify-between gap-4 mb-6">
                     <div>
