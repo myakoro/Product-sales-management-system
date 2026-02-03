@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
         }
 
         // 配列に変換し、粗利率を計算
-        let result = Array.from(categoryMap.values()).map(cat => ({
+        const result = Array.from(categoryMap.values()).map(cat => ({
             categoryId: cat.categoryId,
             categoryName: cat.categoryName,
             sales: Math.round(cat.sales),

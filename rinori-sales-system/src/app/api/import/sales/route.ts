@@ -95,7 +95,7 @@ export async function POST(request: Request) {
         }
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        let decodedText = new TextDecoder('utf-8').decode(buffer);
+        const decodedText = new TextDecoder('utf-8').decode(buffer);
         let parsedData: any[] = [];
 
         const parseResult = Papa.parse(decodedText, { header: true, skipEmptyLines: true });

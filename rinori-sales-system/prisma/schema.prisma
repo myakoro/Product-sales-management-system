@@ -270,3 +270,12 @@ model NEShopMapping {
   @@map("ne_shop_mappings")
 }
 
+
+// V1.58 管理売上予算マスタ
+model ManagementBudget {
+  periodYm    String   @id @map("period_ym") // YYYY-MM
+  amount      Float    @default(0)           // 目標売上（税別）
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("management_budgets")
+}

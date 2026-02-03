@@ -55,6 +55,13 @@ export default function SettingsPage() {
             color: 'from-purple-400 to-violet-600'
         },
         {
+            title: '管理売上予算',
+            description: '年月別の管理売上目標（税別）の設定',
+            href: '/settings/management-budget',
+            icon: '🏁',
+            color: 'from-sky-400 to-blue-600'
+        },
+        {
             title: 'カテゴリー管理',
             description: '商品カテゴリーの作成・編集・紐付け管理',
             href: '/settings/categories',

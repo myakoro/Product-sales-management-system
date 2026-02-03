@@ -1,0 +1,272 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ユーザーマスタ
+model User {
+  id            Int      @id @default(autoincrement())
+  username      String   @unique
+  passwordHash  String   @map("password_hash")
+  role          String   @default("staff") // 'master' or 'staff'
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  salesRecords  SalesRecord[]
+  adExpenses    AdExpense[]
+  adBudgets     AdBudget[]
+  importHistories ImportHistory[]
+
+  @@map("users")
+}
+
+// 商品カテゴリ（V1.55更新）
+model ProductCategory {
+  id           Int      @id @default(autoincrement())
+  name         String   // カテゴリー名
+  displayOrder Int      @default(0) @map("display_order") // 表示順序
+  isActive     Boolean  @default(true) @map("is_active") // 有効/無効
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  products     Product[]
+
+  @@map("product_categories")
+}
+
+// 商品マスタ
+model Product {
+  productCode        String   @id @map("product_code")
+  productName        String   @map("product_name")
+  salesPriceExclTax  Float    @map("sales_price_excl_tax")
+  costExclTax        Float    @map("cost_excl_tax")
+  productType        String   @map("product_type") // '自社' or '仕入'
+  managementStatus   String   @map("management_status") // '管理中' or '管理外'
+  categoryId         Int?     @map("category_id")
+  asin               String?  @unique @map("asin") // V1.51追加: Amazon ASIN
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  category           ProductCategory? @relation(fields: [categoryId], references: [id])
+  salesRecords       SalesRecord[]
+  monthlyBudgets     MonthlyBudget[]
+  periodBudgets      PeriodBudget[]
+
+  @@map("products")
+}
+
+// 売上実績
+model SalesRecord {
+  id                  Int      @id @default(autoincrement())
+  productCode         String   @map("product_code")
+  periodYm            String   @map("period_ym")
+  salesDate           DateTime @map("sales_date")
+  quantity            Int
+  salesAmountExclTax  Float    @map("sales_amount_excl_tax")
+  costAmountExclTax   Float    @map("cost_amount_excl_tax")
+  grossProfit         Float    @map("gross_profit")
+  salesChannelId      Int?     @map("sales_channel_id")
+  externalOrderId     String?  @unique @map("external_order_id") // V1.54追加: NEの受注番号等
+  importHistoryId     Int      @map("import_history_id")
+  createdByUserId     Int      @map("created_by_user_id")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  product             Product        @relation(fields: [productCode], references: [productCode])
+  salesChannel        SalesChannel?  @relation(fields: [salesChannelId], references: [id])
+  importHistory       ImportHistory  @relation(fields: [importHistoryId], references: [id])
+  createdBy           User           @relation(fields: [createdByUserId], references: [id])
+
+  @@map("sales_records")
+}
+
+// 月別予算
+model MonthlyBudget {
+  id                   Int      @id @default(autoincrement())
+  productCode          String   @map("product_code")
+  periodYm             String   @map("period_ym")
+  budgetQuantity       Int      @map("budget_quantity")
+  budgetSalesExclTax   Float    @map("budget_sales_excl_tax")
+  budgetCostExclTax    Float    @map("budget_cost_excl_tax")
+  budgetGrossProfit    Float    @map("budget_gross_profit")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+
+  product              Product  @relation(fields: [productCode], references: [productCode])
+
+  @@map("monthly_budgets")
+}
+
+// 期間予算
+model PeriodBudget {
+  id                 Int      @id @default(autoincrement())
+  productCode        String   @map("product_code")
+  startYm            String   @map("start_ym")
+  endYm              String   @map("end_ym")
+  totalQuantity      Int      @map("total_quantity")
+  totalSalesExclTax  Float    @map("total_sales_excl_tax")
+  memo               String?
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  product            Product  @relation(fields: [productCode], references: [productCode])
+  histories          PeriodBudgetHistory[]
+
+  @@map("period_budgets")
+}
+
+// 期間予算履歴
+model PeriodBudgetHistory {
+  id                Int      @id @default(autoincrement())
+  periodBudgetId    Int      @map("period_budget_id")
+  productCode       String   @map("product_code")
+  startYm           String   @map("start_ym")
+  endYm             String   @map("end_ym")
+  totalQuantity     Int      @map("total_quantity")
+  monthlyBreakdown  String   @map("monthly_breakdown") // JSON string
+  savedAt           DateTime @default(now()) @map("saved_at")
+
+  periodBudget      PeriodBudget @relation(fields: [periodBudgetId], references: [id])
+
+  @@map("period_budget_histories")
+}
+
+// 広告費カテゴリ
+model AdCategory {
+  id           Int      @id @default(autoincrement())
+  categoryName String   @map("category_name")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  adExpenses   AdExpense[]
+  adBudgets    AdBudget[]
+
+  @@map("ad_categories")
+}
+
+// 広告費
+model AdExpense {
+  id              Int      @id @default(autoincrement())
+  expenseDate     DateTime @map("expense_date")
+  amount          Float
+  adCategoryId    Int      @map("ad_category_id")
+  memo            String?
+  createdByUserId Int      @map("created_by_user_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  adCategory      AdCategory @relation(fields: [adCategoryId], references: [id])
+  createdBy       User       @relation(fields: [createdByUserId], references: [id])
+
+  @@map("ad_expenses")
+}
+
+// 広告予算 (V1.53追加)
+model AdBudget {
+  id              Int        @id @default(autoincrement())
+  periodYm        String     @map("period_ym")       // 予算対象年月 (YYYY-MM)
+  adCategoryId    Int        @map("ad_category_id")  // 広告カテゴリID (FK)
+  amount          Float      @default(0)             // 予算額
+  createdByUserId Int        @map("created_by_user_id") // 登録・更新ユーザー (FK)
+  createdAt       DateTime   @default(now()) @map("created_at")
+  updatedAt       DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  adCategory      AdCategory @relation(fields: [adCategoryId], references: [id])
+  createdBy       User       @relation(fields: [createdByUserId], references: [id])
+
+  @@unique([periodYm, adCategoryId]) // 1カテゴリ1ヶ月に対し1予算
+  @@map("ad_budgets")
+}
+
+// 税率マスタ
+model TaxRate {
+  id        Int      @id @default(autoincrement())
+  startYm   String   @map("start_ym")
+  rate      Float
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("tax_rates")
+}
+
+model SalesChannel {
+  id            Int      @id @default(autoincrement())
+  name          String   @unique
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  salesRecords   SalesRecord[]
+  importHistories ImportHistory[]
+  neShopMappings NEShopMapping[]
+
+  @@map("sales_channels")
+}
+
+// CSV取込履歴
+model ImportHistory {
+  id               Int      @id @default(autoincrement())
+  importType       String   @map("import_type") // 'sales' or 'products'
+  targetYm         String?  @map("target_ym")
+  importMode       String?  @map("import_mode") // 'append' or 'overwrite'
+  dataSource       String?  @map("data_source") // V1.51追加: 'NE' or 'Amazon'
+  comment          String?
+  salesChannelId   Int?     @map("sales_channel_id")
+  recordCount      Int      @map("record_count")
+  importedByUserId Int      @map("imported_by_user_id")
+  importedAt       DateTime @default(now()) @map("imported_at")
+
+  importedBy       User          @relation(fields: [importedByUserId], references: [id])
+  salesChannel     SalesChannel? @relation(fields: [salesChannelId], references: [id])
+  salesRecords     SalesRecord[]
+  
+  @@map("import_histories")
+}
+
+// 新商品候補
+model NewProductCandidate {
+  id          Int      @id @default(autoincrement())
+  productCode String   @map("product_code")
+  sampleSku   String   @map("sample_sku")
+  productName String?  @map("product_name")
+  status      String   @default("pending") // 'pending', 'registered', 'ignored'
+  detectedAt  DateTime @default(now()) @map("detected_at")
+
+  @@map("new_product_candidates")
+}
+
+// v1.52 除外キーワード
+model ExclusionKeyword {
+  id        Int      @id @default(autoincrement())
+  keyword   String   @unique
+  matchType String   @default("startsWith") @map("match_type") // 'startsWith' or 'contains'
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("exclusion_keywords")
+}
+
+// V1.54 ネクストエンジン認証
+model NEAuth {
+  id            Int      @id @default(1)
+  accessToken   String   @map("access_token")
+  refreshToken  String   @map("refresh_token")
+  expiresAt     DateTime @map("expires_at")      // アクセストークン有効期限
+  refreshesAt   DateTime @map("refreshes_at")    // リフレッシュトークン有効期限
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("ne_auth")
+}
+
+// V1.54 ネクストエンジン店舗マッピング
+model NEShopMapping {
+  neShopId    Int      @id @map("ne_shop_id")
+  channelId   Int      @map("channel_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  channel     SalesChannel @relation(fields: [channelId], references: [id])
+
+  @@map("ne_shop_mappings")
+}
+

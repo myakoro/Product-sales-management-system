@@ -1,0 +1,15 @@
+const buttonStyle = { 
+    display: 'block',
+    color: '#0070f3', 
+    textDecoration: 'none', 
+    fontSize: '1.25rem',
+    padding: '1rem 1.5rem',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    textAlign: 'center',
+    backgroundColor: 'white',
+    transition: 'all 0.2s'
+};
+
+// Use this style for all menu links in dashboard
+// Example: <Link href="/path" style={buttonStyle}>Label</Link>

@@ -17,7 +17,13 @@ Thumbs.db
 .idea/
 .vscode/
 
-# Local DB / backups (do not commit)
-rinori-sales-system/prisma/prod.db
-rinori-sales-system/rinori-sales-backup-*.db
-rinori-sales-system/check-prod-db.js
+# Local DB / backups (CRITICAL: DO NOT COMMIT)
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+rinori-sales-backup-*.db
+**/prisma/*.db
+**/prisma/*.db-journal
+**/prisma/*.db-shm
+**/prisma/*.db-wal

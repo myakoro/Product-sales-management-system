@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 
 type PlData = {
@@ -161,6 +161,9 @@ function PlPageContent() {
     const [showCategoryPrevYear, setShowCategoryPrevYear] = useState(true);
     const [categoryGraphType, setCategoryGraphType] = useState<'line' | 'bar'>('line');
 
+    // V1.58: カテゴリー円グラフ（売上構成 / 粗利構成）
+    const [categoryPieMode, setCategoryPieMode] = useState<'sales' | 'grossProfit'>('sales');
+
     // Query params for tab selection
     const searchParams = useSearchParams();
     const tabParam = searchParams.get('tab');
@@ -202,6 +205,77 @@ function PlPageContent() {
     const handleCategorySelectAll = () => {
         setSelectedCategories([]);
     };
+
+    const pieColors = ['#1E40AF', '#047857', '#B45309', '#9F1239', '#6D28D9', '#64748B'];
+
+    const categoryTotals = (() => {
+        const totalSales = categoryData.reduce((sum, c) => sum + (c.sales || 0), 0);
+        const totalGrossProfit = categoryData.reduce((sum, c) => sum + (c.grossProfit || 0), 0);
+        return { totalSales, totalGrossProfit };
+    })();
+
+    const categoryPieData = (() => {
+        if (activeTab !== 'category') return [] as Array<{ name: string; value: number; ratio: number }>;
+        if (!categoryData.length) return [];
+
+        const isGrossProfitMode = categoryPieMode === 'grossProfit';
+        const eligible = isGrossProfitMode
+            ? categoryData.filter(c => (c.grossProfit || 0) >= 0)
+            : categoryData;
+
+        const total = eligible.reduce((sum, c) => sum + (isGrossProfitMode ? (c.grossProfit || 0) : (c.sales || 0)), 0);
+        if (total <= 0) return [];
+
+        const selected = eligible.filter(c => selectedCategories.includes(c.categoryId));
+        const other = eligible.filter(c => !selectedCategories.includes(c.categoryId));
+
+        const slices = [
+            ...selected.map((c) => ({
+                name: c.categoryName || '未分類',
+                value: isGrossProfitMode ? (c.grossProfit || 0) : (c.sales || 0),
+            })),
+        ];
+
+        const otherValue = other.reduce((sum, c) => sum + (isGrossProfitMode ? (c.grossProfit || 0) : (c.sales || 0)), 0);
+        if (other.length > 0) {
+            slices.push({ name: 'その他', value: otherValue });
+        }
+
+        const withRatio = slices
+            .filter(s => s.value > 0)
+            .map(s => ({
+                ...s,
+                ratio: (s.value / total) * 100,
+            }));
+
+        if (!withRatio.length) return [];
+
+        const roundedExceptOther = withRatio
+            .filter(s => s.name !== 'その他')
+            .map(s => ({ ...s, ratio: Number(s.ratio.toFixed(1)) }));
+
+        const otherSlice = withRatio.find(s => s.name === 'その他');
+        if (!otherSlice) {
+            const sumRounded = roundedExceptOther.reduce((acc, s) => acc + s.ratio, 0);
+            if (Math.abs(100 - sumRounded) <= 0.2) {
+                const last = roundedExceptOther[roundedExceptOther.length - 1];
+                last.ratio = Number((last.ratio + (100 - sumRounded)).toFixed(1));
+            }
+            return roundedExceptOther;
+        }
+
+        const sumRounded = roundedExceptOther.reduce((acc, s) => acc + s.ratio, 0);
+        const otherRounded = Number((100 - sumRounded).toFixed(1));
+
+        return [
+            ...roundedExceptOther,
+            {
+                name: 'その他',
+                value: otherSlice.value,
+                ratio: otherRounded < 0 ? 0 : otherRounded,
+            }
+        ];
+    })();
 
     // PL Trend Graph state
     const [plTrendData, setPlTrendData] = useState<PLTrendData[]>([]);
@@ -877,6 +951,10 @@ function PlPageContent() {
                                             {categoryData.map((cat, idx) => {
                                                 const isSelected = selectedCategories.includes(cat.categoryId);
                                                 const isDisabled = !isSelected && selectedCategories.length >= 5;
+                                                const totalGrossProfit = categoryTotals.totalGrossProfit;
+                                                const grossProfitShare = totalGrossProfit !== 0
+                                                    ? (cat.grossProfit / totalGrossProfit) * 100
+                                                    : 0;
                                                 return (
                                                     <tr key={idx} className="border-b border-gray-100 hover:bg-gray-50">
                                                         <td className="py-3 px-4 text-center">
@@ -898,7 +976,7 @@ function PlPageContent() {
                                                             {formatCurrency(cat.cogs)}
                                                         </td>
                                                         <td className="py-3 px-4 text-right font-mono font-semibold">
-                                                            {formatCurrency(cat.grossProfit)}
+                                                            <div className="flex flex-col items-end"><span>{formatCurrency(cat.grossProfit)}</span><span className="text-[10px] text-gray-400 font-sans">({totalGrossProfit === 0 ? '-' : `${grossProfitShare.toFixed(1)}%`})</span></div>
                                                         </td>
                                                         <td className="py-3 px-4 text-right font-mono">
                                                             {cat.grossProfitRate.toFixed(1)}%
@@ -941,6 +1019,80 @@ function PlPageContent() {
                 {/* カテゴリー別PLグラフ */}
                 {activeTab === 'category' && (
                     <div className="mt-8 bg-white border border-gray-200 rounded p-6 shadow-sm">
+                        <div className="mb-6">
+                            <div className="flex items-center justify-between gap-4 flex-wrap">
+                                <h3 className="text-xl font-bold text-[#00214d]">構成比 円グラフ</h3>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() => setCategoryPieMode('sales')}
+                                        className={`px-4 py-1.5 text-sm font-medium rounded transition-colors ${categoryPieMode === 'sales'
+                                            ? 'bg-[#00214d] text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        売上構成
+                                    </button>
+                                    <button
+                                        onClick={() => setCategoryPieMode('grossProfit')}
+                                        className={`px-4 py-1.5 text-sm font-medium rounded transition-colors ${categoryPieMode === 'grossProfit'
+                                            ? 'bg-[#00214d] text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
+                                    >
+                                        粗利構成
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="mt-4">
+                                {selectedCategories.length === 0 ? (
+                                    <div className="text-center py-10 text-gray-500">
+                                        円グラフに個別表示したいカテゴリーを、上の表から最大5件まで選択してください。
+                                    </div>
+                                ) : categoryPieData.length === 0 ? (
+                                    <div className="text-center py-10 text-gray-500">
+                                        表示できるデータがありません。
+                                    </div>
+                                ) : (
+                                    <div className="w-full">
+                                        <ResponsiveContainer width="100%" height={320}>
+                                            <PieChart>
+                                                <Tooltip
+                                                    formatter={(value: any, name: any, props: any) => {
+                                                        const ratio = props?.payload?.ratio;
+                                                        if (typeof ratio === 'number') {
+                                                            return [`${formatCurrency(Number(value))} (${ratio.toFixed(1)}%)`, name];
+                                                        }
+                                                        return [formatCurrency(Number(value)), name];
+                                                    }}
+                                                />
+                                                <Legend />
+                                                <Pie
+                                                    data={categoryPieData}
+                                                    dataKey="value"
+                                                    nameKey="name"
+                                                    cx="50%"
+                                                    cy="50%"
+                                                    outerRadius={110}
+                                                    label={({ name, ratio }: any) => `${name} ${Number(ratio).toFixed(1)}%`}
+                                                >
+                                                    {categoryPieData.map((_, index) => (
+                                                        <Cell key={`cell-${index}`} fill={pieColors[index % pieColors.length]} />
+                                                    ))}
+                                                </Pie>
+                                            </PieChart>
+                                        </ResponsiveContainer>
+
+                                        {categoryPieMode === 'grossProfit' && categoryData.some(c => (c.grossProfit || 0) < 0) && (
+                                            <div className="mt-3 text-xs text-gray-500">
+                                                ※赤字カテゴリーはグラフから除外されています
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="mb-4">
                             <div
                                 className="flex items-center justify-between cursor-pointer"

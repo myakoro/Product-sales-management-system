@@ -4,13 +4,15 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import PeriodNavigator from "@/components/PeriodNavigator";
 
+type ManagementBudgetRow = { periodYm: string; amount: number };
+
 // 月のリストを生成（開始月から終了月まで）
 function generateMonths(startYm: string, endYm: string) {
     const months = [];
     const start = new Date(startYm + "-01");
     const end = new Date(endYm + "-01");
 
-    let current = new Date(start);
+    const current = new Date(start);
     while (current <= end) {
         const ym = current.toISOString().slice(0, 7);
         months.push(ym);
@@ -56,6 +58,9 @@ export default function BudgetPage() {
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [sortKey, setSortKey] = useState<SortKey>('productCode');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+    const [targetAmount, setTargetAmount] = useState(0);
+    const [targetLoading, setTargetLoading] = useState(false);
 
     // History Modal State
     const [showHistory, setShowHistory] = useState(false);
@@ -103,6 +108,27 @@ export default function BudgetPage() {
     // 期間が変更されたらデータを再取得
     useEffect(() => {
         fetchBudgetData();
+    }, [startYm, endYm]);
+
+    const fetchTargetAmount = async () => {
+        if (!startYm || !endYm) return;
+        setTargetLoading(true);
+        try {
+            const res = await fetch(`/api/settings/management-budget?startYm=${startYm}&endYm=${endYm}`);
+            if (!res.ok) throw new Error('Failed to fetch');
+            const rows: ManagementBudgetRow[] = await res.json();
+            const sum = rows.reduce((acc, r) => acc + (r.amount || 0), 0);
+            setTargetAmount(Math.round(sum));
+        } catch (e) {
+            console.error(e);
+            setTargetAmount(0);
+        } finally {
+            setTargetLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchTargetAmount();
     }, [startYm, endYm]);
 
     // 期間合計から月別に配分（productCode ベースで更新）
@@ -255,6 +281,9 @@ export default function BudgetPage() {
         totalProfit: acc.totalProfit + p.periodProfit,
     }), { totalSales: 0, totalProfit: 0 });
 
+    const companyPlanAmount = budgetData.reduce((sum, p) => sum + (p.periodSales || 0), 0);
+    const varianceAmount = targetAmount - companyPlanAmount;
+
     const profitRate = summary.totalSales > 0
         ? (summary.totalProfit / summary.totalSales * 100).toFixed(1)
         : "0.0";
@@ -310,7 +339,7 @@ export default function BudgetPage() {
 
                 {/* サマリ（スクロール時も上部に固定） */}
                 <div className="bg-blue-50 border border-blue-200 rounded p-4 mb-4 sticky top-0 z-20">
-                    <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
                         <div>
                             <div className="text-sm text-gray-600">合計売上（税別）</div>
                             <div className="text-lg font-semibold">¥{Math.round(summary.totalSales).toLocaleString()}</div>
@@ -322,6 +351,27 @@ export default function BudgetPage() {
                         <div>
                             <div className="text-sm text-gray-600">粗利率</div>
                             <div className="text-lg font-semibold">{profitRate}%</div>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center mt-4 pt-4 border-t border-blue-200">
+                        <div>
+                            <div className="text-sm text-gray-600">管理売上予算（目標）</div>
+                            <div className="text-lg font-semibold">
+                                {targetLoading ? '読み込み中...' : `¥${Math.round(targetAmount).toLocaleString()}`}
+                            </div>
+                        </div>
+                        <div>
+                            <div className="text-sm text-gray-600">全社商品予算（計画）</div>
+                            <div className="text-lg font-semibold">¥{Math.round(companyPlanAmount).toLocaleString()}</div>
+                        </div>
+                        <div>
+                            <div className="text-sm text-gray-600">乖離額（不足分）</div>
+                            {varianceAmount > 0 ? (
+                                <div className="text-lg font-semibold text-red-600">あと ¥{Math.round(varianceAmount).toLocaleString()} 不足</div>
+                            ) : (
+                                <div className="text-lg font-semibold text-emerald-700">目標達成</div>
+                            )}
                         </div>
                     </div>
                 </div>
