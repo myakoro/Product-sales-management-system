@@ -5,6 +5,8 @@
     "scripts": {
         "dev": "next dev",
         "dev:https": "next dev --experimental-https",
+        "build": "next build",
+        "postinstall": "prisma generate",
         "start": "node scripts/migrate-unique-constraint.cjs && node scripts/init-db.cjs && next start",
         "lint": "next lint",
         "db:seed": "node prisma/seed.js"
