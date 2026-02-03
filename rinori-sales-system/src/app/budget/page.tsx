@@ -52,6 +52,7 @@ export default function BudgetPage() {
     const [startYm, setStartYm] = useState(startDefault);
     const [endYm, setEndYm] = useState(endDefault);
     const [searchTerm, setSearchTerm] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("");
     const [months, setMonths] = useState<string[]>([]);
     const [budgetData, setBudgetData] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -59,6 +60,9 @@ export default function BudgetPage() {
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
     const [sortKey, setSortKey] = useState<SortKey>('productCode');
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+
+    // カテゴリーリストの抽出
+    const categories = Array.from(new Set(budgetData.map(p => p.categoryName).filter(Boolean))).sort();
 
     const { data: session, status } = useSession();
     const [targetAmount, setTargetAmount] = useState(0);
@@ -254,11 +258,14 @@ export default function BudgetPage() {
     };
 
     // フィルタリング
-    const filteredData = budgetData.filter(p =>
-        p.productCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (p.categoryName || "").toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const filteredData = budgetData.filter(p => {
+        const matchesKeyword =
+            p.productCode.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            p.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            (p.categoryName || "").toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = !selectedCategory || p.categoryName === selectedCategory;
+        return matchesKeyword && matchesCategory;
+    });
 
     const sortedData = [...filteredData].sort((a, b) => {
         if (sortKey === 'productCode') {
@@ -330,6 +337,20 @@ export default function BudgetPage() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                                 className="w-full px-3 py-2 border border-gray-300 rounded"
                             />
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-medium mb-2">カテゴリー</label>
+                            <select
+                                value={selectedCategory}
+                                onChange={(e) => setSelectedCategory(e.target.value)}
+                                className="w-full px-3 py-2 border border-gray-300 rounded bg-white"
+                            >
+                                <option value="">すべて</option>
+                                {categories.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                 </div>
