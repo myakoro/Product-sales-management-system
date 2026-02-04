@@ -403,12 +403,12 @@ export default function BudgetVsActualPage() {
                                     <div style={{ fontWeight: '500' }}>予算:</div>
                                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'baseline' }}>
                                         <span>¥{Math.round(summary.totalBudgetGrossProfit).toLocaleString()}</span>
-                                        <span style={{ fontSize: '0.9rem', color: '#666' }}>({summary.totalBudgetGrossProfitRate.toFixed(1)}%)</span>
+                                        <span style={{ fontSize: '1.1rem', color: '#374151', fontWeight: '600' }}>({summary.totalBudgetGrossProfitRate.toFixed(1)}%)</span>
                                     </div>
                                     <div style={{ fontWeight: '500' }}>実績:</div>
                                     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'baseline' }}>
                                         <span>¥{Math.round(summary.totalActualGrossProfit).toLocaleString()}</span>
-                                        <span style={{ fontSize: '0.9rem', color: '#666' }}>({summary.totalActualGrossProfitRate.toFixed(1)}%)</span>
+                                        <span style={{ fontSize: '1.1rem', color: '#374151', fontWeight: '600' }}>({summary.totalActualGrossProfitRate.toFixed(1)}%)</span>
                                     </div>
                                     <div style={{ fontWeight: '600' }}>達成率:</div>
                                     <div style={{
@@ -636,16 +636,16 @@ export default function BudgetVsActualPage() {
                                                     )}
                                                     {hasBudgetData && (
                                                         <td className="px-4 py-4 text-right text-neutral-600">
-                                                            <div className="flex flex-col items-end">
+                                                            <div className="flex flex-col items-end gap-1">
                                                                 <span>¥{Math.round(p.budgetGrossProfit).toLocaleString()}</span>
-                                                                <span className="text-[10px] text-gray-400 font-sans italic">({p.budgetGrossProfitRate.toFixed(1)}%)</span>
+                                                                <span className="text-sm text-gray-700 font-bold font-sans">({p.budgetGrossProfitRate.toFixed(1)}%)</span>
                                                             </div>
                                                         </td>
                                                     )}
                                                     <td className="px-4 py-4 text-right font-semibold text-neutral-800">
-                                                        <div className="flex flex-col items-end">
+                                                        <div className="flex flex-col items-end gap-1">
                                                             <span>¥{Math.round(p.actualGrossProfit).toLocaleString()}</span>
-                                                            <span className="text-[10px] text-gray-500 font-sans italic">({p.actualGrossProfitRate.toFixed(1)}%)</span>
+                                                            <span className="text-sm text-gray-700 font-bold font-sans">({p.actualGrossProfitRate.toFixed(1)}%)</span>
                                                         </div>
                                                     </td>
                                                     {hasBudgetData && (
