@@ -1265,7 +1265,7 @@ function PlPageContent() {
                                                                     dot={{ fill: colorSales, r: 4, strokeWidth: 0 }}
                                                                 />
                                                             )}
-                                                            {categoryVisibleItems.salesPrevYear && showCategoryPrevYear && (
+                                                            {showCategoryPrevYear && (
                                                                 <Line
                                                                     yAxisId="left"
                                                                     type="monotone"
@@ -1288,7 +1288,7 @@ function PlPageContent() {
                                                                     dot={{ fill: colorGP, r: 3.5, strokeWidth: 0 }}
                                                                 />
                                                             )}
-                                                            {categoryVisibleItems.grossProfitPrevYear && showCategoryPrevYear && (
+                                                            {showCategoryPrevYear && (
                                                                 <Line
                                                                     yAxisId="left"
                                                                     type="monotone"
@@ -1383,7 +1383,7 @@ function PlPageContent() {
                                                                     name={`${category?.categoryName || '未分類'} - 売上高`}
                                                                 />
                                                             )}
-                                                            {categoryVisibleItems.salesPrevYear && showCategoryPrevYear && (
+                                                            {showCategoryPrevYear && (
                                                                 <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`salesPrevYear_${catId}`}
@@ -1401,7 +1401,7 @@ function PlPageContent() {
                                                                     name={`${category?.categoryName || '未分類'} - 粗利`}
                                                                 />
                                                             )}
-                                                            {categoryVisibleItems.grossProfitPrevYear && showCategoryPrevYear && (
+                                                            {showCategoryPrevYear && (
                                                                 <Bar
                                                                     yAxisId="left"
                                                                     dataKey={`grossProfitPrevYear_${catId}`}
