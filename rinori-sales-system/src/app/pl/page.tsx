@@ -797,7 +797,7 @@ function PlPageContent() {
                                                 <span>粗利:</span>
                                                 <div className="text-right">
                                                     <span className="font-bold">{formatCurrency(data.grossProfit)}</span>
-                                                    <span className="text-sm ml-2 text-gray-600">({formatPercent(data.grossProfit, data.sales)})</span>
+                                                    <span className="ml-2 font-bold">({formatPercent(data.grossProfit, data.sales)})</span>
                                                 </div>
                                             </div>
 
@@ -981,9 +981,9 @@ function PlPageContent() {
                                                             {formatCurrency(cat.cogs)}
                                                         </td>
                                                         <td className="py-3 px-4 text-right font-mono font-semibold">
-                                                            <div className="flex flex-col items-end"><span>{formatCurrency(cat.grossProfit)}</span><span className="text-[10px] text-gray-400 font-sans">({totalGrossProfit === 0 ? '-' : `${grossProfitShare.toFixed(1)}%`})</span></div>
+                                                            <div className="flex flex-col items-end gap-1"><span>{formatCurrency(cat.grossProfit)}</span><span className="text-sm text-gray-700 font-bold font-sans">({totalGrossProfit === 0 ? '-' : `${grossProfitShare.toFixed(1)}%`})</span></div>
                                                         </td>
-                                                        <td className="py-3 px-4 text-right font-mono">
+                                                        <td className="py-3 px-4 text-right font-mono font-bold text-lg">
                                                             {cat.grossProfitRate.toFixed(1)}%
                                                         </td>
                                                     </tr>
