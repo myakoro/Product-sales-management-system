@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
 import PeriodNavigator from "@/components/PeriodNavigator";
@@ -74,6 +74,15 @@ export default function BudgetPage() {
     const [selectedProduct, setSelectedProduct] = useState<{ code: string, name: string } | null>(null);
     const [loadingHistory, setLoadingHistory] = useState(false);
 
+    // 初期データのスナップショット（変更検知用）
+    const initialBudgetDataRef = useRef<string>("");
+
+    const isDirty = useCallback(() => {
+        if (!initialBudgetDataRef.current) return false;
+        const current = JSON.stringify(budgetData.map(p => ({ productCode: p.productCode, monthlyQty: p.monthlyQty })));
+        return current !== initialBudgetDataRef.current;
+    }, [budgetData]);
+
     // データ取得
     const fetchBudgetData = async () => {
         if (!startYm || !endYm) return;
@@ -103,6 +112,8 @@ export default function BudgetPage() {
             });
 
             setBudgetData(formattedData);
+            // 初期スナップショットを保存
+            initialBudgetDataRef.current = JSON.stringify(formattedData.map((p: any) => ({ productCode: p.productCode, monthlyQty: p.monthlyQty })));
         } catch (error) {
             console.error(error);
             setMessage({ type: 'error', text: 'データの取得に失敗しました。' });
@@ -240,6 +251,8 @@ export default function BudgetPage() {
             if (!res.ok) throw new Error('Save failed');
 
             setMessage({ type: 'success', text: '保存しました。' });
+            // 保存後にスナップショットを更新
+            initialBudgetDataRef.current = JSON.stringify(budgetData.map(p => ({ productCode: p.productCode, monthlyQty: p.monthlyQty })));
         } catch (error) {
             console.error(error);
             setMessage({ type: 'error', text: '保存に失敗しました。' });
@@ -322,6 +335,9 @@ export default function BudgetPage() {
                                 startYm={startYm}
                                 endYm={endYm}
                                 onChange={(start, end) => {
+                                    if (isDirty() && !window.confirm('変更が保存されていません。変更を破棄して移動しますか？')) {
+                                        return;
+                                    }
                                     setStartYm(start);
                                     setEndYm(end);
                                 }}

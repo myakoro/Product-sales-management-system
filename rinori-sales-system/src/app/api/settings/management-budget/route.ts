@@ -1,27 +1,32 @@
 import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 // GET: 管理売上予算の取得
 export async function GET(request: Request) {
+    console.log('[ManagementBudget API] GET request started');
     try {
+        console.log('[ManagementBudget API] Fetching session...');
         const session = await getServerSession(authOptions);
         if (!session) {
-            console.log('[ManagementBudget API] Unauthorized access attempt');
+            console.log('[ManagementBudget API] No session found - Unauthorized');
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
+        console.log('[ManagementBudget API] Session found for user:', session.user?.name);
 
         const { searchParams } = new URL(request.url);
         const startYm = searchParams.get('startYm');
         const endYm = searchParams.get('endYm');
 
-        console.log(`[ManagementBudget API] GET request: startYm=${startYm}, endYm=${endYm}`);
+        console.log(`[ManagementBudget API] Parameters: startYm=${startYm}, endYm=${endYm}`);
 
         if (!startYm || !endYm) {
+            console.log('[ManagementBudget API] Missing parameters');
             return NextResponse.json({ error: 'Missing startYm or endYm' }, { status: 400 });
         }
 
+        console.log('[ManagementBudget API] Executing Prisma query...');
         const budgets = await prisma.managementBudget.findMany({
             where: {
                 periodYm: {
@@ -34,12 +39,15 @@ export async function GET(request: Request) {
             },
         });
 
-        console.log(`[ManagementBudget API] Returning ${budgets.length} budgets. Sample:`, budgets[0]);
+        console.log(`[ManagementBudget API] Query success. Found ${budgets.length} rows.`);
 
         return NextResponse.json(budgets);
-    } catch (error) {
-        console.error('[ManagementBudget API] GET error:', error);
-        return NextResponse.json({ error: 'Failed to fetch management budgets' }, { status: 500 });
+    } catch (error: any) {
+        console.error('[ManagementBudget API] CRITICAL GET error:', error.message, error.stack);
+        return NextResponse.json({
+            error: 'Failed to fetch management budgets',
+            details: error.message
+        }, { status: 500 });
     }
 }
 
