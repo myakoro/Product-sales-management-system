@@ -29,8 +29,10 @@ export default function EditProductPage({
         productType: "own",
         managementStatus: "managed",
         asin: "", // V1.51追加
+        categoryId: null as number | null, // カテゴリID追加
     });
     const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState<Array<{id: number, name: string}>>([]);
 
     // Initial Fetch
     const fetchProduct = async () => {
@@ -67,6 +69,22 @@ export default function EditProductPage({
         // Better to use useEffect.
     }
 
+    // カテゴリ一覧取得
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const res = await fetch('/api/categories');
+                if (res.ok) {
+                    const data = await res.json();
+                    setCategories(data);
+                }
+            } catch (e) {
+                console.error('カテゴリ取得エラー:', e);
+            }
+        };
+        fetchCategories();
+    }, []);
+
     // Using useEffect correctly
     useEffect(() => {
         // Need to define async inside useEffect
@@ -83,6 +101,7 @@ export default function EditProductPage({
                         productType: data.productType,
                         managementStatus: data.managementStatus,
                         asin: data.asin || "", // V1.51追加
+                        categoryId: data.categoryId || null, // カテゴリID追加
                     });
                 } else {
                     alert("データの取得に失敗しました");
@@ -261,6 +280,26 @@ export default function EditProductPage({
                                     className="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-md focus:border-rinori-gold focus:ring-2 focus:ring-rinori-gold/20 transition-all duration-200"
                                 />
                             </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-sm font-semibold text-neutral-700 mb-2">
+                                カテゴリー
+                            </label>
+                            <select
+                                value={formData.categoryId || ""}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, categoryId: e.target.value ? Number(e.target.value) : null })
+                                }
+                                className="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-md bg-white focus:border-rinori-gold focus:ring-2 focus:ring-rinori-gold/20 transition-all duration-200 font-medium"
+                            >
+                                <option value="">未分類</option>
+                                {categories.map((cat) => (
+                                    <option key={cat.id} value={cat.id}>
+                                        {cat.name}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
