@@ -1,0 +1,615 @@
+﻿
+> rinori-sales-system@0.1.0 build
+> next build
+
+  笆ｲ Next.js 14.2.18
+  - Environments: .env
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Linting and checking validity of types ...
+node.exe :  筧ｯ ESLint: Failed to loa
+d plugin 'react' declared in '.eslin
+trc.json ﾂｻ eslint-config-next/core-
+web-vitals ﾂｻ C:\Users\takuy\Desktop
+\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\
+node_modules\eslint-config-next\inde
+x.js': Cannot find module '../util/C
+omponents' Require stack: - C:\Users
+\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori
+-sales-system\node_modules\eslint-co
+nfig-next\node_modules\eslint-plugin
+-react\lib\rules\boolean-prop-naming
+.js - C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅
+・す繧ｹ繝・Β\rinori-sales-system\node_mod
+ules\eslint-config-next\node_modules
+\eslint-plugin-react\lib\rules\index
+.js - C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅
+・す繧ｹ繝・Β\rinori-sales-system\node_mod
+ules\eslint-config-next\node_modules
+\eslint-plugin-react\index.js - C:\U
+sers\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\ri
+nori-sales-system\node_modules\@esli
+nt\eslintrc\dist\eslintrc.cjs Refere
+nced from: C:\Users\takuy\Desktop\螢ｲ
+荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\nod
+e_modules\eslint-config-next\index.j
+s
+発生場所 行:1 文字:1
++ & "C:\Program Files\nodejs/node.ex
+e" "C:\Program Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSp 
+   ecified: ( 筧ｯ ESLint: Fai...g-n  
+  ext\index.js:String) [], Remote   
+ Exception
+    + FullyQualifiedErrorId : Nativ 
+   eCommandError
+ 
+   Collecting page data ...
+   Generating static pages (0/74) ...
+[NE OAuth] Login error: n [Error]: D
+ynamic server usage: Route /api/auth
+/nextengine/login couldn't be render
+ed statically because it used `heade
+rs`. See more info here: https://nex
+tjs.org/docs/messages/dynamic-server
+-error
+    at l (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\9276.js:1:37157)
+    at d (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\2857.js:25:26595)
+    at s (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\2857.js:25:19584)
+    at h (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\app\api\auth\nextengine\log
+in\route.js:1:1278)
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\compiled\next-server
+\app-route.runtime.prod.js:6:37016
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\server\lib\trace\tra
+cer.js:140:36
+    at NoopContextManager.with (C:\U
+sers\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\ri
+nori-sales-system\node_modules\next\
+dist\compiled\@opentelemetry\api\ind
+ex.js:1:7062)
+    at ContextAPI.with (C:\Users\tak
+uy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sal
+es-system\node_modules\next\dist\com
+piled\@opentelemetry\api\index.js:1:
+518)
+    at NoopTracer.startActiveSpan (C
+:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β
+\rinori-sales-system\node_modules\ne
+xt\dist\compiled\@opentelemetry\api\
+index.js:1:18093)
+    at ProxyTracer.startActiveSpan (
+C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・
+Β\rinori-sales-system\node_modules\n
+ext\dist\compiled\@opentelemetry\api
+\index.js:1:18854) {
+  description: "Route /api/auth/next
+engine/login couldn't be rendered st
+atically because it used `headers`. 
+See more info here: https://nextjs.o
+rg/docs/messages/dynamic-server-erro
+r",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[莠亥ｮ滄寔險・ 繧ｨ繝ｩ繝ｼ逋ｺ逕・ B [Error]: Dynam
+ic server usage: Route /api/budget/v
+s-actual couldn't be rendered static
+ally because it used `request.url`. 
+See more info here: https://nextjs.o
+rg/docs/messages/dynamic-server-erro
+r
+    at V (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\node
+_modules\next\dist\compiled\next-ser
+ver\app-route.runtime.prod.js:6:2177
+7)
+    at Object.get (C:\Users\takuy\De
+sktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-sy
+stem\node_modules\next\dist\compiled
+\next-server\app-route.runtime.prod.
+js:6:29137)
+    at i (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\app\api\budget\vs-actual\ro
+ute.js:1:557)
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\compiled\next-server
+\app-route.runtime.prod.js:6:37016
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\server\lib\trace\tra
+cer.js:140:36
+    at NoopContextManager.with (C:\U
+sers\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\ri
+nori-sales-system\node_modules\next\
+dist\compiled\@opentelemetry\api\ind
+ex.js:1:7062)
+    at ContextAPI.with (C:\Users\tak
+uy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sal
+es-system\node_modules\next\dist\com
+piled\@opentelemetry\api\index.js:1:
+518)
+    at NoopTracer.startActiveSpan (C
+:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β
+\rinori-sales-system\node_modules\ne
+xt\dist\compiled\@opentelemetry\api\
+index.js:1:18093)
+    at ProxyTracer.startActiveSpan (
+C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・
+Β\rinori-sales-system\node_modules\n
+ext\dist\compiled\@opentelemetry\api
+\index.js:1:18854)
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\server\lib\trace\tra
+cer.js:122:103 {
+  description: "Route /api/budget/vs
+-actual couldn't be rendered statica
+lly because it used `request.url`. S
+ee more info here: https://nextjs.or
+g/docs/messages/dynamic-server-error
+",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Failed to fetch import histories: B 
+[Error]: Dynamic server usage: Route
+ /api/import-histories couldn't be r
+endered statically because it used `
+request.url`. See more info here: ht
+tps://nextjs.org/docs/messages/dynam
+ic-server-error
+    at V (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\node
+_modules\next\dist\compiled\next-ser
+ver\app-route.runtime.prod.js:6:2177
+7)
+    at Object.get (C:\Users\takuy\De
+sktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-sy
+stem\node_modules\next\dist\compiled
+\next-server\app-route.runtime.prod.
+js:6:29137)
+    at l (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\app\api\import-histories\ro
+ute.js:1:557)
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\compiled\next-server
+\app-route.runtime.prod.js:6:37016
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\server\lib\trace\tra
+cer.js:140:36
+    at NoopContextManager.with (C:\U
+sers\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\ri
+nori-sales-system\node_modules\next\
+dist\compiled\@opentelemetry\api\ind
+ex.js:1:7062)
+    at ContextAPI.with (C:\Users\tak
+uy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sal
+es-system\node_modules\next\dist\com
+piled\@opentelemetry\api\index.js:1:
+518)
+    at NoopTracer.startActiveSpan (C
+:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β
+\rinori-sales-system\node_modules\ne
+xt\dist\compiled\@opentelemetry\api\
+index.js:1:18093)
+    at ProxyTracer.startActiveSpan (
+C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・
+Β\rinori-sales-system\node_modules\n
+ext\dist\compiled\@opentelemetry\api
+\index.js:1:18854)
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\server\lib\trace\tra
+cer.js:122:103 {
+  description: "Route /api/import-hi
+stories couldn't be rendered statica
+lly because it used `request.url`. S
+ee more info here: https://nextjs.or
+g/docs/messages/dynamic-server-error
+",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[Channels API] Error: n [Error]: Dyn
+amic server usage: Route /api/channe
+ls couldn't be rendered statically b
+ecause it used `headers`. See more i
+nfo here: https://nextjs.org/docs/me
+ssages/dynamic-server-error
+    at l (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\9276.js:1:37157)
+    at d (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\2857.js:25:26595)
+    at s (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\2857.js:25:19584)
+    at d (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\app\api\channels\route.js:1
+:1256)
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\compiled\next-server
+\app-route.runtime.prod.js:6:37016
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\server\lib\trace\tra
+cer.js:140:36
+    at NoopContextManager.with (C:\U
+sers\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\ri
+nori-sales-system\node_modules\next\
+dist\compiled\@opentelemetry\api\ind
+ex.js:1:7062)
+    at ContextAPI.with (C:\Users\tak
+uy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sal
+es-system\node_modules\next\dist\com
+piled\@opentelemetry\api\index.js:1:
+518)
+    at NoopTracer.startActiveSpan (C
+:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β
+\rinori-sales-system\node_modules\ne
+xt\dist\compiled\@opentelemetry\api\
+index.js:1:18093)
+    at ProxyTracer.startActiveSpan (
+C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・
+Β\rinori-sales-system\node_modules\n
+ext\dist\compiled\@opentelemetry\api
+\index.js:1:18854) {
+  description: "Route /api/channels 
+couldn't be rendered statically beca
+use it used `headers`. See more info
+ here: https://nextjs.org/docs/messa
+ges/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[NE Shops] Error: n [Error]: Dynamic
+ server usage: Route /api/nextengine
+/shops couldn't be rendered statical
+ly because it used `headers`. See mo
+re info here: https://nextjs.org/doc
+s/messages/dynamic-server-error
+    at l (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\9276.js:1:37157)
+    at d (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\2857.js:25:26595)
+    at s (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\2857.js:25:19584)
+    at u (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\app\api\nextengine\shops\ro
+ute.js:1:1258)
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\compiled\next-server
+\app-route.runtime.prod.js:6:37016
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\server\lib\trace\tra
+cer.js:140:36
+    at NoopContextManager.with (C:\U
+sers\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\ri
+nori-sales-system\node_modules\next\
+dist\compiled\@opentelemetry\api\ind
+ex.js:1:7062)
+    at ContextAPI.with (C:\Users\tak
+uy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sal
+es-system\node_modules\next\dist\com
+piled\@opentelemetry\api\index.js:1:
+518)
+    at NoopTracer.startActiveSpan (C
+:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β
+\rinori-sales-system\node_modules\ne
+xt\dist\compiled\@opentelemetry\api\
+index.js:1:18093)
+    at ProxyTracer.startActiveSpan (
+C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・
+Β\rinori-sales-system\node_modules\n
+ext\dist\compiled\@opentelemetry\api
+\index.js:1:18854) {
+  description: "Route /api/nextengin
+e/shops couldn't be rendered statica
+lly because it used `headers`. See m
+ore info here: https://nextjs.org/do
+cs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (18/74) 
+[莠育ｮ怜ｮ溽ｸｾ繧ｰ繝ｩ繝柊PI] 繧ｨ繝ｩ繝ｼ: n [Error]
+: Dynamic server usage: Route /api/c
+harts/budget-vs-actual couldn't be r
+endered statically because it used `
+headers`. See more info here: https:
+//nextjs.org/docs/messages/dynamic-s
+erver-error
+    at l (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\9276.js:1:37157)
+    at d (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\2857.js:25:26595)
+    at s (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\2857.js:25:19584)
+    at y (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\app\api\charts\budget-vs-ac
+tual\route.js:1:1299)
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\compiled\next-server
+\app-route.runtime.prod.js:6:37016
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\server\lib\trace\tra
+cer.js:140:36
+    at NoopContextManager.with (C:\U
+sers\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\ri
+nori-sales-system\node_modules\next\
+dist\compiled\@opentelemetry\api\ind
+ex.js:1:7062)
+    at ContextAPI.with (C:\Users\tak
+uy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sal
+es-system\node_modules\next\dist\com
+piled\@opentelemetry\api\index.js:1:
+518)
+    at NoopTracer.startActiveSpan (C
+:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β
+\rinori-sales-system\node_modules\ne
+xt\dist\compiled\@opentelemetry\api\
+index.js:1:18093)
+    at ProxyTracer.startActiveSpan (
+C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・
+Β\rinori-sales-system\node_modules\n
+ext\dist\compiled\@opentelemetry\api
+\index.js:1:18854) {
+  description: "Route /api/charts/bu
+dget-vs-actual couldn't be rendered 
+statically because it used `headers`
+. See more info here: https://nextjs
+.org/docs/messages/dynamic-server-er
+ror",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[PL謗ｨ遘ｻ繧ｰ繝ｩ繝柊PI] 繧ｨ繝ｩ繝ｼ: n [Error]: 
+Dynamic server usage: Route /api/cha
+rts/pl-trend couldn't be rendered st
+atically because it used `headers`. 
+See more info here: https://nextjs.o
+rg/docs/messages/dynamic-server-erro
+r
+    at l (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\9276.js:1:37157)
+    at d (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\2857.js:25:26595)
+    at s (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\chunks\2857.js:25:19584)
+    at g (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\app\api\charts\pl-trend\rou
+te.js:1:1299)
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\compiled\next-server
+\app-route.runtime.prod.js:6:37016
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\server\lib\trace\tra
+cer.js:140:36
+    at NoopContextManager.with (C:\U
+sers\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\ri
+nori-sales-system\node_modules\next\
+dist\compiled\@opentelemetry\api\ind
+ex.js:1:7062)
+    at ContextAPI.with (C:\Users\tak
+uy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sal
+es-system\node_modules\next\dist\com
+piled\@opentelemetry\api\index.js:1:
+518)
+    at NoopTracer.startActiveSpan (C
+:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β
+\rinori-sales-system\node_modules\ne
+xt\dist\compiled\@opentelemetry\api\
+index.js:1:18093)
+    at ProxyTracer.startActiveSpan (
+C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・
+Β\rinori-sales-system\node_modules\n
+ext\dist\compiled\@opentelemetry\api
+\index.js:1:18854) {
+  description: "Route /api/charts/pl
+-trend couldn't be rendered statical
+ly because it used `headers`. See mo
+re info here: https://nextjs.org/doc
+s/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching category PL: B [Error
+]: Dynamic server usage: Route /api/
+pl/category couldn't be rendered sta
+tically because it used `request.url
+`. See more info here: https://nextj
+s.org/docs/messages/dynamic-server-e
+rror
+    at V (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\node
+_modules\next\dist\compiled\next-ser
+ver\app-route.runtime.prod.js:6:2177
+7)
+    at Object.get (C:\Users\takuy\De
+sktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-sy
+stem\node_modules\next\dist\compiled
+\next-server\app-route.runtime.prod.
+js:6:29137)
+    at c (C:\Users\takuy\Desktop\螢ｲ荳
+顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\.nex
+t\server\app\api\pl\category\route.j
+s:1:557)
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\compiled\next-server
+\app-route.runtime.prod.js:6:37016
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\server\lib\trace\tra
+cer.js:140:36
+    at NoopContextManager.with (C:\U
+sers\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\ri
+nori-sales-system\node_modules\next\
+dist\compiled\@opentelemetry\api\ind
+ex.js:1:7062)
+    at ContextAPI.with (C:\Users\tak
+uy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sal
+es-system\node_modules\next\dist\com
+piled\@opentelemetry\api\index.js:1:
+518)
+    at NoopTracer.startActiveSpan (C
+:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β
+\rinori-sales-system\node_modules\ne
+xt\dist\compiled\@opentelemetry\api\
+index.js:1:18093)
+    at ProxyTracer.startActiveSpan (
+C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・
+Β\rinori-sales-system\node_modules\n
+ext\dist\compiled\@opentelemetry\api
+\index.js:1:18854)
+    at C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡
+逅・す繧ｹ繝・Β\rinori-sales-system\node_mo
+dules\next\dist\server\lib\trace\tra
+cer.js:122:103 {
+  description: "Route /api/pl/catego
+ry couldn't be rendered statically b
+ecause it used `request.url`. See mo
+re info here: https://nextjs.org/doc
+s/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (36/74) 
+   Generating static pages (55/74) 
+ 笨・Generating static pages (74/74)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                 Size     First Load JS
+笏・笳・/                                       4.06 kB         108 kB
+笏・笳・/_not-found                             876 B          88.2 kB
+笏・笳・/ad-expenses                            5.51 kB        99.7 kB
+笏・ﾆ・/api/account/change-password            0 B                0 B
+笏・ﾆ・/api/ad-budgets                         0 B                0 B
+笏・ﾆ・/api/ad-categories                      0 B                0 B
+笏・ﾆ・/api/ad-categories/[id]                 0 B                0 B
+笏・ﾆ・/api/ad-expenses                        0 B                0 B
+笏・ﾆ・/api/ad-expenses/[id]                   0 B                0 B
+笏・ﾆ・/api/admin/users                        0 B                0 B
+笏・ﾆ・/api/admin/users/[id]                   0 B                0 B
+笏・ﾆ・/api/auth/[...nextauth]                 0 B                0 B
+笏・ﾆ・/api/auth/nextengine/callback           0 B                0 B
+笏・ﾆ・/api/auth/nextengine/login              0 B                0 B
+笏・ﾆ・/api/auth/nextengine/status             0 B                0 B
+笏・ﾆ・/api/auth/session-check                 0 B                0 B
+笏・ﾆ・/api/budget                             0 B                0 B
+笏・ﾆ・/api/budget/history                     0 B                0 B
+笏・ﾆ・/api/budget/vs-actual                   0 B                0 B
+笏・ﾆ・/api/categories                         0 B                0 B
+笏・ﾆ・/api/categories/[id]                    0 B                0 B
+笏・ﾆ・/api/categories/[id]/products           0 B                0 B
+笏・ﾆ・/api/channels                           0 B                0 B
+笏・ﾆ・/api/charts/budget-vs-actual            0 B                0 B
+笏・ﾆ・/api/charts/pl-trend                    0 B                0 B
+笏・ﾆ・/api/dashboard                          0 B                0 B
+笏・ﾆ・/api/export/database                    0 B                0 B
+笏・ﾆ・/api/import-histories                   0 B                0 B
+笏・ﾆ・/api/import-histories/[id]              0 B                0 B
+笏・ﾆ・/api/import-histories/[id]/channel      0 B                0 B
+笏・ﾆ・/api/import/database                    0 B                0 B
+笏・ﾆ・/api/import/history                     0 B                0 B
+笏・ﾆ・/api/import/sales                       0 B                0 B
+笏・ﾆ・/api/nextengine/mappings                0 B                0 B
+笏・ﾆ・/api/nextengine/shops                   0 B                0 B
+笏・ﾆ・/api/nextengine/sync                    0 B                0 B
+笏・ﾆ・/api/pl                                 0 B                0 B
+笏・ﾆ・/api/pl/category                        0 B                0 B
+笏・ﾆ・/api/pl/monthly                         0 B                0 B
+笏・ﾆ・/api/pl/products                        0 B                0 B
+笏・ﾆ・/api/products                           0 B                0 B
+笏・ﾆ・/api/products/[code]                    0 B                0 B
+笏・ﾆ・/api/products/candidates                0 B                0 B
+笏・ﾆ・/api/products/candidates/[id]           0 B                0 B
+笏・ﾆ・/api/products/candidates/bulk-ignore    0 B                0 B
+笏・ﾆ・/api/products/candidates/bulk-register  0 B                0 B
+笏・ﾆ・/api/products/import/apply              0 B                0 B
+笏・ﾆ・/api/products/import/check              0 B                0 B
+笏・笳・/api/products/incomplete                0 B                0 B
+笏・ﾆ・/api/sales-channels                     0 B                0 B
+笏・ﾆ・/api/sales-channels/[id]                0 B                0 B
+笏・ﾆ・/api/sales/import                       0 B                0 B
+笏・ﾆ・/api/settings/cleanup                   0 B                0 B
+笏・ﾆ・/api/settings/exclusion-keywords        0 B                0 B
+笏・ﾆ・/api/settings/exclusion-keywords/[id]   0 B                0 B
+笏・ﾆ・/api/settings/management-budget         0 B                0 B
+笏・ﾆ・/api/settings/nextengine/mapping        0 B                0 B
+笏・ﾆ・/api/settings/sales-channels            0 B                0 B
+笏・ﾆ・/api/system/seed                        0 B                0 B
+笏・ﾆ・/api/tax-rates                          0 B                0 B
+笏・笳・/budget                                 4.47 kB         108 kB
+笏・笳・/budget/vs-actual                       7.3 kB          215 kB
+笏・笳・/import-histories                       2.46 kB        96.7 kB
+笏・笳・/import/history                         3.29 kB         107 kB
+笏・笳・/import/sales                           12.3 kB         106 kB
+笏・笳・/login                                  1.31 kB        98.4 kB
+笏・笳・/pl                                     13.8 kB         232 kB
+笏・笳・/pl/monthly                             3.49 kB         107 kB
+笏・笳・/pl/products                            5.71 kB         214 kB
+笏・笳・/products                               10.3 kB         105 kB
+笏・ﾆ・/products/[code]                        2.99 kB        97.2 kB
+笏・笳・/products/candidates                    3.85 kB        98.1 kB
+笏・笳・/products/import                        4.17 kB        98.4 kB
+笏・笳・/products/new                           2.84 kB          97 kB
+笏・笳・/sales                                  2.83 kB          97 kB
+笏・笳・/settings                               1.84 kB         106 kB
+笏・笳・/settings/account                       2.79 kB         107 kB
+笏・笳・/settings/ad-categories                 574 B          87.9 kB
+笏・笳・/settings/categories                    3.01 kB         107 kB
+笏・笳・/settings/exclusion-keywords            2.51 kB        96.7 kB
+笏・笳・/settings/export                        2.43 kB        99.5 kB
+笏・笳・/settings/import                        2.9 kB          100 kB
+笏・笳・/settings/management-budget             2.62 kB         107 kB
+笏・笳・/settings/nextengine                    3.92 kB         108 kB
+笏・笳・/settings/sales-channels                1.71 kB        95.9 kB
+笏・笳・/settings/tax-rates                     2.99 kB         107 kB
+笏・笳・/settings/users                         3.52 kB         107 kB
++ First Load JS shared by all               87.3 kB
+  笏・chunks/117-9a731ccf7dc4dbda.js          31.8 kB
+  笏・chunks/fd9d1056-2c7f6f7bc4913acc.js     53.6 kB
+  笏・other shared chunks (total)             1.96 kB
+
+
+ﾆ・Middleware                                49.3 kB
+
+笳・ (Static)   prerendered as static content
+ﾆ・ (Dynamic)  server-rendered on demand
+

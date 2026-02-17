@@ -1,0 +1,79 @@
+﻿
+> rinori-sales-system@0.1.0 build
+> next build
+
+  笆ｲ Next.js 14.2.18
+  - Environments: .env
+
+   Creating an optimized production build ...
+ 笨・Compiled successfully
+   Linting and checking validity of types ...
+node.exe :  筧ｯ ESLint: Failed to loa
+d plugin 'react' declared in '.eslin
+trc.json ﾂｻ eslint-config-next/core-
+web-vitals ﾂｻ C:\Users\takuy\Desktop
+\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\
+node_modules\eslint-config-next\inde
+x.js': Cannot find module '../util/C
+omponents' Require stack: - C:\Users
+\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\rinori
+-sales-system\node_modules\eslint-co
+nfig-next\node_modules\eslint-plugin
+-react\lib\rules\boolean-prop-naming
+.js - C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅
+・す繧ｹ繝・Β\rinori-sales-system\node_mod
+ules\eslint-config-next\node_modules
+\eslint-plugin-react\lib\rules\index
+.js - C:\Users\takuy\Desktop\螢ｲ荳顔ｮ｡逅
+・す繧ｹ繝・Β\rinori-sales-system\node_mod
+ules\eslint-config-next\node_modules
+\eslint-plugin-react\index.js - C:\U
+sers\takuy\Desktop\螢ｲ荳顔ｮ｡逅・す繧ｹ繝・Β\ri
+nori-sales-system\node_modules\@esli
+nt\eslintrc\dist\eslintrc.cjs Refere
+nced from: C:\Users\takuy\Desktop\螢ｲ
+荳顔ｮ｡逅・す繧ｹ繝・Β\rinori-sales-system\nod
+e_modules\eslint-config-next\index.j
+s
+発生場所 行:1 文字:1
++ & "C:\Program Files\nodejs/node.ex
+e" "C:\Program Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSp 
+   ecified: ( 筧ｯ ESLint: Fai...g-n  
+  ext\index.js:String) [], Remote   
+ Exception
+    + FullyQualifiedErrorId : Nativ 
+   eCommandError
+ 
+Failed to compile.
+
+./src/app/api/settings/management-bu
+dget/route.ts:30:38
+Type error: Property 'managementBudg
+et' does not exist on type 'PrismaCl
+ient<PrismaClientOptions, never, Def
+aultArgs>'.
+
+[0m [90m 28 |[39m[0m
+[0m [90m 29 |[39m         console
+[33m.[39mlog([32m'[ManagementBudg
+et API] Executing Prisma query...'[
+39m)[33m;[39m[0m
+[0m[31m[1m>[22m[39m[90m 30 |[
+39m         [36mconst[39m budgets 
+[33m=[39m [36mawait[39m prisma[
+33m.[39mmanagementBudget[33m.[39m
+findMany({[0m
+[0m [90m    |[39m                
+                      [31m[1m^[22
+m[39m[0m
+[0m [90m 31 |[39m             whe
+re[33m:[39m {[0m
+[0m [90m 32 |[39m                
+ periodYm[33m:[39m {[0m
+[0m [90m 33 |[39m                
+     gte[33m:[39m startYm[33m,[3
+9m[0m

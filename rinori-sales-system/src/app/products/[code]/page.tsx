@@ -32,7 +32,7 @@ export default function EditProductPage({
         categoryId: null as number | null, // カテゴリID追加
     });
     const [loading, setLoading] = useState(true);
-    const [categories, setCategories] = useState<Array<{id: number, name: string}>>([]);
+    const [categories, setCategories] = useState<Array<{ id: number, name: string }>>([]);
 
     // Initial Fetch
     const fetchProduct = async () => {
@@ -50,6 +50,7 @@ export default function EditProductPage({
                     productType: data.productType,
                     managementStatus: data.managementStatus,
                     asin: data.asin || "", // V1.51追加
+                    categoryId: data.categoryId || null, // カテゴリID追加
                 });
             } else {
                 alert("データの取得に失敗しました");
@@ -208,7 +209,7 @@ export default function EditProductPage({
                         <div className="bg-gradient-to-r from-orange-50 to-white border-2 border-orange-200 rounded-lg p-4">
                             <label className="block text-sm font-semibold text-neutral-700 mb-2 flex items-center gap-2">
                                 <svg className="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M.045 18.02c.072-.116.187-.124.348-.022 3.636 2.11 7.594 3.166 11.87 3.166 2.852 0 5.668-.533 8.447-1.595l.315-.14c.138-.06.234-.1.293-.13.226-.088.39-.046.525.13.12.174.09.336-.12.48-.256.19-.6.41-1.006.654-1.244.743-2.64 1.316-4.185 1.726-1.53.406-3.045.61-4.516.61-2.265 0-4.463-.42-6.588-1.265-2.11-.84-3.987-2.033-5.63-3.582-.22-.21-.304-.433-.247-.663.043-.18.148-.3.314-.36z"/>
+                                    <path d="M.045 18.02c.072-.116.187-.124.348-.022 3.636 2.11 7.594 3.166 11.87 3.166 2.852 0 5.668-.533 8.447-1.595l.315-.14c.138-.06.234-.1.293-.13.226-.088.39-.046.525.13.12.174.09.336-.12.48-.256.19-.6.41-1.006.654-1.244.743-2.64 1.316-4.185 1.726-1.53.406-3.045.61-4.516.61-2.265 0-4.463-.42-6.588-1.265-2.11-.84-3.987-2.033-5.63-3.582-.22-.21-.304-.433-.247-.663.043-.18.148-.3.314-.36z" />
                                 </svg>
                                 ASIN (Amazon)
                             </label>

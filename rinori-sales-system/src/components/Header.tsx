@@ -2,12 +2,11 @@
 
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 export default function Header() {
     const { data: session } = useSession();
     const user = session?.user as any;
-    const router = useRouter();
     const pathname = usePathname();
 
     if (!session) return null;
