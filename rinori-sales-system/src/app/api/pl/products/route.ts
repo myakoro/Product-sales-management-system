@@ -10,6 +10,7 @@ interface SalesRecordGroup {
         salesAmountExclTax: number | null;
         costAmountExclTax: number | null;
         grossProfit: number | null;
+        quantity: number | null;
     };
 }
 
@@ -26,6 +27,7 @@ interface ProductPLResult {
     sales: number;
     cost: number;
     grossProfit: number;
+    quantity: number;
     costRate: number;
     grossProfitRate: number;
 }
@@ -55,6 +57,7 @@ export async function GET(request: Request) {
                 salesAmountExclTax: true,
                 costAmountExclTax: true,
                 grossProfit: true,
+                quantity: true,
             },
             where: {
                 periodYm: {
@@ -86,6 +89,7 @@ export async function GET(request: Request) {
             const sales = g._sum.salesAmountExclTax || 0;
             const cost = g._sum.costAmountExclTax || 0;
             const gp = g._sum.grossProfit || 0;
+            const quantity = g._sum.quantity || 0;
 
             return {
                 productCode: g.productCode,
@@ -94,6 +98,7 @@ export async function GET(request: Request) {
                 sales: sales,
                 cost: cost,
                 grossProfit: gp,
+                quantity: quantity,
                 costRate: sales ? (cost / sales) * 100 : 0,
                 grossProfitRate: sales ? (gp / sales) * 100 : 0,
             };
