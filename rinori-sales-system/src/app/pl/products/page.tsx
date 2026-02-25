@@ -291,6 +291,12 @@ export default function ProductPLPage() {
                                             <span className="text-[#d4af37]">{getSortIcon('sales')}</span>
                                         </div>
                                     </th>
+                                    <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('quantity')}>
+                                        <div className="flex items-center justify-end gap-2">
+                                            <span>販売数量</span>
+                                            <span className="text-[#d4af37]">{getSortIcon('quantity')}</span>
+                                        </div>
+                                    </th>
                                     <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('cost')}>
                                         <div className="flex items-center justify-end gap-2">
                                             <span>原価</span>
@@ -335,6 +341,7 @@ export default function ProductPLPage() {
                                             <td className="px-4 py-4 font-mono font-semibold text-[#00214d]">{item.productCode}</td>
                                             <td className="px-4 py-4 text-neutral-700">{item.productName}</td>
                                             <td className="px-4 py-4 text-right font-semibold text-neutral-800">{formatCurrency(item.sales)}</td>
+                                            <td className="px-4 py-4 text-right text-neutral-700">{item.quantity?.toLocaleString() || 0}</td>
                                             <td className="px-4 py-4 text-right text-neutral-600">{formatCurrency(item.cost)}</td>
                                             <td className="px-4 py-4 text-right font-bold text-green-600">{formatCurrency(item.grossProfit)}</td>
                                             <td className="px-4 py-4 text-right text-neutral-600">{formatPercent(item.costRate)}</td>
