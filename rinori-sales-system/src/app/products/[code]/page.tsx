@@ -136,7 +136,7 @@ export default function EditProductPage({
     };
 
     const handleDelete = async () => {
-        if (!confirm("本当に削除しますか？\n※売上履歴がある商品は削除できません")) return;
+        if (!confirm("本当に削除しますか？\n売上実績がない場合、設定済みの予算データも含めて一括削除されます。\n※売上実績がある商品は削除できません。")) return;
         try {
             const res = await fetch(`/api/products/${code}`, {
                 method: "DELETE",
@@ -194,15 +194,17 @@ export default function EditProductPage({
                             <label className="block text-sm font-semibold text-neutral-700 mb-2">商品コード</label>
                             <input
                                 type="text"
-                                disabled
                                 value={formData.productCode}
-                                className="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-md bg-neutral-100 text-neutral-500"
+                                onChange={(e) =>
+                                    setFormData({ ...formData, productCode: e.target.value })
+                                }
+                                className="w-full px-4 py-2.5 border-2 border-neutral-200 rounded-md focus:border-rinori-gold focus:ring-2 focus:ring-rinori-gold/20 transition-all duration-200"
                             />
-                            <p className="text-xs text-neutral-500 mt-2 flex items-center gap-1.5">
+                            <p className="text-xs text-rinori-navy mt-2 flex items-center gap-1.5">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                商品コードは変更できません
+                                コードを変更すると、関連する売上や予算データも新コードに自動で書き換えられます
                             </p>
                         </div>
 
