@@ -141,6 +141,21 @@ export async function GET(request: Request) {
             const budgetGrossProfitRate = budget.sales > 0 ? (budget.grossProfit / budget.sales) * 100 : 0;
             const actualGrossProfitRate = actual.sales > 0 ? (actual.grossProfit / actual.sales) * 100 : 0;
 
+            // V1.62: 売上不足額と必要販売個数の計算
+            let shortageAmount: number | null = null;
+            let requiredQuantity: number | null = null;
+
+            if (actual.sales < budget.sales) {
+                // 売上不足額
+                shortageAmount = budget.sales - actual.sales;
+
+                // 必要販売個数（予算数量が0でない場合のみ計算）
+                if (budget.quantity > 0) {
+                    const unitPrice = budget.sales / budget.quantity;
+                    requiredQuantity = Math.ceil(shortageAmount / unitPrice);
+                }
+            }
+
             productResults.push({
                 productCode: product.productCode,
                 productName: product.productName,
@@ -150,6 +165,8 @@ export async function GET(request: Request) {
                 budgetSales: budget.sales,
                 actualSales: actual.sales,
                 salesAchievementRate: Math.round(salesAchievementRate * 10) / 10,
+                shortageAmount,
+                requiredQuantity,
                 budgetCost: budget.cost,
                 actualCost: actual.cost,
                 budgetGrossProfit: budget.grossProfit,

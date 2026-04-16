@@ -15,6 +15,8 @@ type ProductResult = {
     budgetSales: number;
     actualSales: number;
     salesAchievementRate: number;
+    shortageAmount: number | null;
+    requiredQuantity: number | null;
     budgetCost: number;
     actualCost: number;
     budgetGrossProfit: number;
@@ -471,7 +473,7 @@ export default function BudgetVsActualPage() {
                         ) : (
                             <div className="overflow-x-auto rounded-xl border-2 border-neutral-200">
                                 <table className="w-full text-sm">
-                                    <thead className="bg-gradient-to-r from-[#00214d] to-[#002855] text-white">
+                                    <thead className="bg-gradient-to-r from-[#00214d] to-[#002855] text-white sticky top-0 z-10">
                                         <tr>
                                             <th className="px-4 py-4 text-center font-bold">
                                                 <button
@@ -544,6 +546,22 @@ export default function BudgetVsActualPage() {
                                                     <div className="flex items-center justify-end gap-2">
                                                         <span>売上達成率</span>
                                                         <span className="text-[#d4af37]">{getSortIcon('salesAchievementRate')}</span>
+                                                    </div>
+                                                </th>
+                                            )}
+                                            {hasBudgetData && (
+                                                <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('shortageAmount')}>
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <span>売上不足額</span>
+                                                        <span className="text-[#d4af37]">{getSortIcon('shortageAmount')}</span>
+                                                    </div>
+                                                </th>
+                                            )}
+                                            {hasBudgetData && (
+                                                <th className="px-4 py-4 text-right cursor-pointer hover:bg-white/10 transition-colors font-bold" onClick={() => handleSort('requiredQuantity')}>
+                                                    <div className="flex items-center justify-end gap-2">
+                                                        <span>必要販売個数</span>
+                                                        <span className="text-[#d4af37]">{getSortIcon('requiredQuantity')}</span>
                                                     </div>
                                                 </th>
                                             )}
@@ -632,6 +650,24 @@ export default function BudgetVsActualPage() {
                                                                     {p.salesAchievementRate.toFixed(1)}%
                                                                 </span>
                                                             </div>
+                                                        </td>
+                                                    )}
+                                                    {hasBudgetData && (
+                                                        <td className="px-4 py-4 text-right text-neutral-700">
+                                                            {p.shortageAmount === null ? (
+                                                                <span className="text-green-600 font-bold">達成済み</span>
+                                                            ) : (
+                                                                <span>¥{Math.round(p.shortageAmount).toLocaleString()}</span>
+                                                            )}
+                                                        </td>
+                                                    )}
+                                                    {hasBudgetData && (
+                                                        <td className="px-4 py-4 text-right text-neutral-700">
+                                                            {p.requiredQuantity === null ? (
+                                                                <span className="text-green-600 font-bold">達成済み</span>
+                                                            ) : (
+                                                                <span>{p.requiredQuantity.toLocaleString()}個</span>
+                                                            )}
                                                         </td>
                                                     )}
                                                     {hasBudgetData && (
